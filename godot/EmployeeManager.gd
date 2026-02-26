@@ -102,7 +102,7 @@ static func generate_random_candidate() -> Employee:
 
 	var role        := rng.randi_range(0, Employee.Role.size() - 1) as Employee.Role
 	var personality := rng.randi_range(0, Employee.Personality.size() - 1) as Employee.Personality
-	var first       := first_names[rng.randi_range(0, first_names.size() - 1)]
-	var last        := last_names[rng.randi_range(0, last_names.size() - 1)]
+	var first: String = first_names[rng.randi_range(0, first_names.size() - 1)]
+	var last: String  = last_names[rng.randi_range(0, last_names.size() - 1)]
 
 	return Employee.create(first, last, role, personality)
