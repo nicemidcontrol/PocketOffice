@@ -1,6 +1,16 @@
-[gd_scene load_steps=2 format=3 uid="uid://main390x844po"]
+[gd_scene load_steps=4 format=3 uid="uid://main390x844po"]
 
-[ext_resource type="PackedScene" path="res://scenes/HUD.tscn" id="1_hudscene"]
+[ext_resource type="Script" path="res://scripts/ui/Main.gd" id="1_mainscript"]
+[ext_resource type="PackedScene" path="res://scenes/HUD.tscn" id="2_hudscene"]
+
+; Blue-navy button style matching the HireScreen palette
+[sub_resource type="StyleBoxFlat" id="SBFlat_hirebtn"]
+bg_color = Color(0.08, 0.18, 0.44, 0.92)
+border_width_left = 1
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 1
+border_color = Color(0.4, 0.65, 1.0, 0.9)
 
 ; ═════════════════════════════════════════════════════════════════════════════
 ;  Main — root scene loaded by project.godot
@@ -8,11 +18,13 @@
 ;  Layout (390×844 portrait):
 ;    Main (Control, full-rect)
 ;    ├── Background (ColorRect)  — dark canvas behind all game content
-;    └── HUD  (CanvasLayer, layer 10)  — stat bar + message feed
+;    ├── HireBtn (Button)        — bottom-center, above HUD message area
+;    └── HUD (CanvasLayer, layer 10)  — stat bar + message feed
 ;
-;  GameManager and SaveSystem are Autoloads (see project.godot [autoload]).
-;  HUD.gd connects to GameManager signals in its own _ready(); nothing
-;  extra is needed here.
+;  HUD TopBar    : y   0 –  64 px  (always visible)
+;  HireBtn       : y 728 – 780 px  (52 px tall, 220 px wide, centered)
+;  HUD MsgPanel  : y 792 – 844 px  (only visible when a message fires)
+;  — 12 px clear gap on each side keeps the button fully unobstructed —
 ; ═════════════════════════════════════════════════════════════════════════════
 
 [node name="Main" type="Control"]
@@ -20,6 +32,7 @@ anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
+script = ExtResource("1_mainscript")
 
 ; ── Dark base canvas — same navy as the HUD panels ───────────────────────────
 [node name="Background" type="ColorRect" parent="."]
@@ -31,5 +44,27 @@ grow_horizontal = 2
 grow_vertical = 2
 color = Color(0.047, 0.047, 0.11, 1.0)
 
+; ── HIRE STAFF button ─────────────────────────────────────────────────────────
+;  Anchored to the bottom-centre of the viewport.
+;  Bottom edge at y=780 (64 px above MessagePanel zone, 12 px gap below).
+[node name="HireBtn" type="Button" parent="."]
+layout_mode = 1
+anchor_left = 0.5
+anchor_top = 1.0
+anchor_right = 0.5
+anchor_bottom = 1.0
+offset_left = -110.0
+offset_top = -116.0
+offset_right = 110.0
+offset_bottom = -64.0
+grow_horizontal = 2
+grow_vertical = 0
+text = "HIRE STAFF"
+theme_override_colors/font_color = Color(0.82, 0.9, 1.0, 1.0)
+theme_override_font_sizes/font_size = 14
+theme_override_styles/normal = SubResource("SBFlat_hirebtn")
+
 ; ── HUD overlay (CanvasLayer defined inside HUD.tscn) ────────────────────────
-[node name="HUD" parent="." instance=ExtResource("1_hudscene")]
+[node name="HUD" parent="." instance=ExtResource("2_hudscene")]
+
+[connection signal="pressed" from="HireBtn" to="." method="_on_hire_btn_pressed"]
