@@ -39,7 +39,7 @@ static func load_save() -> Dictionary:
 	var json_str := file.get_as_text()
 	file.close()
 
-	var parsed = JSON.parse_string(json_str)
+	var parsed: Variant = JSON.parse_string(json_str)
 	if typeof(parsed) != TYPE_DICTIONARY:
 		push_error("[SaveSystem] Save file is corrupt or invalid JSON.")
 		return {}

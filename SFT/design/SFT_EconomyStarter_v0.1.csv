@@ -1,6 +1,0 @@
-item_id,name_th,base_price,base_cost,base_cook_time_s,unlock_level,category,notes
-menu_fried_chicken,ไก่ทอด,35,15,6.0,1,menu,เมนูเริ่มต้น กำไรกลาง ๆ
-menu_pad_thai,ผัดไทย,50,22,8.5,2,menu,กำไรดีขึ้น แต่ใช้เวลานานขึ้น
-menu_thai_tea,ชานมไทย,40,12,5.0,3,menu,กำไรดี ทำเร็ว เหมาะกับ throughput
-upgrade_stove_speed,อัปเกรดเตา: ทำเร็วขึ้น,0,120,0,1,upgrade,ค่าสกุลเงิน coins; ลด cook time ตามสูตรที่กำหนด
-upgrade_staff_hire,จ้างพนักงาน,0,300,0,2,upgrade,เปิดระบบ auto/เพิ่มความเร็วการเสิร์ฟ

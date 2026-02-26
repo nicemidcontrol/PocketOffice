@@ -1,4 +1,3 @@
-class_name EconomyManager
 extends Node
 
 # ─────────────────────────────────────────
@@ -94,7 +93,7 @@ func repay_loan(amount: int) -> bool:
 #  HELPERS
 # ─────────────────────────────────────────
 func _log_transaction(description: String, amount: int) -> void:
-	var gm: GameManager = get_node_or_null("/root/GameManager")
+	var gm: Node = get_node_or_null("/root/GameManager")
 	_ledger.append({
 		"description": description,
 		"amount":      amount,

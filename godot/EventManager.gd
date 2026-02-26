@@ -1,4 +1,3 @@
-class_name EventManager
 extends Node
 
 # ─────────────────────────────────────────
@@ -128,7 +127,7 @@ func try_trigger_random_event() -> void:
 # ─────────────────────────────────────────
 #  RESOLVE  (called by UI after player picks a choice)
 # ─────────────────────────────────────────
-func resolve_event(event_data: Dictionary, choice: Dictionary, gm: GameManager) -> void:
+func resolve_event(event_data: Dictionary, choice: Dictionary, gm: Node) -> void:
 	var outcome_type:  int = choice["outcome_type"]
 	var outcome_value: int = choice["outcome_value"]
 

@@ -1,4 +1,3 @@
-class_name OfficeManager
 extends Node
 
 # ─────────────────────────────────────────
@@ -89,7 +88,7 @@ func unlock_floor(floor_index: int) -> void:
 # ─────────────────────────────────────────
 #  PLACE ROOMS
 # ─────────────────────────────────────────
-func place_room(floor: int, x: int, y: int, room_type: RoomType, gm: GameManager) -> bool:
+func place_room(floor: int, x: int, y: int, room_type: RoomType, gm: Node) -> bool:
 	var cost: int = ROOM_COSTS.get(room_type, 0)
 	if not gm.economy.spend(cost, "Build " + RoomType.keys()[room_type]):
 		return false
