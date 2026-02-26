@@ -1,0 +1,35 @@
+[gd_scene load_steps=2 format=3 uid="uid://main390x844po"]
+
+[ext_resource type="PackedScene" path="res://scenes/HUD.tscn" id="1_hudscene"]
+
+; ═════════════════════════════════════════════════════════════════════════════
+;  Main — root scene loaded by project.godot
+;
+;  Layout (390×844 portrait):
+;    Main (Control, full-rect)
+;    ├── Background (ColorRect)  — dark canvas behind all game content
+;    └── HUD  (CanvasLayer, layer 10)  — stat bar + message feed
+;
+;  GameManager and SaveSystem are Autoloads (see project.godot [autoload]).
+;  HUD.gd connects to GameManager signals in its own _ready(); nothing
+;  extra is needed here.
+; ═════════════════════════════════════════════════════════════════════════════
+
+[node name="Main" type="Control"]
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+; ── Dark base canvas — same navy as the HUD panels ───────────────────────────
+[node name="Background" type="ColorRect" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0.047, 0.047, 0.11, 1.0)
+
+; ── HUD overlay (CanvasLayer defined inside HUD.tscn) ────────────────────────
+[node name="HUD" parent="." instance=ExtResource("1_hudscene")]

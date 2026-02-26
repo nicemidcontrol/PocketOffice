@@ -25,6 +25,11 @@ window/handheld/orientation="portrait"
 
 textures/canvas_textures/default_texture_filter=0
 
+[autoload]
+
+SaveSystem="*res://SaveSystem.gd"
+GameManager="*res://GameManager.gd"
+
 [input]
 
 ui_tap={
