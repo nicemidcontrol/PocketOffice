@@ -1,0 +1,516 @@
+[gd_scene load_steps=10 format=3 uid="uid://hirescreen390po"]
+
+[ext_resource type="Script" path="res://scripts/ui/HireScreen.gd" id="1_hirescr"]
+
+; ── Panels ────────────────────────────────────────────────────────────────────
+[sub_resource type="StyleBoxFlat" id="SBFlat_header"]
+bg_color = Color(0.047, 0.047, 0.11, 0.97)
+border_width_bottom = 2
+border_color = Color(0.18, 0.42, 0.78, 1.0)
+
+[sub_resource type="StyleBoxFlat" id="SBFlat_bottom"]
+bg_color = Color(0.047, 0.047, 0.11, 0.97)
+border_width_top = 2
+border_color = Color(0.18, 0.42, 0.78, 1.0)
+
+[sub_resource type="StyleBoxFlat" id="SBFlat_card"]
+bg_color = Color(0.078, 0.078, 0.172, 1.0)
+border_width_left = 1
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 1
+border_color = Color(0.18, 0.42, 0.78, 0.45)
+
+; ── Buttons ───────────────────────────────────────────────────────────────────
+[sub_resource type="StyleBoxFlat" id="SBFlat_hire"]
+bg_color = Color(0.08, 0.36, 0.17, 1.0)
+border_width_left = 1
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 1
+border_color = Color(0.22, 0.9, 0.42, 0.7)
+
+[sub_resource type="StyleBoxFlat" id="SBFlat_refresh"]
+bg_color = Color(0.08, 0.18, 0.44, 1.0)
+border_width_left = 1
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 1
+border_color = Color(0.18, 0.42, 0.78, 0.8)
+
+; ── Progress bars ─────────────────────────────────────────────────────────────
+[sub_resource type="StyleBoxFlat" id="SBFlat_bar_bg"]
+bg_color = Color(0.1, 0.1, 0.2, 1.0)
+
+[sub_resource type="StyleBoxFlat" id="SBFlat_skill_fill"]
+bg_color = Color(0.22, 0.9, 0.42, 1.0)
+
+[sub_resource type="StyleBoxFlat" id="SBFlat_mot_fill"]
+bg_color = Color(1.0, 0.82, 0.1, 1.0)
+
+; ═════════════════════════════════════════════════════════════════════════════
+;  ROOT
+; ═════════════════════════════════════════════════════════════════════════════
+[node name="HireScreen" type="Control"]
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_hirescr")
+
+[node name="BG" type="ColorRect" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0.047, 0.047, 0.11, 1.0)
+
+; ═════════════════════════════════════════════════════════════════════════════
+;  HEADER  —  64 px, top-wide
+;  [← BACK]   HIRE STAFF   [$10K]
+; ═════════════════════════════════════════════════════════════════════════════
+[node name="Header" type="Panel" parent="."]
+layout_mode = 1
+anchors_preset = 10
+anchor_right = 1.0
+offset_bottom = 64.0
+grow_horizontal = 2
+theme_override_styles/panel = SubResource("SBFlat_header")
+
+[node name="Margin" type="MarginContainer" parent="Header"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/margin_left = 8
+theme_override_constants/margin_top = 8
+theme_override_constants/margin_right = 8
+theme_override_constants/margin_bottom = 8
+
+[node name="HBox" type="HBoxContainer" parent="Header/Margin"]
+layout_mode = 2
+alignment = 1
+
+[node name="BackBtn" type="Button" parent="Header/Margin/HBox"]
+layout_mode = 2
+text = "← BACK"
+theme_override_colors/font_color = Color(0.5, 0.7, 1.0, 1.0)
+theme_override_font_sizes/font_size = 12
+
+[node name="TitleLabel" type="Label" parent="Header/Margin/HBox"]
+layout_mode = 2
+size_flags_horizontal = 3
+text = "HIRE STAFF"
+horizontal_alignment = 1
+theme_override_colors/font_color = Color(0.92, 0.92, 0.95, 1.0)
+theme_override_font_sizes/font_size = 15
+
+[node name="CashLabel" type="Label" parent="Header/Margin/HBox"]
+layout_mode = 2
+text = "$0"
+horizontal_alignment = 2
+theme_override_colors/font_color = Color(0.22, 0.9, 0.42, 1.0)
+theme_override_font_sizes/font_size = 14
+
+; ═════════════════════════════════════════════════════════════════════════════
+;  BODY  —  ScrollContainer between header and bottom bar
+; ═════════════════════════════════════════════════════════════════════════════
+[node name="Body" type="ScrollContainer" parent="."]
+layout_mode = 1
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_top = 64.0
+offset_bottom = -72.0
+grow_horizontal = 2
+grow_vertical = 2
+horizontal_scroll_mode = 0
+
+[node name="Margin" type="MarginContainer" parent="Body"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/margin_left = 12
+theme_override_constants/margin_top = 12
+theme_override_constants/margin_right = 12
+theme_override_constants/margin_bottom = 12
+
+[node name="Cards" type="VBoxContainer" parent="Body/Margin"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/separation = 12
+
+[node name="HintLabel" type="Label" parent="Body/Margin/Cards"]
+layout_mode = 2
+text = "3 candidates available  •  Refresh costs $500"
+horizontal_alignment = 1
+theme_override_colors/font_color = Color(0.5, 0.51, 0.62, 1.0)
+theme_override_font_sizes/font_size = 11
+
+; ─────────────────────────────────────────
+;  CARD 0
+; ─────────────────────────────────────────
+[node name="Card0" type="Panel" parent="Body/Margin/Cards"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_styles/panel = SubResource("SBFlat_card")
+
+[node name="Margin" type="MarginContainer" parent="Body/Margin/Cards/Card0"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/margin_left = 14
+theme_override_constants/margin_top = 12
+theme_override_constants/margin_right = 14
+theme_override_constants/margin_bottom = 12
+
+[node name="VBox" type="VBoxContainer" parent="Body/Margin/Cards/Card0/Margin"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/separation = 8
+
+[node name="TopRow" type="HBoxContainer" parent="Body/Margin/Cards/Card0/Margin/VBox"]
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="NameLabel" type="Label" parent="Body/Margin/Cards/Card0/Margin/VBox/TopRow"]
+layout_mode = 2
+size_flags_horizontal = 3
+text = "Candidate"
+theme_override_colors/font_color = Color(0.92, 0.92, 0.95, 1.0)
+theme_override_font_sizes/font_size = 15
+
+[node name="RoleChip" type="Label" parent="Body/Margin/Cards/Card0/Margin/VBox/TopRow"]
+layout_mode = 2
+text = "DEV"
+theme_override_colors/font_color = Color(0.4, 0.8, 1.0, 1.0)
+theme_override_font_sizes/font_size = 11
+
+[node name="PersLabel" type="Label" parent="Body/Margin/Cards/Card0/Margin/VBox"]
+layout_mode = 2
+text = "Normal"
+theme_override_colors/font_color = Color(0.6, 0.62, 0.72, 1.0)
+theme_override_font_sizes/font_size = 12
+
+[node name="SkillRow" type="HBoxContainer" parent="Body/Margin/Cards/Card0/Margin/VBox"]
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="SkillKey" type="Label" parent="Body/Margin/Cards/Card0/Margin/VBox/SkillRow"]
+layout_mode = 2
+custom_minimum_size = Vector2(32, 0)
+size_flags_vertical = 4
+text = "SKL"
+theme_override_colors/font_color = Color(0.5, 0.51, 0.62, 1.0)
+theme_override_font_sizes/font_size = 10
+
+[node name="SkillBar" type="ProgressBar" parent="Body/Margin/Cards/Card0/Margin/VBox/SkillRow"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 4
+custom_minimum_size = Vector2(0, 10)
+show_percentage = false
+value = 50.0
+theme_override_styles/background = SubResource("SBFlat_bar_bg")
+theme_override_styles/fill = SubResource("SBFlat_skill_fill")
+
+[node name="MotRow" type="HBoxContainer" parent="Body/Margin/Cards/Card0/Margin/VBox"]
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="MotKey" type="Label" parent="Body/Margin/Cards/Card0/Margin/VBox/MotRow"]
+layout_mode = 2
+custom_minimum_size = Vector2(32, 0)
+size_flags_vertical = 4
+text = "MOT"
+theme_override_colors/font_color = Color(0.5, 0.51, 0.62, 1.0)
+theme_override_font_sizes/font_size = 10
+
+[node name="MotBar" type="ProgressBar" parent="Body/Margin/Cards/Card0/Margin/VBox/MotRow"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 4
+custom_minimum_size = Vector2(0, 10)
+show_percentage = false
+value = 50.0
+theme_override_styles/background = SubResource("SBFlat_bar_bg")
+theme_override_styles/fill = SubResource("SBFlat_mot_fill")
+
+[node name="BottomRow" type="HBoxContainer" parent="Body/Margin/Cards/Card0/Margin/VBox"]
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="SalaryLabel" type="Label" parent="Body/Margin/Cards/Card0/Margin/VBox/BottomRow"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 4
+text = "$0 / mo"
+theme_override_colors/font_color = Color(0.92, 0.92, 0.95, 1.0)
+theme_override_font_sizes/font_size = 13
+
+[node name="HireBtn" type="Button" parent="Body/Margin/Cards/Card0/Margin/VBox/BottomRow"]
+layout_mode = 2
+custom_minimum_size = Vector2(80, 32)
+text = "HIRE"
+theme_override_colors/font_color = Color(0.9, 0.98, 0.92, 1.0)
+theme_override_font_sizes/font_size = 13
+theme_override_styles/normal = SubResource("SBFlat_hire")
+
+; ─────────────────────────────────────────
+;  CARD 1
+; ─────────────────────────────────────────
+[node name="Card1" type="Panel" parent="Body/Margin/Cards"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_styles/panel = SubResource("SBFlat_card")
+
+[node name="Margin" type="MarginContainer" parent="Body/Margin/Cards/Card1"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/margin_left = 14
+theme_override_constants/margin_top = 12
+theme_override_constants/margin_right = 14
+theme_override_constants/margin_bottom = 12
+
+[node name="VBox" type="VBoxContainer" parent="Body/Margin/Cards/Card1/Margin"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/separation = 8
+
+[node name="TopRow" type="HBoxContainer" parent="Body/Margin/Cards/Card1/Margin/VBox"]
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="NameLabel" type="Label" parent="Body/Margin/Cards/Card1/Margin/VBox/TopRow"]
+layout_mode = 2
+size_flags_horizontal = 3
+text = "Candidate"
+theme_override_colors/font_color = Color(0.92, 0.92, 0.95, 1.0)
+theme_override_font_sizes/font_size = 15
+
+[node name="RoleChip" type="Label" parent="Body/Margin/Cards/Card1/Margin/VBox/TopRow"]
+layout_mode = 2
+text = "DEV"
+theme_override_colors/font_color = Color(0.4, 0.8, 1.0, 1.0)
+theme_override_font_sizes/font_size = 11
+
+[node name="PersLabel" type="Label" parent="Body/Margin/Cards/Card1/Margin/VBox"]
+layout_mode = 2
+text = "Normal"
+theme_override_colors/font_color = Color(0.6, 0.62, 0.72, 1.0)
+theme_override_font_sizes/font_size = 12
+
+[node name="SkillRow" type="HBoxContainer" parent="Body/Margin/Cards/Card1/Margin/VBox"]
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="SkillKey" type="Label" parent="Body/Margin/Cards/Card1/Margin/VBox/SkillRow"]
+layout_mode = 2
+custom_minimum_size = Vector2(32, 0)
+size_flags_vertical = 4
+text = "SKL"
+theme_override_colors/font_color = Color(0.5, 0.51, 0.62, 1.0)
+theme_override_font_sizes/font_size = 10
+
+[node name="SkillBar" type="ProgressBar" parent="Body/Margin/Cards/Card1/Margin/VBox/SkillRow"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 4
+custom_minimum_size = Vector2(0, 10)
+show_percentage = false
+value = 50.0
+theme_override_styles/background = SubResource("SBFlat_bar_bg")
+theme_override_styles/fill = SubResource("SBFlat_skill_fill")
+
+[node name="MotRow" type="HBoxContainer" parent="Body/Margin/Cards/Card1/Margin/VBox"]
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="MotKey" type="Label" parent="Body/Margin/Cards/Card1/Margin/VBox/MotRow"]
+layout_mode = 2
+custom_minimum_size = Vector2(32, 0)
+size_flags_vertical = 4
+text = "MOT"
+theme_override_colors/font_color = Color(0.5, 0.51, 0.62, 1.0)
+theme_override_font_sizes/font_size = 10
+
+[node name="MotBar" type="ProgressBar" parent="Body/Margin/Cards/Card1/Margin/VBox/MotRow"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 4
+custom_minimum_size = Vector2(0, 10)
+show_percentage = false
+value = 50.0
+theme_override_styles/background = SubResource("SBFlat_bar_bg")
+theme_override_styles/fill = SubResource("SBFlat_mot_fill")
+
+[node name="BottomRow" type="HBoxContainer" parent="Body/Margin/Cards/Card1/Margin/VBox"]
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="SalaryLabel" type="Label" parent="Body/Margin/Cards/Card1/Margin/VBox/BottomRow"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 4
+text = "$0 / mo"
+theme_override_colors/font_color = Color(0.92, 0.92, 0.95, 1.0)
+theme_override_font_sizes/font_size = 13
+
+[node name="HireBtn" type="Button" parent="Body/Margin/Cards/Card1/Margin/VBox/BottomRow"]
+layout_mode = 2
+custom_minimum_size = Vector2(80, 32)
+text = "HIRE"
+theme_override_colors/font_color = Color(0.9, 0.98, 0.92, 1.0)
+theme_override_font_sizes/font_size = 13
+theme_override_styles/normal = SubResource("SBFlat_hire")
+
+; ─────────────────────────────────────────
+;  CARD 2
+; ─────────────────────────────────────────
+[node name="Card2" type="Panel" parent="Body/Margin/Cards"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_styles/panel = SubResource("SBFlat_card")
+
+[node name="Margin" type="MarginContainer" parent="Body/Margin/Cards/Card2"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/margin_left = 14
+theme_override_constants/margin_top = 12
+theme_override_constants/margin_right = 14
+theme_override_constants/margin_bottom = 12
+
+[node name="VBox" type="VBoxContainer" parent="Body/Margin/Cards/Card2/Margin"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/separation = 8
+
+[node name="TopRow" type="HBoxContainer" parent="Body/Margin/Cards/Card2/Margin/VBox"]
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="NameLabel" type="Label" parent="Body/Margin/Cards/Card2/Margin/VBox/TopRow"]
+layout_mode = 2
+size_flags_horizontal = 3
+text = "Candidate"
+theme_override_colors/font_color = Color(0.92, 0.92, 0.95, 1.0)
+theme_override_font_sizes/font_size = 15
+
+[node name="RoleChip" type="Label" parent="Body/Margin/Cards/Card2/Margin/VBox/TopRow"]
+layout_mode = 2
+text = "DEV"
+theme_override_colors/font_color = Color(0.4, 0.8, 1.0, 1.0)
+theme_override_font_sizes/font_size = 11
+
+[node name="PersLabel" type="Label" parent="Body/Margin/Cards/Card2/Margin/VBox"]
+layout_mode = 2
+text = "Normal"
+theme_override_colors/font_color = Color(0.6, 0.62, 0.72, 1.0)
+theme_override_font_sizes/font_size = 12
+
+[node name="SkillRow" type="HBoxContainer" parent="Body/Margin/Cards/Card2/Margin/VBox"]
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="SkillKey" type="Label" parent="Body/Margin/Cards/Card2/Margin/VBox/SkillRow"]
+layout_mode = 2
+custom_minimum_size = Vector2(32, 0)
+size_flags_vertical = 4
+text = "SKL"
+theme_override_colors/font_color = Color(0.5, 0.51, 0.62, 1.0)
+theme_override_font_sizes/font_size = 10
+
+[node name="SkillBar" type="ProgressBar" parent="Body/Margin/Cards/Card2/Margin/VBox/SkillRow"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 4
+custom_minimum_size = Vector2(0, 10)
+show_percentage = false
+value = 50.0
+theme_override_styles/background = SubResource("SBFlat_bar_bg")
+theme_override_styles/fill = SubResource("SBFlat_skill_fill")
+
+[node name="MotRow" type="HBoxContainer" parent="Body/Margin/Cards/Card2/Margin/VBox"]
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="MotKey" type="Label" parent="Body/Margin/Cards/Card2/Margin/VBox/MotRow"]
+layout_mode = 2
+custom_minimum_size = Vector2(32, 0)
+size_flags_vertical = 4
+text = "MOT"
+theme_override_colors/font_color = Color(0.5, 0.51, 0.62, 1.0)
+theme_override_font_sizes/font_size = 10
+
+[node name="MotBar" type="ProgressBar" parent="Body/Margin/Cards/Card2/Margin/VBox/MotRow"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 4
+custom_minimum_size = Vector2(0, 10)
+show_percentage = false
+value = 50.0
+theme_override_styles/background = SubResource("SBFlat_bar_bg")
+theme_override_styles/fill = SubResource("SBFlat_mot_fill")
+
+[node name="BottomRow" type="HBoxContainer" parent="Body/Margin/Cards/Card2/Margin/VBox"]
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="SalaryLabel" type="Label" parent="Body/Margin/Cards/Card2/Margin/VBox/BottomRow"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 4
+text = "$0 / mo"
+theme_override_colors/font_color = Color(0.92, 0.92, 0.95, 1.0)
+theme_override_font_sizes/font_size = 13
+
+[node name="HireBtn" type="Button" parent="Body/Margin/Cards/Card2/Margin/VBox/BottomRow"]
+layout_mode = 2
+custom_minimum_size = Vector2(80, 32)
+text = "HIRE"
+theme_override_colors/font_color = Color(0.9, 0.98, 0.92, 1.0)
+theme_override_font_sizes/font_size = 13
+theme_override_styles/normal = SubResource("SBFlat_hire")
+
+; ═════════════════════════════════════════════════════════════════════════════
+;  BOTTOM BAR  —  72 px, bottom-wide
+;  Full-width Refresh button with cost hint
+; ═════════════════════════════════════════════════════════════════════════════
+[node name="BottomBar" type="Panel" parent="."]
+layout_mode = 1
+anchors_preset = 12
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_top = -72.0
+grow_horizontal = 2
+grow_vertical = 0
+theme_override_styles/panel = SubResource("SBFlat_bottom")
+
+[node name="Margin" type="MarginContainer" parent="BottomBar"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/margin_left = 12
+theme_override_constants/margin_top = 12
+theme_override_constants/margin_right = 12
+theme_override_constants/margin_bottom = 12
+
+[node name="RefreshBtn" type="Button" parent="BottomBar/Margin"]
+layout_mode = 2
+size_flags_horizontal = 3
+text = "↺  REFRESH CANDIDATES  (-$500)"
+theme_override_colors/font_color = Color(0.8, 0.88, 1.0, 1.0)
+theme_override_font_sizes/font_size = 14
+theme_override_styles/normal = SubResource("SBFlat_refresh")
+
+; ═════════════════════════════════════════════════════════════════════════════
+;  SIGNAL CONNECTIONS
+;  HireBtn connections are wired in HireScreen.gd _collect_card_refs()
+; ═════════════════════════════════════════════════════════════════════════════
+[connection signal="pressed" from="Header/Margin/HBox/BackBtn" to="." method="_on_back_pressed"]
+[connection signal="pressed" from="BottomBar/Margin/RefreshBtn" to="." method="_on_refresh_pressed"]
