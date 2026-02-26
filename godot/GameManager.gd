@@ -151,9 +151,9 @@ func _advance_year() -> void:
 func _check_tier_upgrade() -> void:
 	var current_tier: int = company_data["tier"]
 	var new_tier := current_tier
-	var emp_count := employees.hired_count()
-	var earned    := economy.total_earned
-	var rep       := company_data["reputation"]
+	var emp_count: int = employees.hired_count()
+	var earned: int    = economy.total_earned
+	var rep: int       = company_data["reputation"]
 
 	if emp_count >= 51 and earned >= 1_000_000 and rep >= 500:
 		new_tier = CompanyTier.GLOBAL_CORP
