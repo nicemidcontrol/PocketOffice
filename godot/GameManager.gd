@@ -5,7 +5,6 @@
 ## This is the single source of truth for all game state.
 ## All sub-managers are child nodes added in _ready().
 
-class_name GameManager
 extends Node
 
 # ─────────────────────────────────────────
@@ -25,11 +24,11 @@ signal game_message(message: String)
 # ─────────────────────────────────────────
 #  SUB-MANAGERS  (child nodes)
 # ─────────────────────────────────────────
-var employees: EmployeeManager
-var economy:   EconomyManager
-var projects:  ProjectManager
-var events:    EventManager
-var office:    OfficeManager
+var employees: Node
+var economy:   Node
+var projects:  Node
+var events:    Node
+var office:    Node
 
 # ─────────────────────────────────────────
 #  COMPANY STATE
@@ -73,11 +72,11 @@ func _process(delta: float) -> void:
 #  SUB-MANAGER SETUP
 # ─────────────────────────────────────────
 func _init_sub_managers() -> void:
-	employees = EmployeeManager.new()
-	economy   = EconomyManager.new()
-	projects  = ProjectManager.new()
-	events    = EventManager.new()
-	office    = OfficeManager.new()
+	employees = load("res://EmployeeManager.gd").new()
+	economy   = load("res://EconomyManager.gd").new()
+	projects  = load("res://ProjectManager.gd").new()
+	events    = load("res://EventManager.gd").new()
+	office    = load("res://OfficeManager.gd").new()
 
 	for manager in [employees, economy, projects, events, office]:
 		add_child(manager)

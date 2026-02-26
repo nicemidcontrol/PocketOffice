@@ -1,4 +1,3 @@
-class_name ProjectManager
 extends Node
 
 # ─────────────────────────────────────────
@@ -79,7 +78,7 @@ func assign_employees(project_id: String, employees: Array[Employee]) -> bool:
 # ─────────────────────────────────────────
 #  DAILY TICK
 # ─────────────────────────────────────────
-func tick_projects(gm: GameManager) -> void:
+func tick_projects(gm: Node) -> void:
 	for proj in _projects:
 		if proj["status"] != ProjectStatus.ACTIVE:
 			continue
@@ -101,7 +100,7 @@ func _get_progress(proj: Dictionary) -> float:
 # ─────────────────────────────────────────
 #  COMPLETE / FAIL
 # ─────────────────────────────────────────
-func _complete_project(proj: Dictionary, gm: GameManager) -> void:
+func _complete_project(proj: Dictionary, gm: Node) -> void:
 	proj["status"] = ProjectStatus.COMPLETED
 	gm.economy.add_revenue(proj["reward_money"], "Project: " + proj["project_title"])
 	gm.company_data.reputation = mini(1000, gm.company_data.reputation + proj["reward_reputation"])
@@ -109,7 +108,7 @@ func _complete_project(proj: Dictionary, gm: GameManager) -> void:
 	project_completed.emit(proj)
 	gm.broadcast("✅ Project '%s' completed! +$%d" % [proj["project_title"], proj["reward_money"]])
 
-func _fail_project(proj: Dictionary, gm: GameManager) -> void:
+func _fail_project(proj: Dictionary, gm: Node) -> void:
 	proj["status"] = ProjectStatus.FAILED
 	gm.company_data.reputation = maxi(0, gm.company_data.reputation - proj["penalty_reputation"])
 	_free_employees(proj, gm, false)
@@ -118,7 +117,7 @@ func _fail_project(proj: Dictionary, gm: GameManager) -> void:
 		proj["project_title"], proj["penalty_reputation"]
 	])
 
-func _free_employees(proj: Dictionary, gm: GameManager, success: bool) -> void:
+func _free_employees(proj: Dictionary, gm: Node, success: bool) -> void:
 	var ids: Array = proj["assigned_employee_ids"]
 	for emp in gm.employees.get_all_employees():
 		if emp.id in ids:
