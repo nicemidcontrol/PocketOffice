@@ -1,7 +1,8 @@
-[gd_scene load_steps=4 format=3 uid="uid://main390x844po"]
+[gd_scene load_steps=5 format=3 uid="uid://main390x844po"]
 
 [ext_resource type="Script" path="res://scripts/ui/Main.gd" id="1_mainscript"]
 [ext_resource type="PackedScene" path="res://scenes/HUD.tscn" id="2_hudscene"]
+[ext_resource type="PackedScene" path="res://scenes/OfficeView.tscn" id="3_ovscene"]
 
 ; Blue-navy button style matching the HireScreen palette
 [sub_resource type="StyleBoxFlat" id="SBFlat_hirebtn"]
@@ -18,10 +19,12 @@ border_color = Color(0.4, 0.65, 1.0, 0.9)
 ;  Layout (390×844 portrait):
 ;    Main (Control, full-rect)
 ;    ├── Background (ColorRect)  — dark canvas behind all game content
-;    ├── HireBtn (Button)        — bottom-center, above HUD message area
+;    ├── OfficeView               — 2×4 desk grid, y 64–728
+;    ├── HireBtn (Button)         — bottom-center, above HUD message area
 ;    └── HUD (CanvasLayer, layer 10)  — stat bar + message feed
 ;
 ;  HUD TopBar    : y   0 –  64 px  (always visible)
+;  OfficeView    : y  64 – 728 px  (content area)
 ;  HireBtn       : y 728 – 780 px  (52 px tall, 220 px wide, centered)
 ;  HUD MsgPanel  : y 792 – 844 px  (only visible when a message fires)
 ;  — 12 px clear gap on each side keeps the button fully unobstructed —
@@ -43,6 +46,17 @@ anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
 color = Color(0.047, 0.047, 0.11, 1.0)
+
+; ── OfficeView — 2×4 desk grid filling the content area ──────────────────────
+;  y 64–728: below HUD TopBar, above HireBtn top edge
+[node name="OfficeView" parent="." instance=ExtResource("3_ovscene")]
+layout_mode = 1
+anchor_right    = 1.0
+anchor_bottom   = 1.0
+grow_horizontal = 2
+grow_vertical   = 2
+offset_top    = 64.0
+offset_bottom = -116.0
 
 ; ── HIRE STAFF button ─────────────────────────────────────────────────────────
 ;  Anchored to the bottom-centre of the viewport.
