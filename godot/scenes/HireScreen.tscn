@@ -152,7 +152,7 @@ theme_override_font_sizes/font_size = 11
 ; ─────────────────────────────────────────
 ;  CARD 0
 ; ─────────────────────────────────────────
-[node name="Card0" type="Panel" parent="Body/Margin/Cards"]
+[node name="Card0" type="PanelContainer" parent="Body/Margin/Cards"]
 layout_mode = 2
 size_flags_horizontal = 3
 theme_override_styles/panel = SubResource("SBFlat_card")
@@ -260,7 +260,7 @@ theme_override_styles/normal = SubResource("SBFlat_hire")
 ; ─────────────────────────────────────────
 ;  CARD 1
 ; ─────────────────────────────────────────
-[node name="Card1" type="Panel" parent="Body/Margin/Cards"]
+[node name="Card1" type="PanelContainer" parent="Body/Margin/Cards"]
 layout_mode = 2
 size_flags_horizontal = 3
 theme_override_styles/panel = SubResource("SBFlat_card")
@@ -368,7 +368,7 @@ theme_override_styles/normal = SubResource("SBFlat_hire")
 ; ─────────────────────────────────────────
 ;  CARD 2
 ; ─────────────────────────────────────────
-[node name="Card2" type="Panel" parent="Body/Margin/Cards"]
+[node name="Card2" type="PanelContainer" parent="Body/Margin/Cards"]
 layout_mode = 2
 size_flags_horizontal = 3
 theme_override_styles/panel = SubResource("SBFlat_card")
