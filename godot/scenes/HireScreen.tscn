@@ -2,7 +2,7 @@
 
 [ext_resource type="Script" uid="uid://byvf11epv1pfk" path="res://scripts/ui/HireScreen.gd" id="1_hirescr"]
 
-[sub_resource type="StyleBoxFlat" id="SBFlat_header"]
+[sub_resource type="StyleBoxFlat" id="SBFlat_panel"]
 bg_color = Color(0.047, 0.047, 0.11, 0.97)
 border_width_bottom = 2
 border_color = Color(0.18, 0.42, 0.78, 1)
@@ -19,15 +19,6 @@ corner_radius_top_right = 4
 corner_radius_bottom_right = 4
 corner_radius_bottom_left = 4
 
-[sub_resource type="StyleBoxFlat" id="SBFlat_bar_bg"]
-bg_color = Color(0.1, 0.1, 0.2, 1)
-
-[sub_resource type="StyleBoxFlat" id="SBFlat_skill_fill"]
-bg_color = Color(0.22, 0.9, 0.42, 1)
-
-[sub_resource type="StyleBoxFlat" id="SBFlat_mot_fill"]
-bg_color = Color(1, 0.82, 0.1, 1)
-
 [sub_resource type="StyleBoxFlat" id="SBFlat_hire"]
 bg_color = Color(0.08, 0.36, 0.17, 1)
 border_width_left = 1
@@ -36,11 +27,6 @@ border_width_right = 1
 border_width_bottom = 1
 border_color = Color(0.22, 0.9, 0.42, 0.7)
 
-[sub_resource type="StyleBoxFlat" id="SBFlat_bottom"]
-bg_color = Color(0.047, 0.047, 0.11, 0.97)
-border_width_top = 2
-border_color = Color(0.18, 0.42, 0.78, 1)
-
 [sub_resource type="StyleBoxFlat" id="SBFlat_refresh"]
 bg_color = Color(0.08, 0.18, 0.44, 1)
 border_width_left = 1
@@ -48,6 +34,15 @@ border_width_top = 1
 border_width_right = 1
 border_width_bottom = 1
 border_color = Color(0.18, 0.42, 0.78, 0.8)
+
+[sub_resource type="StyleBoxFlat" id="SBFlat_bar_bg"]
+bg_color = Color(0.1, 0.1, 0.2, 1.0)
+
+[sub_resource type="StyleBoxFlat" id="SBFlat_skill_fill"]
+bg_color = Color(0.22, 0.9, 0.42, 1.0)
+
+[sub_resource type="StyleBoxFlat" id="SBFlat_mot_fill"]
+bg_color = Color(1.0, 0.82, 0.1, 1.0)
 
 [node name="HireScreen" type="Control"]
 layout_mode = 3
@@ -58,7 +53,6 @@ grow_horizontal = 2
 grow_vertical = 2
 script = ExtResource("1_hirescript")
 
-; ── Dark canvas fill ──────────────────────────────────────────────────────────
 [node name="Background" type="ColorRect" parent="."]
 layout_mode = 1
 anchors_preset = 15
@@ -134,7 +128,7 @@ theme_override_font_sizes/font_size = 11
 text = "3 candidates available  •  Refresh costs $500"
 horizontal_alignment = 1
 
-[node name="Card0" type="PanelContainer" parent="Body/Margin/Cards"]
+[node name="Card0" type="PanelContainer" parent="Body/VBox"]
 layout_mode = 2
 size_flags_horizontal = 3
 custom_minimum_size = Vector2(0, 200)
@@ -236,7 +230,7 @@ theme_override_colors/font_color = Color(0.9, 0.98, 0.92, 1.0)
 theme_override_styles/normal = SubResource("SBFlat_hire")
 text = "HIRE"
 
-[node name="Card1" type="PanelContainer" parent="Body/Margin/Cards"]
+[node name="Card1" type="PanelContainer" parent="Body/VBox"]
 layout_mode = 2
 size_flags_horizontal = 3
 custom_minimum_size = Vector2(0, 200)
@@ -338,7 +332,7 @@ theme_override_colors/font_color = Color(0.9, 0.98, 0.92, 1.0)
 theme_override_styles/normal = SubResource("SBFlat_hire")
 text = "HIRE"
 
-[node name="Card2" type="PanelContainer" parent="Body/Margin/Cards"]
+[node name="Card2" type="PanelContainer" parent="Body/VBox"]
 layout_mode = 2
 size_flags_horizontal = 3
 custom_minimum_size = Vector2(0, 200)
@@ -440,7 +434,7 @@ theme_override_colors/font_color = Color(0.9, 0.98, 0.92, 1.0)
 theme_override_styles/normal = SubResource("SBFlat_hire")
 text = "HIRE"
 
-[node name="BottomBar" type="Panel" parent="."]
+[node name="Footer" type="Panel" parent="."]
 layout_mode = 1
 anchors_preset = 12
 anchor_right = 1.0
@@ -469,13 +463,6 @@ theme_override_constants/margin_top = 12
 theme_override_constants/margin_right = 12
 theme_override_constants/margin_bottom = 12
 
-[node name="RefreshBtn" type="Button" parent="BottomBar/Margin"]
-layout_mode = 2
-size_flags_horizontal = 3
-theme_override_colors/font_color = Color(0.8, 0.88, 1, 1)
-theme_override_font_sizes/font_size = 14
-theme_override_styles/normal = SubResource("SBFlat_refresh")
-text = "↺  REFRESH CANDIDATES  (-$500)"
+[connection signal="pressed" from="Header/HBox/BackButton" to="." method="_on_back_pressed"]
+[connection signal="pressed" from="Footer/RefreshButton" to="." method="_on_refresh_pressed"]
 
-[connection signal="pressed" from="Header/Margin/HBox/BackBtn" to="." method="_on_back_pressed"]
-[connection signal="pressed" from="BottomBar/Margin/RefreshBtn" to="." method="_on_refresh_pressed"]
