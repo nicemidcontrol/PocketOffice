@@ -2,13 +2,11 @@
 
 [ext_resource type="Script" path="res://scripts/ui/HireScreen.gd" id="1_hirescript"]
 
-; ── Header / Footer panel style ───────────────────────────────────────────────
 [sub_resource type="StyleBoxFlat" id="SBFlat_panel"]
 bg_color = Color(0.047, 0.047, 0.11, 0.97)
 border_width_bottom = 2
 border_color = Color(0.18, 0.42, 0.78, 1.0)
 
-; ── Card panel style ──────────────────────────────────────────────────────────
 [sub_resource type="StyleBoxFlat" id="SBFlat_card"]
 bg_color = Color(0.078, 0.078, 0.172, 1.0)
 border_width_left = 1
@@ -21,7 +19,6 @@ corner_radius_top_right = 4
 corner_radius_bottom_right = 4
 corner_radius_bottom_left = 4
 
-; ── HIRE button style ─────────────────────────────────────────────────────────
 [sub_resource type="StyleBoxFlat" id="SBFlat_hire"]
 bg_color = Color(0.08, 0.36, 0.17, 1.0)
 border_width_left = 1
@@ -30,7 +27,6 @@ border_width_right = 1
 border_width_bottom = 1
 border_color = Color(0.22, 0.9, 0.42, 0.7)
 
-; ── REFRESH button style ──────────────────────────────────────────────────────
 [sub_resource type="StyleBoxFlat" id="SBFlat_refresh"]
 bg_color = Color(0.08, 0.18, 0.44, 1.0)
 border_width_left = 1
@@ -39,7 +35,6 @@ border_width_right = 1
 border_width_bottom = 1
 border_color = Color(0.18, 0.42, 0.78, 0.8)
 
-; ── Progress bar styles ───────────────────────────────────────────────────────
 [sub_resource type="StyleBoxFlat" id="SBFlat_bar_bg"]
 bg_color = Color(0.1, 0.1, 0.2, 1.0)
 
@@ -49,34 +44,6 @@ bg_color = Color(0.22, 0.9, 0.42, 1.0)
 [sub_resource type="StyleBoxFlat" id="SBFlat_mot_fill"]
 bg_color = Color(1.0, 0.82, 0.1, 1.0)
 
-; ═════════════════════════════════════════════════════════════════════════════
-;  HireScreen — root (390×844 portrait)
-;
-;  HireScreen (Control, full-rect)
-;  ├── Background (ColorRect)
-;  ├── Header (Panel, 60 px top)
-;  │   └── HBox (HBoxContainer, fills header)
-;  │       ├── BackButton
-;  │       ├── TitleLabel (expand)
-;  │       └── CashLabel
-;  ├── Body (ScrollContainer, y 60–784)
-;  │   └── VBox (VBoxContainer, min-x=370, sep=12)
-;  │       ├── HintLabel
-;  │       ├── Card0 (PanelContainer, min-y=200)
-;  │       │   └── Margin (10 px all sides)
-;  │       │       └── VBox
-;  │       │           ├── HBoxTop0 → NameLabel0 + RoleLabel0
-;  │       │           ├── PersLabel0
-;  │       │           ├── HBoxSkl0  → SklLabel0 + SkillBar0
-;  │       │           ├── HBoxMot0  → MotLabel0 + MoralBar0
-;  │       │           ├── SalaryLabel0
-;  │       │           └── HireButton0
-;  │       ├── Card1 (same, suffix 1)
-;  │       └── Card2 (same, suffix 2)
-;  └── Footer (Panel, 60 px bottom)
-;      └── RefreshButton
-; ═════════════════════════════════════════════════════════════════════════════
-
 [node name="HireScreen" type="Control"]
 anchor_right = 1.0
 anchor_bottom = 1.0
@@ -84,7 +51,6 @@ grow_horizontal = 2
 grow_vertical = 2
 script = ExtResource("1_hirescript")
 
-; ── Dark canvas fill ──────────────────────────────────────────────────────────
 [node name="Background" type="ColorRect" parent="."]
 layout_mode = 1
 anchors_preset = 15
@@ -94,7 +60,6 @@ grow_horizontal = 2
 grow_vertical = 2
 color = Color(0.047, 0.047, 0.11, 1.0)
 
-; ── Header (top 60 px) ────────────────────────────────────────────────────────
 [node name="Header" type="Panel" parent="."]
 layout_mode = 1
 anchors_preset = 10
@@ -135,7 +100,6 @@ horizontal_alignment = 2
 theme_override_font_sizes/font_size = 14
 theme_override_colors/font_color = Color(0.22, 0.9, 0.42, 1.0)
 
-; ── Body — ScrollContainer (y 60–784) ─────────────────────────────────────────
 [node name="Body" type="ScrollContainer" parent="."]
 layout_mode = 1
 anchor_right = 1.0
@@ -159,9 +123,6 @@ horizontal_alignment = 1
 theme_override_font_sizes/font_size = 11
 theme_override_colors/font_color = Color(0.5, 0.51, 0.62, 1.0)
 
-; ─────────────────────────────────────────
-;  CARD 0
-; ─────────────────────────────────────────
 [node name="Card0" type="PanelContainer" parent="Body/VBox"]
 layout_mode = 2
 size_flags_horizontal = 3
@@ -263,9 +224,6 @@ theme_override_font_sizes/font_size = 13
 theme_override_colors/font_color = Color(0.9, 0.98, 0.92, 1.0)
 theme_override_styles/normal = SubResource("SBFlat_hire")
 
-; ─────────────────────────────────────────
-;  CARD 1
-; ─────────────────────────────────────────
 [node name="Card1" type="PanelContainer" parent="Body/VBox"]
 layout_mode = 2
 size_flags_horizontal = 3
@@ -367,9 +325,6 @@ theme_override_font_sizes/font_size = 13
 theme_override_colors/font_color = Color(0.9, 0.98, 0.92, 1.0)
 theme_override_styles/normal = SubResource("SBFlat_hire")
 
-; ─────────────────────────────────────────
-;  CARD 2
-; ─────────────────────────────────────────
 [node name="Card2" type="PanelContainer" parent="Body/VBox"]
 layout_mode = 2
 size_flags_horizontal = 3
@@ -471,7 +426,6 @@ theme_override_font_sizes/font_size = 13
 theme_override_colors/font_color = Color(0.9, 0.98, 0.92, 1.0)
 theme_override_styles/normal = SubResource("SBFlat_hire")
 
-; ── Footer (bottom 60 px) ─────────────────────────────────────────────────────
 [node name="Footer" type="Panel" parent="."]
 layout_mode = 1
 anchors_preset = 12
@@ -503,3 +457,4 @@ theme_override_styles/normal = SubResource("SBFlat_refresh")
 
 [connection signal="pressed" from="Header/HBox/BackButton" to="." method="_on_back_pressed"]
 [connection signal="pressed" from="Footer/RefreshButton" to="." method="_on_refresh_pressed"]
+
