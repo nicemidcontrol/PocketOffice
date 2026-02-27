@@ -1,39 +1,81 @@
 extends Control
 
-# ─────────────────────────────────────────
-#  CONSTANTS
-# ─────────────────────────────────────────
-const REFRESH_COST := 500
-const CARD_COUNT   := 3
+const REFRESH_COST: int = 500
 
 # ─────────────────────────────────────────
-#  NODE REFS  (static)
+#  HEADER / FOOTER
 # ─────────────────────────────────────────
-@onready var _cash_label:  Label  = $Header/Margin/HBox/CashLabel
-@onready var _refresh_btn: Button = $BottomBar/Margin/RefreshBtn
+@onready var _cash_label: Label   = $Header/HBox/CashLabel
+@onready var _refresh_btn: Button = $Footer/RefreshButton
 
-# Per-card refs — collected at runtime to avoid 21 individual @onready lines
-var _name_labels:   Array[Label]       = []
-var _role_chips:    Array[Label]       = []
-var _pers_labels:   Array[Label]       = []
-var _skill_bars:    Array[ProgressBar] = []
-var _mot_bars:      Array[ProgressBar] = []
-var _salary_labels: Array[Label]       = []
-var _hire_btns:     Array[Button]      = []
+# ─────────────────────────────────────────
+#  CARD 0
+# ─────────────────────────────────────────
+@onready var _name_0: Label        = $Body/VBox/Card0/Margin/VBox/HBoxTop0/NameLabel0
+@onready var _role_0: Label        = $Body/VBox/Card0/Margin/VBox/HBoxTop0/RoleLabel0
+@onready var _pers_0: Label        = $Body/VBox/Card0/Margin/VBox/PersLabel0
+@onready var _skill_0: ProgressBar = $Body/VBox/Card0/Margin/VBox/HBoxSkl0/SkillBar0
+@onready var _moral_0: ProgressBar = $Body/VBox/Card0/Margin/VBox/HBoxMot0/MoralBar0
+@onready var _salary_0: Label      = $Body/VBox/Card0/Margin/VBox/SalaryLabel0
+@onready var _hire_0: Button       = $Body/VBox/Card0/Margin/VBox/HireButton0
+
+# ─────────────────────────────────────────
+#  CARD 1
+# ─────────────────────────────────────────
+@onready var _name_1: Label        = $Body/VBox/Card1/Margin/VBox/HBoxTop1/NameLabel1
+@onready var _role_1: Label        = $Body/VBox/Card1/Margin/VBox/HBoxTop1/RoleLabel1
+@onready var _pers_1: Label        = $Body/VBox/Card1/Margin/VBox/PersLabel1
+@onready var _skill_1: ProgressBar = $Body/VBox/Card1/Margin/VBox/HBoxSkl1/SkillBar1
+@onready var _moral_1: ProgressBar = $Body/VBox/Card1/Margin/VBox/HBoxMot1/MoralBar1
+@onready var _salary_1: Label      = $Body/VBox/Card1/Margin/VBox/SalaryLabel1
+@onready var _hire_1: Button       = $Body/VBox/Card1/Margin/VBox/HireButton1
+
+# ─────────────────────────────────────────
+#  CARD 2
+# ─────────────────────────────────────────
+@onready var _name_2: Label        = $Body/VBox/Card2/Margin/VBox/HBoxTop2/NameLabel2
+@onready var _role_2: Label        = $Body/VBox/Card2/Margin/VBox/HBoxTop2/RoleLabel2
+@onready var _pers_2: Label        = $Body/VBox/Card2/Margin/VBox/PersLabel2
+@onready var _skill_2: ProgressBar = $Body/VBox/Card2/Margin/VBox/HBoxSkl2/SkillBar2
+@onready var _moral_2: ProgressBar = $Body/VBox/Card2/Margin/VBox/HBoxMot2/MoralBar2
+@onready var _salary_2: Label      = $Body/VBox/Card2/Margin/VBox/SalaryLabel2
+@onready var _hire_2: Button       = $Body/VBox/Card2/Margin/VBox/HireButton2
 
 # ─────────────────────────────────────────
 #  STATE
 # ─────────────────────────────────────────
-var _gm: Node      = null
-var _em_script             # loaded via load() — no class_name reference
+var _gm: Node       = null
+var _em: GDScript   = null
 var _candidates: Array = []
+
+# Indexed arrays built from @onready refs — used by populate_candidates()
+var _name_labels:   Array[Label]       = []
+var _role_labels:   Array[Label]       = []
+var _pers_labels:   Array[Label]       = []
+var _skill_bars:    Array[ProgressBar] = []
+var _moral_bars:    Array[ProgressBar] = []
+var _salary_labels: Array[Label]       = []
+var _hire_btns:     Array[Button]      = []
 
 # ─────────────────────────────────────────
 #  LIFECYCLE
 # ─────────────────────────────────────────
 func _ready() -> void:
-	_em_script = load("res://EmployeeManager.gd")
-	_collect_card_refs()
+	_em = load("res://EmployeeManager.gd") as GDScript
+
+	# Build typed indexed arrays from @onready refs
+	_name_labels   = [_name_0,   _name_1,   _name_2]
+	_role_labels   = [_role_0,   _role_1,   _role_2]
+	_pers_labels   = [_pers_0,   _pers_1,   _pers_2]
+	_skill_bars    = [_skill_0,  _skill_1,  _skill_2]
+	_moral_bars    = [_moral_0,  _moral_1,  _moral_2]
+	_salary_labels = [_salary_0, _salary_1, _salary_2]
+	_hire_btns     = [_hire_0,   _hire_1,   _hire_2]
+
+	# Wire hire button signals with index
+	for i: int in range(3):
+		var idx: int = i
+		_hire_btns[i].pressed.connect(_on_hire_pressed.bind(idx))
 
 	# GameManager is an Autoload — wait one frame to ensure it is ready.
 	await get_tree().process_frame
@@ -44,44 +86,29 @@ func _ready() -> void:
 
 	_gm.economy.cash_changed.connect(_on_cash_changed)
 	_on_cash_changed(_gm.economy.current_cash)
-	_generate_candidates()
-
-# Populate per-card ref arrays and wire Hire button signals.
-func _collect_card_refs() -> void:
-	for i in CARD_COUNT:
-		var base: String = "Body/Margin/Cards/Card%d/Margin/VBox" % i
-		_name_labels.append(get_node(base + "/TopRow/NameLabel"))
-		_role_chips.append(get_node(base + "/TopRow/RoleChip"))
-		_pers_labels.append(get_node(base + "/PersLabel"))
-		_skill_bars.append(get_node(base + "/SkillRow/SkillBar"))
-		_mot_bars.append(get_node(base + "/MotRow/MotBar"))
-		_salary_labels.append(get_node(base + "/BottomRow/SalaryLabel"))
-		_hire_btns.append(get_node(base + "/BottomRow/HireBtn"))
-
-		var idx := i  # capture for closure
-		_hire_btns[i].pressed.connect(_on_hire_pressed.bind(idx))
+	populate_candidates()
 
 # ─────────────────────────────────────────
-#  CANDIDATE GENERATION
+#  CANDIDATE POPULATION
 # ─────────────────────────────────────────
-func _generate_candidates() -> void:
+func populate_candidates() -> void:
 	_candidates.clear()
-	for i in CARD_COUNT:
-		var emp = _em_script.generate_random_candidate()
-		_candidates.append(emp)
-		_populate_card(i, emp)
+	for i: int in range(3):
+		_candidates.append(_em.generate_random_candidate())
+	for i: int in range(3):
+		_fill_card(i, _candidates[i])
 
-func _populate_card(i: int, emp) -> void:
-	_name_labels[i].text    = emp.full_name()
-	_role_chips[i].text     = _role_str(emp.role)
-	_role_chips[i].modulate = _role_color(emp.role)
-	_pers_labels[i].text    = _personality_str(emp.personality)
-	_skill_bars[i].value    = emp.skill
-	_mot_bars[i].value      = emp.motivation
-	_salary_labels[i].text  = "$%s / mo" % _fmt(emp.monthly_salary)
-	_hire_btns[i].text      = "HIRE"
-	_hire_btns[i].disabled  = false
-	_hire_btns[i].modulate  = Color.WHITE
+func _fill_card(idx: int, emp: Object) -> void:
+	_name_labels[idx].text     = emp.full_name()
+	_role_labels[idx].text     = _role_str(emp.role)
+	_role_labels[idx].modulate = _role_color(emp.role)
+	_pers_labels[idx].text     = _pers_str(emp.personality)
+	_skill_bars[idx].value     = float(emp.skill)
+	_moral_bars[idx].value     = float(emp.motivation)
+	_salary_labels[idx].text   = "$%s / mo" % _fmt(emp.monthly_salary)
+	_hire_btns[idx].text       = "HIRE"
+	_hire_btns[idx].disabled   = false
+	_hire_btns[idx].modulate   = Color.WHITE
 
 # ─────────────────────────────────────────
 #  SIGNAL HANDLERS
@@ -93,20 +120,20 @@ func _on_cash_changed(amount: int) -> void:
 func _on_hire_pressed(idx: int) -> void:
 	if _gm == null or idx >= _candidates.size():
 		return
-	var emp = _candidates[idx]
+	var emp: Object = _candidates[idx]
 	_gm.employees.hire(emp)
 	_gm.broadcast("%s joined the team!" % emp.full_name())
 	_hire_btns[idx].text     = "✓ HIRED"
 	_hire_btns[idx].disabled = true
-	_hire_btns[idx].modulate = Color(0.42, 0.42, 0.42, 1.0)
+	_hire_btns[idx].modulate = Color(0.4, 0.4, 0.4, 1.0)
 
 func _on_refresh_pressed() -> void:
 	if _gm == null:
 		return
 	if not _gm.economy.spend(REFRESH_COST, "Recruitment Agency Fee"):
-		_gm.broadcast("Not enough cash to refresh candidates. (Need $%d)" % REFRESH_COST)
+		_gm.broadcast("Not enough cash to refresh. (Need $%d)" % REFRESH_COST)
 		return
-	_generate_candidates()
+	populate_candidates()
 
 func _on_back_pressed() -> void:
 	get_tree().change_scene_to_file("res://scenes/Main.tscn")
@@ -115,8 +142,8 @@ func _on_back_pressed() -> void:
 #  DISPLAY HELPERS
 # ─────────────────────────────────────────
 
-# Must match Employee.Role enum order: DEVELOPER=0 DESIGNER=1 MARKETER=2
-# HR_SPECIALIST=3 ACCOUNTANT=4 MANAGER=5 INTERN=6
+# Employee.Role: DEVELOPER=0 DESIGNER=1 MARKETER=2 HR_SPECIALIST=3
+#                ACCOUNTANT=4 MANAGER=5 INTERN=6
 func _role_str(role: int) -> String:
 	match role:
 		0: return "DEV"
@@ -139,9 +166,9 @@ func _role_color(role: int) -> Color:
 		6: return Color(0.65, 0.65, 0.65, 1.0)  # gray   — Intern
 	return Color.WHITE
 
-# Must match Employee.Personality enum order: NORMAL=0 WORKAHOLIC=1 LAZY=2
-# GOSSIP=3 PERFECTIONIST=4 TEAM_PLAYER=5 LONE_STAR=6
-func _personality_str(p: int) -> String:
+# Employee.Personality: NORMAL=0 WORKAHOLIC=1 LAZY=2 GOSSIP=3
+#                       PERFECTIONIST=4 TEAM_PLAYER=5 LONE_STAR=6
+func _pers_str(p: int) -> String:
 	match p:
 		0: return "Normal"
 		1: return "Workaholic"
