@@ -88,25 +88,25 @@ func unlock_floor(floor_index: int) -> void:
 # ─────────────────────────────────────────
 #  PLACE ROOMS
 # ─────────────────────────────────────────
-func place_room(floor: int, x: int, y: int, room_type: RoomType, gm: Node) -> bool:
+func place_room(floor_idx: int, x: int, y: int, room_type: RoomType, gm: Node) -> bool:
 	var cost: int = ROOM_COSTS.get(room_type, 0)
 	if not gm.economy.spend(cost, "Build " + RoomType.keys()[room_type]):
 		return false
-	return _place_raw(floor, x, y, room_type)
+	return _place_raw(floor_idx, x, y, room_type)
 
-func _place_raw(floor: int, x: int, y: int, room_type: RoomType) -> bool:
-	if not _floors.has(floor):
+func _place_raw(floor_idx: int, x: int, y: int, room_type: RoomType) -> bool:
+	if not _floors.has(floor_idx):
 		return false
 	if x < 0 or x >= FLOOR_WIDTH or y < 0 or y >= FLOOR_HEIGHT:
 		return false
-	_floors[floor][y][x] = room_type
-	room_placed.emit(floor, x, y, room_type)
+	_floors[floor_idx][y][x] = room_type
+	room_placed.emit(floor_idx, x, y, room_type)
 	return true
 
-func get_tile(floor: int, x: int, y: int) -> RoomType:
-	if not _floors.has(floor):
+func get_tile(floor_idx: int, x: int, y: int) -> RoomType:
+	if not _floors.has(floor_idx):
 		return RoomType.EMPTY
-	return _floors[floor][y][x]
+	return _floors[floor_idx][y][x]
 
 # ─────────────────────────────────────────
 #  FINANCIALS
