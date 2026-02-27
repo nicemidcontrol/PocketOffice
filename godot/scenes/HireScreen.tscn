@@ -1,14 +1,14 @@
-[gd_scene load_steps=9 format=3 uid="uid://hirescreen390x844"]
+[gd_scene load_steps=10 format=3 uid="uid://b7dju0mjovits"]
 
-[ext_resource type="Script" path="res://scripts/ui/HireScreen.gd" id="1_hirescript"]
+[ext_resource type="Script" uid="uid://byvf11epv1pfk" path="res://scripts/ui/HireScreen.gd" id="1_hirescr"]
 
 [sub_resource type="StyleBoxFlat" id="SBFlat_panel"]
 bg_color = Color(0.047, 0.047, 0.11, 0.97)
 border_width_bottom = 2
-border_color = Color(0.18, 0.42, 0.78, 1.0)
+border_color = Color(0.18, 0.42, 0.78, 1)
 
 [sub_resource type="StyleBoxFlat" id="SBFlat_card"]
-bg_color = Color(0.078, 0.078, 0.172, 1.0)
+bg_color = Color(0.078, 0.078, 0.172, 1)
 border_width_left = 1
 border_width_top = 1
 border_width_right = 1
@@ -20,7 +20,7 @@ corner_radius_bottom_right = 4
 corner_radius_bottom_left = 4
 
 [sub_resource type="StyleBoxFlat" id="SBFlat_hire"]
-bg_color = Color(0.08, 0.36, 0.17, 1.0)
+bg_color = Color(0.08, 0.36, 0.17, 1)
 border_width_left = 1
 border_width_top = 1
 border_width_right = 1
@@ -28,7 +28,7 @@ border_width_bottom = 1
 border_color = Color(0.22, 0.9, 0.42, 0.7)
 
 [sub_resource type="StyleBoxFlat" id="SBFlat_refresh"]
-bg_color = Color(0.08, 0.18, 0.44, 1.0)
+bg_color = Color(0.08, 0.18, 0.44, 1)
 border_width_left = 1
 border_width_top = 1
 border_width_right = 1
@@ -45,6 +45,8 @@ bg_color = Color(0.22, 0.9, 0.42, 1.0)
 bg_color = Color(1.0, 0.82, 0.1, 1.0)
 
 [node name="HireScreen" type="Control"]
+layout_mode = 3
+anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
@@ -58,7 +60,7 @@ anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
-color = Color(0.047, 0.047, 0.11, 1.0)
+color = Color(0.047, 0.047, 0.11, 1)
 
 [node name="Header" type="Panel" parent="."]
 layout_mode = 1
@@ -79,29 +81,32 @@ theme_override_constants/separation = 8
 
 [node name="BackButton" type="Button" parent="Header/HBox"]
 layout_mode = 2
-custom_minimum_size = Vector2(80, 0)
-text = "< BACK"
+alignment = 1
+
+[node name="BackBtn" type="Button" parent="Header/Margin/HBox"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.5, 0.7, 1, 1)
 theme_override_font_sizes/font_size = 12
-theme_override_colors/font_color = Color(0.5, 0.7, 1.0, 1.0)
+text = "← BACK"
 
 [node name="TitleLabel" type="Label" parent="Header/HBox"]
 layout_mode = 2
 size_flags_horizontal = 3
+theme_override_colors/font_color = Color(0.92, 0.92, 0.95, 1)
+theme_override_font_sizes/font_size = 15
 text = "HIRE STAFF"
 horizontal_alignment = 1
-theme_override_font_sizes/font_size = 15
-theme_override_colors/font_color = Color(0.92, 0.92, 0.95, 1.0)
 
 [node name="CashLabel" type="Label" parent="Header/HBox"]
 layout_mode = 2
-custom_minimum_size = Vector2(80, 0)
+theme_override_colors/font_color = Color(0.22, 0.9, 0.42, 1)
+theme_override_font_sizes/font_size = 14
 text = "$0"
 horizontal_alignment = 2
-theme_override_font_sizes/font_size = 14
-theme_override_colors/font_color = Color(0.22, 0.9, 0.42, 1.0)
 
 [node name="Body" type="ScrollContainer" parent="."]
 layout_mode = 1
+anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
@@ -118,10 +123,10 @@ theme_override_constants/separation = 12
 
 [node name="HintLabel" type="Label" parent="Body/VBox"]
 layout_mode = 2
+theme_override_colors/font_color = Color(0.5, 0.51, 0.62, 1)
+theme_override_font_sizes/font_size = 11
 text = "3 candidates available  •  Refresh costs $500"
 horizontal_alignment = 1
-theme_override_font_sizes/font_size = 11
-theme_override_colors/font_color = Color(0.5, 0.51, 0.62, 1.0)
 
 [node name="Card0" type="PanelContainer" parent="Body/VBox"]
 layout_mode = 2
@@ -147,82 +152,83 @@ theme_override_constants/separation = 8
 [node name="NameLabel0" type="Label" parent="Body/VBox/Card0/Margin/VBox/HBoxTop0"]
 layout_mode = 2
 size_flags_horizontal = 3
-text = "Candidate"
+theme_override_colors/font_color = Color(0.92, 0.92, 0.95, 1)
 theme_override_font_sizes/font_size = 15
-theme_override_colors/font_color = Color(0.92, 0.92, 0.95, 1.0)
+text = "Candidate"
 
 [node name="RoleLabel0" type="Label" parent="Body/VBox/Card0/Margin/VBox/HBoxTop0"]
 layout_mode = 2
-text = "DEV"
-horizontal_alignment = 2
+theme_override_colors/font_color = Color(0.4, 0.8, 1, 1)
 theme_override_font_sizes/font_size = 11
-theme_override_colors/font_color = Color(0.4, 0.8, 1.0, 1.0)
+text = "DEV"
 
 [node name="PersLabel0" type="Label" parent="Body/VBox/Card0/Margin/VBox"]
 layout_mode = 2
-text = "Normal"
+theme_override_colors/font_color = Color(0.6, 0.62, 0.72, 1)
 theme_override_font_sizes/font_size = 12
-theme_override_colors/font_color = Color(0.6, 0.62, 0.72, 1.0)
+text = "Normal"
 
 [node name="HBoxSkl0" type="HBoxContainer" parent="Body/VBox/Card0/Margin/VBox"]
 layout_mode = 2
 theme_override_constants/separation = 8
 
-[node name="SklLabel0" type="Label" parent="Body/VBox/Card0/Margin/VBox/HBoxSkl0"]
+[node name="SkillKey" type="Label" parent="Body/Margin/Cards/Card0/Margin/VBox/SkillRow"]
+custom_minimum_size = Vector2(32, 0)
 layout_mode = 2
-custom_minimum_size = Vector2(36, 0)
-size_flags_vertical = 4
-text = "SKL"
+theme_override_colors/font_color = Color(0.5, 0.51, 0.62, 1)
 theme_override_font_sizes/font_size = 10
-theme_override_colors/font_color = Color(0.5, 0.51, 0.62, 1.0)
+text = "SKL"
 
-[node name="SkillBar0" type="ProgressBar" parent="Body/VBox/Card0/Margin/VBox/HBoxSkl0"]
+[node name="SkillBar" type="ProgressBar" parent="Body/Margin/Cards/Card0/Margin/VBox/SkillRow"]
+custom_minimum_size = Vector2(0, 10)
 layout_mode = 2
 size_flags_horizontal = 3
 size_flags_vertical = 4
-custom_minimum_size = Vector2(0, 10)
-show_percentage = false
-max_value = 100.0
-value = 50.0
 theme_override_styles/background = SubResource("SBFlat_bar_bg")
 theme_override_styles/fill = SubResource("SBFlat_skill_fill")
+value = 50.0
+show_percentage = false
 
 [node name="HBoxMot0" type="HBoxContainer" parent="Body/VBox/Card0/Margin/VBox"]
 layout_mode = 2
 theme_override_constants/separation = 8
 
-[node name="MotLabel0" type="Label" parent="Body/VBox/Card0/Margin/VBox/HBoxMot0"]
+[node name="MotKey" type="Label" parent="Body/Margin/Cards/Card0/Margin/VBox/MotRow"]
+custom_minimum_size = Vector2(32, 0)
 layout_mode = 2
-custom_minimum_size = Vector2(36, 0)
-size_flags_vertical = 4
-text = "MOT"
+theme_override_colors/font_color = Color(0.5, 0.51, 0.62, 1)
 theme_override_font_sizes/font_size = 10
-theme_override_colors/font_color = Color(0.5, 0.51, 0.62, 1.0)
+text = "MOT"
 
-[node name="MoralBar0" type="ProgressBar" parent="Body/VBox/Card0/Margin/VBox/HBoxMot0"]
+[node name="MotBar" type="ProgressBar" parent="Body/Margin/Cards/Card0/Margin/VBox/MotRow"]
+custom_minimum_size = Vector2(0, 10)
 layout_mode = 2
 size_flags_horizontal = 3
 size_flags_vertical = 4
-custom_minimum_size = Vector2(0, 10)
-show_percentage = false
-max_value = 100.0
-value = 50.0
 theme_override_styles/background = SubResource("SBFlat_bar_bg")
 theme_override_styles/fill = SubResource("SBFlat_mot_fill")
+value = 50.0
+show_percentage = false
 
 [node name="SalaryLabel0" type="Label" parent="Body/VBox/Card0/Margin/VBox"]
 layout_mode = 2
-text = "$0 / mo"
-theme_override_font_sizes/font_size = 13
-theme_override_colors/font_color = Color(0.92, 0.92, 0.95, 1.0)
+theme_override_constants/separation = 8
 
-[node name="HireButton0" type="Button" parent="Body/VBox/Card0/Margin/VBox"]
+[node name="SalaryLabel" type="Label" parent="Body/Margin/Cards/Card0/Margin/VBox/BottomRow"]
 layout_mode = 2
-custom_minimum_size = Vector2(0, 32)
-text = "HIRE"
+size_flags_horizontal = 3
+theme_override_colors/font_color = Color(0.92, 0.92, 0.95, 1)
+theme_override_font_sizes/font_size = 13
+text = "$0 / mo"
+
+[node name="HireBtn" type="Button" parent="Body/Margin/Cards/Card0/Margin/VBox/BottomRow"]
+custom_minimum_size = Vector2(80, 32)
+layout_mode = 2
+theme_override_colors/font_color = Color(0.9, 0.98, 0.92, 1)
 theme_override_font_sizes/font_size = 13
 theme_override_colors/font_color = Color(0.9, 0.98, 0.92, 1.0)
 theme_override_styles/normal = SubResource("SBFlat_hire")
+text = "HIRE"
 
 [node name="Card1" type="PanelContainer" parent="Body/VBox"]
 layout_mode = 2
@@ -248,82 +254,83 @@ theme_override_constants/separation = 8
 [node name="NameLabel1" type="Label" parent="Body/VBox/Card1/Margin/VBox/HBoxTop1"]
 layout_mode = 2
 size_flags_horizontal = 3
-text = "Candidate"
+theme_override_colors/font_color = Color(0.92, 0.92, 0.95, 1)
 theme_override_font_sizes/font_size = 15
-theme_override_colors/font_color = Color(0.92, 0.92, 0.95, 1.0)
+text = "Candidate"
 
 [node name="RoleLabel1" type="Label" parent="Body/VBox/Card1/Margin/VBox/HBoxTop1"]
 layout_mode = 2
-text = "DEV"
-horizontal_alignment = 2
+theme_override_colors/font_color = Color(0.4, 0.8, 1, 1)
 theme_override_font_sizes/font_size = 11
-theme_override_colors/font_color = Color(0.4, 0.8, 1.0, 1.0)
+text = "DEV"
 
 [node name="PersLabel1" type="Label" parent="Body/VBox/Card1/Margin/VBox"]
 layout_mode = 2
-text = "Normal"
+theme_override_colors/font_color = Color(0.6, 0.62, 0.72, 1)
 theme_override_font_sizes/font_size = 12
-theme_override_colors/font_color = Color(0.6, 0.62, 0.72, 1.0)
+text = "Normal"
 
 [node name="HBoxSkl1" type="HBoxContainer" parent="Body/VBox/Card1/Margin/VBox"]
 layout_mode = 2
 theme_override_constants/separation = 8
 
-[node name="SklLabel1" type="Label" parent="Body/VBox/Card1/Margin/VBox/HBoxSkl1"]
+[node name="SkillKey" type="Label" parent="Body/Margin/Cards/Card1/Margin/VBox/SkillRow"]
+custom_minimum_size = Vector2(32, 0)
 layout_mode = 2
-custom_minimum_size = Vector2(36, 0)
-size_flags_vertical = 4
-text = "SKL"
+theme_override_colors/font_color = Color(0.5, 0.51, 0.62, 1)
 theme_override_font_sizes/font_size = 10
-theme_override_colors/font_color = Color(0.5, 0.51, 0.62, 1.0)
+text = "SKL"
 
-[node name="SkillBar1" type="ProgressBar" parent="Body/VBox/Card1/Margin/VBox/HBoxSkl1"]
+[node name="SkillBar" type="ProgressBar" parent="Body/Margin/Cards/Card1/Margin/VBox/SkillRow"]
+custom_minimum_size = Vector2(0, 10)
 layout_mode = 2
 size_flags_horizontal = 3
 size_flags_vertical = 4
-custom_minimum_size = Vector2(0, 10)
-show_percentage = false
-max_value = 100.0
-value = 50.0
 theme_override_styles/background = SubResource("SBFlat_bar_bg")
 theme_override_styles/fill = SubResource("SBFlat_skill_fill")
+value = 50.0
+show_percentage = false
 
 [node name="HBoxMot1" type="HBoxContainer" parent="Body/VBox/Card1/Margin/VBox"]
 layout_mode = 2
 theme_override_constants/separation = 8
 
-[node name="MotLabel1" type="Label" parent="Body/VBox/Card1/Margin/VBox/HBoxMot1"]
+[node name="MotKey" type="Label" parent="Body/Margin/Cards/Card1/Margin/VBox/MotRow"]
+custom_minimum_size = Vector2(32, 0)
 layout_mode = 2
-custom_minimum_size = Vector2(36, 0)
-size_flags_vertical = 4
-text = "MOT"
+theme_override_colors/font_color = Color(0.5, 0.51, 0.62, 1)
 theme_override_font_sizes/font_size = 10
-theme_override_colors/font_color = Color(0.5, 0.51, 0.62, 1.0)
+text = "MOT"
 
-[node name="MoralBar1" type="ProgressBar" parent="Body/VBox/Card1/Margin/VBox/HBoxMot1"]
+[node name="MotBar" type="ProgressBar" parent="Body/Margin/Cards/Card1/Margin/VBox/MotRow"]
+custom_minimum_size = Vector2(0, 10)
 layout_mode = 2
 size_flags_horizontal = 3
 size_flags_vertical = 4
-custom_minimum_size = Vector2(0, 10)
-show_percentage = false
-max_value = 100.0
-value = 50.0
 theme_override_styles/background = SubResource("SBFlat_bar_bg")
 theme_override_styles/fill = SubResource("SBFlat_mot_fill")
+value = 50.0
+show_percentage = false
 
 [node name="SalaryLabel1" type="Label" parent="Body/VBox/Card1/Margin/VBox"]
 layout_mode = 2
-text = "$0 / mo"
-theme_override_font_sizes/font_size = 13
-theme_override_colors/font_color = Color(0.92, 0.92, 0.95, 1.0)
+theme_override_constants/separation = 8
 
-[node name="HireButton1" type="Button" parent="Body/VBox/Card1/Margin/VBox"]
+[node name="SalaryLabel" type="Label" parent="Body/Margin/Cards/Card1/Margin/VBox/BottomRow"]
 layout_mode = 2
-custom_minimum_size = Vector2(0, 32)
-text = "HIRE"
+size_flags_horizontal = 3
+theme_override_colors/font_color = Color(0.92, 0.92, 0.95, 1)
+theme_override_font_sizes/font_size = 13
+text = "$0 / mo"
+
+[node name="HireBtn" type="Button" parent="Body/Margin/Cards/Card1/Margin/VBox/BottomRow"]
+custom_minimum_size = Vector2(80, 32)
+layout_mode = 2
+theme_override_colors/font_color = Color(0.9, 0.98, 0.92, 1)
 theme_override_font_sizes/font_size = 13
 theme_override_colors/font_color = Color(0.9, 0.98, 0.92, 1.0)
 theme_override_styles/normal = SubResource("SBFlat_hire")
+text = "HIRE"
 
 [node name="Card2" type="PanelContainer" parent="Body/VBox"]
 layout_mode = 2
@@ -349,82 +356,83 @@ theme_override_constants/separation = 8
 [node name="NameLabel2" type="Label" parent="Body/VBox/Card2/Margin/VBox/HBoxTop2"]
 layout_mode = 2
 size_flags_horizontal = 3
-text = "Candidate"
+theme_override_colors/font_color = Color(0.92, 0.92, 0.95, 1)
 theme_override_font_sizes/font_size = 15
-theme_override_colors/font_color = Color(0.92, 0.92, 0.95, 1.0)
+text = "Candidate"
 
 [node name="RoleLabel2" type="Label" parent="Body/VBox/Card2/Margin/VBox/HBoxTop2"]
 layout_mode = 2
-text = "DEV"
-horizontal_alignment = 2
+theme_override_colors/font_color = Color(0.4, 0.8, 1, 1)
 theme_override_font_sizes/font_size = 11
-theme_override_colors/font_color = Color(0.4, 0.8, 1.0, 1.0)
+text = "DEV"
 
 [node name="PersLabel2" type="Label" parent="Body/VBox/Card2/Margin/VBox"]
 layout_mode = 2
-text = "Normal"
+theme_override_colors/font_color = Color(0.6, 0.62, 0.72, 1)
 theme_override_font_sizes/font_size = 12
-theme_override_colors/font_color = Color(0.6, 0.62, 0.72, 1.0)
+text = "Normal"
 
 [node name="HBoxSkl2" type="HBoxContainer" parent="Body/VBox/Card2/Margin/VBox"]
 layout_mode = 2
 theme_override_constants/separation = 8
 
-[node name="SklLabel2" type="Label" parent="Body/VBox/Card2/Margin/VBox/HBoxSkl2"]
+[node name="SkillKey" type="Label" parent="Body/Margin/Cards/Card2/Margin/VBox/SkillRow"]
+custom_minimum_size = Vector2(32, 0)
 layout_mode = 2
-custom_minimum_size = Vector2(36, 0)
-size_flags_vertical = 4
-text = "SKL"
+theme_override_colors/font_color = Color(0.5, 0.51, 0.62, 1)
 theme_override_font_sizes/font_size = 10
-theme_override_colors/font_color = Color(0.5, 0.51, 0.62, 1.0)
+text = "SKL"
 
-[node name="SkillBar2" type="ProgressBar" parent="Body/VBox/Card2/Margin/VBox/HBoxSkl2"]
+[node name="SkillBar" type="ProgressBar" parent="Body/Margin/Cards/Card2/Margin/VBox/SkillRow"]
+custom_minimum_size = Vector2(0, 10)
 layout_mode = 2
 size_flags_horizontal = 3
 size_flags_vertical = 4
-custom_minimum_size = Vector2(0, 10)
-show_percentage = false
-max_value = 100.0
-value = 50.0
 theme_override_styles/background = SubResource("SBFlat_bar_bg")
 theme_override_styles/fill = SubResource("SBFlat_skill_fill")
+value = 50.0
+show_percentage = false
 
 [node name="HBoxMot2" type="HBoxContainer" parent="Body/VBox/Card2/Margin/VBox"]
 layout_mode = 2
 theme_override_constants/separation = 8
 
-[node name="MotLabel2" type="Label" parent="Body/VBox/Card2/Margin/VBox/HBoxMot2"]
+[node name="MotKey" type="Label" parent="Body/Margin/Cards/Card2/Margin/VBox/MotRow"]
+custom_minimum_size = Vector2(32, 0)
 layout_mode = 2
-custom_minimum_size = Vector2(36, 0)
-size_flags_vertical = 4
-text = "MOT"
+theme_override_colors/font_color = Color(0.5, 0.51, 0.62, 1)
 theme_override_font_sizes/font_size = 10
-theme_override_colors/font_color = Color(0.5, 0.51, 0.62, 1.0)
+text = "MOT"
 
-[node name="MoralBar2" type="ProgressBar" parent="Body/VBox/Card2/Margin/VBox/HBoxMot2"]
+[node name="MotBar" type="ProgressBar" parent="Body/Margin/Cards/Card2/Margin/VBox/MotRow"]
+custom_minimum_size = Vector2(0, 10)
 layout_mode = 2
 size_flags_horizontal = 3
 size_flags_vertical = 4
-custom_minimum_size = Vector2(0, 10)
-show_percentage = false
-max_value = 100.0
-value = 50.0
 theme_override_styles/background = SubResource("SBFlat_bar_bg")
 theme_override_styles/fill = SubResource("SBFlat_mot_fill")
+value = 50.0
+show_percentage = false
 
 [node name="SalaryLabel2" type="Label" parent="Body/VBox/Card2/Margin/VBox"]
 layout_mode = 2
-text = "$0 / mo"
-theme_override_font_sizes/font_size = 13
-theme_override_colors/font_color = Color(0.92, 0.92, 0.95, 1.0)
+theme_override_constants/separation = 8
 
-[node name="HireButton2" type="Button" parent="Body/VBox/Card2/Margin/VBox"]
+[node name="SalaryLabel" type="Label" parent="Body/Margin/Cards/Card2/Margin/VBox/BottomRow"]
 layout_mode = 2
-custom_minimum_size = Vector2(0, 32)
-text = "HIRE"
+size_flags_horizontal = 3
+theme_override_colors/font_color = Color(0.92, 0.92, 0.95, 1)
+theme_override_font_sizes/font_size = 13
+text = "$0 / mo"
+
+[node name="HireBtn" type="Button" parent="Body/Margin/Cards/Card2/Margin/VBox/BottomRow"]
+custom_minimum_size = Vector2(80, 32)
+layout_mode = 2
+theme_override_colors/font_color = Color(0.9, 0.98, 0.92, 1)
 theme_override_font_sizes/font_size = 13
 theme_override_colors/font_color = Color(0.9, 0.98, 0.92, 1.0)
 theme_override_styles/normal = SubResource("SBFlat_hire")
+text = "HIRE"
 
 [node name="Footer" type="Panel" parent="."]
 layout_mode = 1
@@ -450,10 +458,10 @@ offset_right = 130.0
 offset_bottom = 18.0
 grow_horizontal = 2
 grow_vertical = 2
-text = "↺  REFRESH CANDIDATES  (-$500)"
-theme_override_font_sizes/font_size = 13
-theme_override_colors/font_color = Color(0.8, 0.88, 1.0, 1.0)
-theme_override_styles/normal = SubResource("SBFlat_refresh")
+theme_override_constants/margin_left = 12
+theme_override_constants/margin_top = 12
+theme_override_constants/margin_right = 12
+theme_override_constants/margin_bottom = 12
 
 [connection signal="pressed" from="Header/HBox/BackButton" to="." method="_on_back_pressed"]
 [connection signal="pressed" from="Footer/RefreshButton" to="." method="_on_refresh_pressed"]
