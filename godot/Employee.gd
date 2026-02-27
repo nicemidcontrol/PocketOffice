@@ -167,7 +167,7 @@ func adjust_motivation(delta: int) -> void:
 	motivation  = clampi(motivation + delta, 0, 100)
 	is_burned_out = motivation <= 10
 
-func to_string() -> String:
+func get_display_string() -> String:
 	return "%s | %s | Lv.%d | Skill:%d Motivation:%d | $%d/mo" % [
 		full_name(), Role.keys()[role], level, skill, motivation, monthly_salary
 	]
