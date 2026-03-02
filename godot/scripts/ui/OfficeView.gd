@@ -143,7 +143,7 @@ func _role_color(role: int) -> Color:
 		1: return Color(0.310, 0.765, 0.969, 1.0)  # #4FC3F7 — DES  cyan
 		2: return Color(1.000, 0.718, 0.302, 1.0)  # #FFB74D — MKT  orange
 		3: return Color(0.400, 0.800, 1.000, 1.0)  # ~#66CCFF — HR  blue
-		4: return Color(0.706, 0.588, 0.882, 1.0)  # ~#B496E1 — ACC lavender
+		4: return Color(0.502, 0.796, 0.769, 1.0)  # #80CBC4 — ACC teal
 		5: return Color(0.808, 0.576, 0.847, 1.0)  # #CE93D8 — MGR  purple
 		6: return Color(0.957, 0.561, 0.694, 1.0)  # #F48FB1 — INT  pink
 	return Color.WHITE
