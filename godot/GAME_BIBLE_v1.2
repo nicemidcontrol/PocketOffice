@@ -1,0 +1,418 @@
+# 📋 Pocket Office — Game Bible
+> Last updated: 2026-03-02
+> This file is the single source of truth for design decisions. Claude should read this before any design or code work.
+
+---
+
+## 🎯 Core Vision
+
+**One-line pitch:**
+> "The office simulation game that finally *gets* what it's actually like to work in a company — and lets you run one."
+
+**Core fantasy (all four must coexist):**
+- Be the CEO who builds an empire from nothing
+- Watch your team's personalities and dynamics play out like a simulation
+- Make strategic decisions that beat your competitors
+- Design and grow your office space floor by floor
+
+**Hidden educational goal:**
+- Players learn how an NGO/corporate office actually operates
+- Understand each role's challenges: Procurement, Operations, Secretary, Management
+- Experience the donor-dependency model of NGO funding — no income generation, rely on donors and HQ annual funding
+- Cross-team cooperation is required to succeed (no single team can win alone)
+
+**The Kairosoft DNA we keep:**
+- Pixel art aesthetic — charming, not realistic
+- 30 Framerate
+- Stats bars that go up as you improve
+- Watch employees visually doing their jobs (idle animations, walking to rooms)
+- Satisfying number growth loop
+- Chill pace — player sets direction, game runs itself
+- Facility combos reward spatial planning
+
+**What makes Pocket Office different from Kairosoft:**
+- Employees have complex, *relatable* personalities (office archetypes everyone recognizes)
+- Train employees using Corporate Points earned from working
+- Group training bonuses — certain personality/role combinations train better together
+- Random events pulled directly from real office life
+- Office politics and drama between employees — relationships that shift over time
+- Work-life balance as a core mechanic (burnout, vacation, morale)
+- 5-year structured campaign with annual evaluations + sandbox after ending
+- **Fever Mode** — when Office Motivation hits 100%, all stats double for 5 minutes
+- Task-Stat matching — specific stats make employees better at specific task types
+- Donor system teaches NGO funding model — win donors via Research to unlock projects and new recruits
+
+---
+
+## 👥 Target Audience
+
+| Segment | Why they play |
+|---|---|
+| Office workers (25–45) | Cathartic — finally *they* make the decisions |
+| Kairosoft fans | Familiar loop, deeper employee layer |
+| Casual simulation fans | Low commitment, chill, pick up and put down |
+
+**Platform:** iOS + Android, portrait mode (390×844)
+**Session length target:** 5–15 minutes per session
+**Tone:** Warm, slightly satirical, never mean-spirited
+
+---
+
+## 💰 Monetization
+
+**Model:** Premium one-time purchase — **$4.99**
+- No ads
+- Players pay once, get the full game; demo allows only 8 hours of play
+- Rationale: office workers have disposable income and hate manipulative monetization
+- Possible future: No upfront cost + paid DLC expansions (new company types, scenarios)
+
+---
+
+## 🏢 Company Type
+
+**Single type for v1.0:** Corporate / Enterprise Office
+
+This is the most universally relatable — everyone has worked in or knows someone in a large corporate environment. Future updates can add:
+- NGO with agricultural field focus (similar to UN FAO model)
+
+---
+
+## 🕹️ Core Game Loop
+
+```
+Hire staff → Assign to projects → Earn Corporate Points + Revenue
+     ↑                                           ↓
+Upgrade office ←── Spend Corp Points ←── Win Donors → More Projects
+```
+
+**Daily loop (in-game time):**
+1. Time advances automatically (chill — player doesn't need to watch every second but would love to anyway in case there is a pop-up)
+2. Employees work on assigned projects; productivity determined by stats + office buffs
+3. Employees walk around and use facilities (5–10 seconds per facility, then move on)
+4. Random events fire occasionally — player makes a choice
+5. Morale/burnout ticks in background for each employee
+
+**Monthly loop:**
+- Pay salaries + rent
+- New project contracts arrive
+- Review team performance
+
+**Annual loop (KEY MECHANIC):**
+- Year-end evaluation — scored across 5 categories (Revenue, Reputation, Team Motivation, Office Quality, Project Completion Rate)
+- Compared against 3–5 AI competitor companies
+- Year 5 = Final Evaluation = Campaign win condition
+
+---
+
+## 🏆 Win Condition & Game Structure
+
+**Campaign mode (5 years):**
+- Each year has an annual evaluation
+- Year 5 final evaluation determines ranking vs. all competitors
+- **Win = #1 ranked company after Year 5**
+- Multiple outcomes possible based on strategy (revenue-focused vs reputation-focused vs employee-focused)
+- After campaign ends → **Sandbox mode unlocks** (keep playing forever, no evaluation pressure)
+
+**Prestige system (post-campaign):**
+- After completing a campaign, player can "Prestige"
+- Reset company but keep small permanent bonuses (e.g., legendary employee, +5% to all stats, extra starting cash)
+- Encourages multiple playthroughs with different strategies
+
+**Multiple playthrough variety:**
+- Different random event seeds each run
+- Random employee pool means different team dynamics every time
+- Different competitor behaviors keep competition fresh
+
+---
+
+## 😤 Office Motivation & Fever Mode
+
+**Office Motivation** is the collective energy/will of the entire office — renamed from "OfficeMorale" for clarity.
+
+- Calculated as an aggregate of all individual employee morale scores
+- Displayed as a 0–100% bar on the HUD
+- Influences productivity, willingness to work, and performance across the board
+
+**Fever Mode:**
+- Triggers automatically when Office Motivation hits **100%**
+- Duration: **5 minutes** (real time)
+- Effect: **All stats doubled** for every employee
+- Visual cue: Screen effect, music shift, excited animations
+- After Fever Mode ends: Office Motivation drops to **50%**
+- Rewards players who invest in morale-building facilities and events
+
+---
+
+## 💼 Corporate Points System
+
+Corporate Points are the in-game resource equivalent of "Research Points" in Kairosoft games.
+
+**How they are earned:**
+- Employees completing tasks
+- Employees finishing projects
+- Employees using facilities
+
+**How they are spent:**
+- **Shop** — buy items to boost employee stats
+- **Training** — level up employees
+- **Research menu** — win Donors, unlock new capabilities
+- **Advertisement** — boost company reputation
+
+**Training details:**
+- Assign an employee to a training session
+- Different job types have unique training perks
+- Certain groups training together earn **bonus stats** (e.g., Procurement + Operations training together = logistics synergy bonus)
+- Training outcomes are influenced by employee personality and current stats
+
+---
+
+## 📊 Employee Stats & Task Matching
+
+Each employee has a set of stats. Specific stats make them better suited to specific tasks.
+
+**Example stats:**
+| Stat | Description |
+|---|---|
+| Charm | Persuasion, client-facing tasks, donor acquisition |
+| Focus | Deep work, report writing, research tasks |
+| Energy | Overall stamina, sustaining long projects |
+| Teamwork | Collaboration bonus, group project efficiency |
+| Tech | IT, systems, technical project tasks |
+| Operation | Admin, logistics, procurement tasks |
+
+**Task-Stat matching examples:**
+| Task | Primary Stat Required |
+|---|---|
+| Getting a Donor | Charm |
+| Writing a Report | Focus |
+| Procurement Run | Organization |
+| System Setup | Technical |
+| Team Workshop | Teamwork |
+
+Employees with high matching stats complete tasks faster and with better quality output.
+
+---
+
+## 🎁 Shop — Consumable Items
+
+Accessed via **HR → Items**. All items are **one-time use consumables**.
+
+| Item | Effect | Stat Affected |
+|---|---|---|
+| Chocolate | Minimal energy boost | Energy |
+| Ergonomic Chair | Minimal working stat boost | Productivity |
+| Company Manual | Moderate focus boost | Focus |
+
+*More items to be added in future updates. Specific stat values to be balanced during M4.*
+
+---
+
+## 🤝 Donor System
+
+Donors are the NGO equivalent of "winning a new major client." They represent real funding and project opportunities.
+
+**How it works:**
+- Accessed via **Corporate → Research**
+- Player spends **Corporate Points** to pursue a donor
+- Winning a donor has **additional requirements** beyond Corp Points (e.g., minimum Reputation, specific employee stat thresholds, completed prerequisite projects)
+- Successfully winning a donor unlocks:
+  - New projects tied to that donor's focus area
+  - New recruitable staff (specialists that come with the donor relationship)
+
+**Design intent:**
+- Teaches players that NGOs cannot generate their own income — they depend on external funding
+- Forces cross-team cooperation (Charm for pitching, Organization for proposals, Technical for reporting back)
+- Annual HQ funding also arrives as a separate passive income stream (no donor required)
+- The Donor pipeline replaces the traditional "revenue from sales" model — players must plan for funding cycles
+
+---
+
+## 🏗️ Facility Combos
+
+Facilities provide stat buffs to nearby employees. Placing specific facilities adjacent to each other activates **combo bonuses**.
+
+**How combos work:**
+- Shared resources can power multiple area effects simultaneously
+- Example: A single **Coffee Machine** placed between a **Lazy Area** and a **Gossip Area** activates both area effects — the Coffee Machine gains the bonus of both combos
+- Rewards thoughtful spatial planning without penalizing clever shared use
+
+**Example combos:**
+| Combo Name | Facilities Required | Bonus |
+|---|---|---|
+| Gossip Hub | Gossip Area + Cafeteria + Coffee Machine | Morale +5, Charm +3 |
+| Focus Zone | Quiet Area + Company Library | Focus +8 |
+| *(More combos to be designed during M3)* | | |
+
+**Combo list** is accessible in-game via **Lists → Combo**.
+
+---
+
+## 🏗️ Menu Tree Structure
+
+```
+Menu
+├── Build
+├── HR
+│   ├── Recruit
+│   ├── Training
+│   └── Items (Shop)
+├── Corporate
+│   ├── Research (Donors + upgrades)
+│   ├── Assign Tasks
+│   └── Info
+├── Lists
+│   ├── Employee
+│   ├── Combo
+│   └── Revenue
+└── System
+    ├── Save
+    ├── Settings
+    ├── Index
+    ├── Score
+    └── Quit
+```
+
+---
+
+## 👤 Employee System (Most Important Differentiator)
+
+### Personality Archetypes
+These should feel like people players have *actually worked with*:
+
+| Personality | Behavior in-game | Office reference |
+|---|---|---|
+| Workaholic | High output, burns out fast, hates vacation events | "That guy who emails at midnight" |
+| Gossip | Spreads morale buffs AND debuffs, causes drama events | "The office news channel" |
+| Perfectionist | Slow but high quality, conflicts with Lazy types | "Won't submit until it's perfect" |
+| Lazy | Low output, high morale drain if others notice | "Always in the kitchen" |
+| Team Player | Boosts nearby employees' morale | "The glue of the team" |
+| Lone Wolf | High personal output, terrible team synergy | "Brilliant but impossible to work with" |
+| Brown-noser | Buffs reputation when investor/client events fire | "Always in the boss's office" |
+| Quiet Quitter | Looks present, produces minimum output | "Doing the bare minimum since 2022" |
+| Legendary | Well respected, built themselves from ground up, high start stats | "Been through all of the problems since 2020" |
+
+### Employee Relationships (Office Politics)
+- Employees develop **relationship scores** with each other over time
+- Some personality combos create **drama events** (e.g., Gossip + Perfectionist = conflict)
+- Some combos create **synergy bonuses** (e.g., Team Player + anyone = +morale)
+- Seating/room placement affects relationship development
+
+### Work-Life Balance Mechanic
+- **Stress meter** (0–100) per employee — rises with overwork, falls with breaks
+- **Burnout state** triggers at stress 90+ — employee becomes 20% productivity, spreads negativity
+- **Vacation events** reduce stress across the team
+- Player must balance pushing hard on deadline projects vs. protecting team wellbeing
+
+---
+
+## 🎲 Random Events (Must Feel Relatable)
+
+**The classics (everyone has experienced these):**
+- "The printer is broken 30 minutes before a deadline"
+- "Mandatory fun team-building event scheduled during crunch"
+- "New management wants to 'revolutionize' the workflow"
+- "Someone left fish in the microwave"
+- "Birthday cake in the kitchen — 30 min productivity loss for everyone"
+- "The air conditioning broke. It is 35°C in the office."
+- "One of the colleagues is wearing unbearable perfume."
+- "Accidentally complained about a colleague in the group chat."
+
+**Career/HR events:**
+- "An employee got a competitor's offer — counter or let them go?"
+- "Someone filed an HR complaint about [random coworker]"
+- "New hire isn't working out — performance review time"
+- "Employee wants to work from home permanently"
+
+**Business events:**
+- "Key client is unhappy with the project progress"
+- "Investor wants a tour of the office"
+- "Press wants to do a feature — but the office is a mess"
+- "Competitor poached your best developer"
+
+**Drama events (triggered by personality conflicts):**
+- "Gossip spread rumors about [Perfectionist's] work quality"
+- "Lone Wolf refused to attend the team meeting. Again."
+- "Brown-noser gets credit for Workaholic's project"
+
+---
+
+## 🏗️ Office Grid System
+
+- Grid-based office layout (10×5 tiles per floor)
+- Multiple floors unlock as company grows
+- Room types provide stat buffs to nearby employees:
+
+| Room | Primary buff |
+|---|---|
+| Desk | Productivity |
+| Meeting Room | Teamwork + project speed |
+| Break Room | Morale recovery |
+| Server Room | Tech project productivity |
+| Training Room | Skill growth rate |
+| HR Office | Morale + reduces drama events |
+| Executive Suite | Reputation + investor events |
+| Rooftop Terrace | Major morale buff (expensive) |
+
+**Floor unlock tiers:**
+- Floor 1: Startup (1–5 employees)
+- Floor 2: SME (6–20 employees)
+- Floor 3: Enterprise (21–50 employees)
+- Floor 4: Global Corp (51+ employees)
+
+---
+
+## 📊 Company Tiers & Progression
+
+| Tier | Employees | Revenue | Reputation |
+|---|---|---|---|
+| Startup | 1–5 | <$30K earned | <50 |
+| SME | 6–20 | $30K–$200K | 50–200 |
+| Enterprise | 21–50 | $200K–$1M | 200–500 |
+| Global Corp | 51+ | >$1M | 500+ |
+
+---
+
+## 🎨 Art Direction
+
+**Style:** 16×16 / 32×32 pixel art — warm, Kairosoft-adjacent
+**Color palette:** Dark navy backgrounds (#0C0C1C), warm accent colors
+**Employee sprites:** Tiny characters visible at their desks, walking to rooms, reacting to events
+**Font:** Pixel font (Press Start 2P or Silkscreen) for headers, clean sans-serif for body text
+**Audio:** 8-bit / chiptune BGM, satisfying UI sounds
+
+---
+
+## 🗺️ Development Milestones
+
+| Milestone | Status | Features |
+|---|---|---|
+| M1: Core Engine | ✅ Done | All managers, HUD, Save system |
+| M2: Core Loop UI | 🔄 In Progress | Hire screen, Project board, Office grid, Bottom nav |
+| M3: Content & Polish | ⏳ Pending | Pixel art, animations, event system UI, audio, facility combos |
+| M4: Campaign & Balance | ⏳ Pending | Competitor AI, annual evaluation, Year 5 ending, prestige, stat balancing |
+| M5: Launch | ⏳ Pending | Tutorial, app store submission, localization |
+
+---
+
+## 🔧 Technical Context (for Claude)
+
+**Engine:** Godot 4.5, GDScript
+**Repo:** https://github.com/nicemidcontrol/PocketOffice
+**Local path:** `C:\godot\PocketOffice2\godot\`
+
+**Critical code rules:**
+- No `class_name` except `Employee.gd` and `SaveSystem.gd`
+- Use `load("res://FileName.gd").new()` — never `ClassName.new()`
+- All variables need explicit types: `var x: int = 0` not `var x := someFunc()`
+- `SaveSystem` must be listed before `GameManager` in Autoloads
+- Claude Code cannot push to `main` directly — always create PR
+
+**Autoloads registered:**
+- `SaveSystem` → `res://SaveSystem.gd`
+- `GameManager` → `res://GameManager.gd`
+
+**Workflow:**
+1. claude.ai/code → write/fix code → push to branch → create PR
+2. GitHub → merge PR to main
+3. Git Bash → `git pull origin main`
+4. Godot → Reload + F5 test
