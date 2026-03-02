@@ -16,8 +16,8 @@ const REFRESH_COST: int = 500
 @onready var _pers_0: Label        = $Body/VBox/Card0/Margin/VBox/PersLabel0
 @onready var _skill_0: ProgressBar = $Body/VBox/Card0/Margin/VBox/HBoxSkl0/SkillBar0
 @onready var _moral_0: ProgressBar = $Body/VBox/Card0/Margin/VBox/HBoxMot0/MoralBar0
-@onready var _salary_0: Label      = $Body/VBox/Card0/Margin/VBox/SalaryLabel0
-@onready var _hire_0: Button       = $Body/VBox/Card0/Margin/VBox/HireButton0
+@onready var _salary_0: Label      = $Body/VBox/Card0/Margin/VBox/HBoxBot0/SalaryLabel0
+@onready var _hire_0: Button       = $Body/VBox/Card0/Margin/VBox/HBoxBot0/HireButton0
 
 # ─────────────────────────────────────────
 #  CARD 1
@@ -27,8 +27,8 @@ const REFRESH_COST: int = 500
 @onready var _pers_1: Label        = $Body/VBox/Card1/Margin/VBox/PersLabel1
 @onready var _skill_1: ProgressBar = $Body/VBox/Card1/Margin/VBox/HBoxSkl1/SkillBar1
 @onready var _moral_1: ProgressBar = $Body/VBox/Card1/Margin/VBox/HBoxMot1/MoralBar1
-@onready var _salary_1: Label      = $Body/VBox/Card1/Margin/VBox/SalaryLabel1
-@onready var _hire_1: Button       = $Body/VBox/Card1/Margin/VBox/HireButton1
+@onready var _salary_1: Label      = $Body/VBox/Card1/Margin/VBox/HBoxBot1/SalaryLabel1
+@onready var _hire_1: Button       = $Body/VBox/Card1/Margin/VBox/HBoxBot1/HireButton1
 
 # ─────────────────────────────────────────
 #  CARD 2
@@ -38,8 +38,8 @@ const REFRESH_COST: int = 500
 @onready var _pers_2: Label        = $Body/VBox/Card2/Margin/VBox/PersLabel2
 @onready var _skill_2: ProgressBar = $Body/VBox/Card2/Margin/VBox/HBoxSkl2/SkillBar2
 @onready var _moral_2: ProgressBar = $Body/VBox/Card2/Margin/VBox/HBoxMot2/MoralBar2
-@onready var _salary_2: Label      = $Body/VBox/Card2/Margin/VBox/SalaryLabel2
-@onready var _hire_2: Button       = $Body/VBox/Card2/Margin/VBox/HireButton2
+@onready var _salary_2: Label      = $Body/VBox/Card2/Margin/VBox/HBoxBot2/SalaryLabel2
+@onready var _hire_2: Button       = $Body/VBox/Card2/Margin/VBox/HBoxBot2/HireButton2
 
 # ─────────────────────────────────────────
 #  STATE
