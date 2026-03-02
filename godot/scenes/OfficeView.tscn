@@ -2,7 +2,6 @@
 
 [ext_resource type="Script" path="res://scripts/ui/OfficeView.gd" id="1_ovscript"]
 
-; Empty slot background — overridden per-slot in OfficeView.gd
 [sub_resource type="StyleBoxFlat" id="SBFlat_slot"]
 bg_color            = Color(0.07, 0.07, 0.15, 1.0)
 border_width_left   = 1
@@ -11,30 +10,6 @@ border_width_right  = 1
 border_width_bottom = 1
 border_color        = Color(0.18, 0.22, 0.38, 1.0)
 
-; ═════════════════════════════════════════════════════════════════════════════
-;  OfficeView — instanced inside Main.tscn
-;
-;  Layout  (occupies the content area between HUD TopBar and HIRE STAFF btn):
-;
-;  OfficeView (Control, full-rect in parent)
-;  └── VBox (VBoxContainer, full-rect, alignment=center, separation=16)
-;      ├── TitleLabel  ("OFFICE")
-;      └── CenterContainer
-;          └── Grid (GridContainer, columns=2, h_sep=8, v_sep=8)
-;              ├── Slot0 (Panel, 80×80)   ├── Slot1 (Panel, 80×80)
-;              ├── Slot2 (Panel, 80×80)   ├── Slot3 (Panel, 80×80)
-;              ├── Slot4 (Panel, 80×80)   ├── Slot5 (Panel, 80×80)
-;              └── Slot6 (Panel, 80×80)   └── Slot7 (Panel, 80×80)
-;
-;  Grid dimensions (px):
-;    width  = 2×80 + 1×8  = 168
-;    height = 4×80 + 3×8  = 344
-;
-;  Slot children are built dynamically by OfficeView.gd:
-;    occupied → VBoxContainer (avatar ColorRect + NameLabel + RoleLabel)
-;    vacant   → centred "VACANT" Label
-; ═════════════════════════════════════════════════════════════════════════════
-
 [node name="OfficeView" type="Control"]
 anchor_right  = 1.0
 anchor_bottom = 1.0
@@ -42,7 +17,6 @@ grow_horizontal = 2
 grow_vertical   = 2
 script = ExtResource("1_ovscript")
 
-; ── Content VBox (fills the OfficeView, centres children vertically) ──────────
 [node name="VBox" type="VBoxContainer" parent="."]
 layout_mode = 1
 anchors_preset  = 15
@@ -53,7 +27,6 @@ grow_vertical   = 2
 alignment = 1
 theme_override_constants/separation = 16
 
-; ── Section title ─────────────────────────────────────────────────────────────
 [node name="TitleLabel" type="Label" parent="VBox"]
 layout_mode = 2
 text = "OFFICE"
@@ -61,7 +34,6 @@ horizontal_alignment = 1
 theme_override_font_sizes/font_size = 11
 theme_override_colors/font_color = Color(0.45, 0.55, 0.72, 1.0)
 
-; ── Grid centred horizontally ─────────────────────────────────────────────────
 [node name="CenterContainer" type="CenterContainer" parent="VBox"]
 layout_mode = 2
 size_flags_horizontal = 3
@@ -72,49 +44,41 @@ columns = 2
 theme_override_constants/h_separation = 8
 theme_override_constants/v_separation = 8
 
-; ── Slot 0 ────────────────────────────────────────────────────────────────────
 [node name="Slot0" type="Panel" parent="VBox/CenterContainer/Grid"]
 layout_mode = 2
 custom_minimum_size = Vector2(80, 80)
 theme_override_styles/panel = SubResource("SBFlat_slot")
 
-; ── Slot 1 ────────────────────────────────────────────────────────────────────
 [node name="Slot1" type="Panel" parent="VBox/CenterContainer/Grid"]
 layout_mode = 2
 custom_minimum_size = Vector2(80, 80)
 theme_override_styles/panel = SubResource("SBFlat_slot")
 
-; ── Slot 2 ────────────────────────────────────────────────────────────────────
 [node name="Slot2" type="Panel" parent="VBox/CenterContainer/Grid"]
 layout_mode = 2
 custom_minimum_size = Vector2(80, 80)
 theme_override_styles/panel = SubResource("SBFlat_slot")
 
-; ── Slot 3 ────────────────────────────────────────────────────────────────────
 [node name="Slot3" type="Panel" parent="VBox/CenterContainer/Grid"]
 layout_mode = 2
 custom_minimum_size = Vector2(80, 80)
 theme_override_styles/panel = SubResource("SBFlat_slot")
 
-; ── Slot 4 ────────────────────────────────────────────────────────────────────
 [node name="Slot4" type="Panel" parent="VBox/CenterContainer/Grid"]
 layout_mode = 2
 custom_minimum_size = Vector2(80, 80)
 theme_override_styles/panel = SubResource("SBFlat_slot")
 
-; ── Slot 5 ────────────────────────────────────────────────────────────────────
 [node name="Slot5" type="Panel" parent="VBox/CenterContainer/Grid"]
 layout_mode = 2
 custom_minimum_size = Vector2(80, 80)
 theme_override_styles/panel = SubResource("SBFlat_slot")
 
-; ── Slot 6 ────────────────────────────────────────────────────────────────────
 [node name="Slot6" type="Panel" parent="VBox/CenterContainer/Grid"]
 layout_mode = 2
 custom_minimum_size = Vector2(80, 80)
 theme_override_styles/panel = SubResource("SBFlat_slot")
 
-; ── Slot 7 ────────────────────────────────────────────────────────────────────
 [node name="Slot7" type="Panel" parent="VBox/CenterContainer/Grid"]
 layout_mode = 2
 custom_minimum_size = Vector2(80, 80)
