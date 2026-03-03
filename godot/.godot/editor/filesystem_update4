@@ -1,2 +1,5 @@
-res://scenes/HireScreen.tscn
-res://Employee.gd
+res://scripts/ui/Main.gd
+res://scripts/ui/PauseMenu.gd
+res://GameManager.gd
+res://main.tscn
+res://ClockManager.gd

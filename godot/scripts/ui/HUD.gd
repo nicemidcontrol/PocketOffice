@@ -6,6 +6,8 @@ extends CanvasLayer
 @onready var cash_label:    Label = $TopBar/Margin/HBox/CashSection/CashLabel
 @onready var rep_label:     Label = $TopBar/Margin/HBox/RepSection/RepLabel
 @onready var date_label:    Label = $TopBar/Margin/HBox/DateSection/DateLabel
+@onready var clock_label:   Label = $TopBar/Margin/HBox/ClockSection/ClockLabel
+@onready var day_label:     Label = $TopBar/Margin/HBox/ClockSection/DayLabel
 @onready var message_panel: Panel = $MessagePanel
 @onready var message_label: Label = $MessagePanel/Margin/MessageLabel
 @onready var message_timer: Timer = $MessageTimer
@@ -14,6 +16,7 @@ extends CanvasLayer
 #  STATE
 # ─────────────────────────────────────────
 var _gm: Node     = null
+var _cm: Node     = null
 var _tween: Tween = null
 
 # ─────────────────────────────────────────
@@ -33,6 +36,10 @@ func _ready() -> void:
 	_gm.economy.cash_changed.connect(_on_cash_changed)
 	_gm.day_passed.connect(_on_day_passed)
 	_gm.month_passed.connect(_on_month_passed)
+
+	_cm = get_node_or_null("/root/ClockManager")
+	if _cm != null:
+		_cm.time_updated.connect(_on_time_updated)
 
 	_refresh_all()
 
@@ -88,3 +95,12 @@ func _on_message_timer_timeout() -> void:
 		_tween.kill()
 	_tween = create_tween()
 	_tween.tween_property(message_panel, "modulate:a", 0.0, 0.4)
+
+func _on_time_updated(hour: int, minute: int) -> void:
+	clock_label.text = "%02d:%02d" % [hour, minute]
+	if _cm != null and _cm.is_work_time:
+		clock_label.add_theme_color_override("font_color", Color(0.22, 0.9, 0.42))
+	else:
+		clock_label.add_theme_color_override("font_color", Color(0.5, 0.51, 0.62))
+	if _cm != null:
+		day_label.text = "D%d" % _cm.current_day

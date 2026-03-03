@@ -48,7 +48,8 @@ var company_data := {
 # ─────────────────────────────────────────
 @export var day_duration_seconds: float = 10.0
 var _day_timer: float = 0.0
-var is_paused: bool = false
+var is_paused: bool  = false
+var corp_points: int = 0
 
 # ─────────────────────────────────────────
 #  LIFECYCLE
@@ -59,6 +60,9 @@ func _ready() -> void:
 		load_game()
 	else:
 		new_game("My Startup Inc.")
+	var _clock: Node = get_node_or_null("/root/ClockManager")
+	if _clock != null:
+		_clock.month_changed.connect(_on_clock_month_changed)
 
 func _process(delta: float) -> void:
 	if is_paused:
@@ -233,3 +237,11 @@ func load_game() -> void:
 	office.from_save_dict(data.get("office", {}))
 	events.initialize()
 	broadcast("Game loaded! Welcome back to %s." % company_data["company_name"])
+
+# ─────────────────────────────────────────
+#  CLOCK HANDLERS
+# ─────────────────────────────────────────
+func _on_clock_month_changed(_month: int, _year: int) -> void:
+	var total_salary: int = employees.get_total_monthly_salary()
+	economy.spend(total_salary, "Monthly Salaries")
+	print("[Economy] Monthly salary paid: $%d" % total_salary)
