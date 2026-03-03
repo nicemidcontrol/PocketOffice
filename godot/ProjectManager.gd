@@ -136,7 +136,8 @@ func _complete_by_id(pid: int, gm: Node) -> void:
 			proj["is_complete"] = true
 			proj["is_active"]   = false
 			gm.economy.add_revenue(proj["reward_cash"], "Project: " + proj["name"])
-			gm.corp_points += proj["reward_corp_points"]
+			gm.add_corp_points(proj["reward_corp_points"])
+			_available.append(_next_from_pool())
 			print("[Project] %s completed! +$%d +%d CP" % [
 				proj["name"], proj["reward_cash"], proj["reward_corp_points"]
 			])

@@ -20,6 +20,7 @@ signal month_passed(month: int)
 signal year_passed(year: int)
 signal tier_upgraded(new_tier: CompanyTier)
 signal game_message(message: String)
+signal corp_points_changed(new_value: int)
 
 # ─────────────────────────────────────────
 #  SUB-MANAGERS  (child nodes)
@@ -184,6 +185,10 @@ func _calculate_annual_score() -> int:
 # ─────────────────────────────────────────
 #  GAME CONTROLS
 # ─────────────────────────────────────────
+func add_corp_points(amount: int) -> void:
+	corp_points += amount
+	corp_points_changed.emit(corp_points)
+
 func toggle_pause() -> void:
 	is_paused = !is_paused
 
