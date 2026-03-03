@@ -3,3 +3,6 @@ res://scripts/ui/PauseMenu.gd
 res://GameManager.gd
 res://main.tscn
 res://ClockManager.gd
+res://scripts/ui/BottomBar.gd
+res://scripts/ui/HireScreen.gd
+res://scripts/ui/ProjectBoard.gd
