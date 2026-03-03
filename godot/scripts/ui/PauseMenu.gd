@@ -1,5 +1,7 @@
 extends CanvasLayer
 
+signal hire_requested
+
 # ─────────────────────────────────────────
 #  NODE REFS
 # ─────────────────────────────────────────
@@ -83,7 +85,7 @@ func _on_hr_pressed() -> void:
 
 func _on_recruit_pressed() -> void:
 	_close()
-	get_tree().change_scene_to_file("res://scenes/HireScreen.tscn")
+	hire_requested.emit()
 
 func _on_coming_soon() -> void:
 	_show_toast("Coming Soon")
