@@ -1,6 +1,7 @@
 extends CanvasLayer
 
 signal hire_requested
+signal project_board_requested
 
 # ─────────────────────────────────────────
 #  NODE REFS
@@ -89,6 +90,10 @@ func _on_recruit_pressed() -> void:
 
 func _on_coming_soon() -> void:
 	_show_toast("Coming Soon")
+
+func _on_assign_pressed() -> void:
+	_close()
+	project_board_requested.emit()
 
 func _on_corporate_pressed() -> void:
 	_toggle_sub(_corporate_sub)

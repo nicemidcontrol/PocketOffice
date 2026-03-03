@@ -48,7 +48,8 @@ var company_data := {
 # ─────────────────────────────────────────
 @export var day_duration_seconds: float = 10.0
 var _day_timer: float = 0.0
-var is_paused: bool = false
+var is_paused: bool  = false
+var corp_points: int = 0
 
 # ─────────────────────────────────────────
 #  LIFECYCLE
