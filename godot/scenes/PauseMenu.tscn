@@ -1,35 +1,61 @@
-[gd_scene load_steps=5 format=3 uid="uid://pausemenu390x844po"]
+[gd_scene load_steps=7 format=3 uid="uid://pausemenu390x844po"]
 
 [ext_resource type="Script" path="res://scripts/ui/PauseMenu.gd" id="1_pmscript"]
 
-[sub_resource type="StyleBoxFlat" id="SBFlat_panel"]
-bg_color                   = Color(0.06, 0.07, 0.16, 0.98)
-border_width_left          = 1
-border_width_top           = 1
-border_width_right         = 1
-border_width_bottom        = 1
-border_color               = Color(0.18, 0.42, 0.78, 0.8)
-corner_radius_top_left     = 8
-corner_radius_top_right    = 8
-corner_radius_bottom_right = 8
-corner_radius_bottom_left  = 8
+[sub_resource type="StyleBoxFlat" id="SBFlat_build"]
+bg_color                   = Color(0.08, 0.08, 0.18, 0.95)
+border_width_left          = 3
+border_color               = Color(0.310, 0.765, 0.969, 1.0)
+corner_radius_top_left     = 6
+corner_radius_top_right    = 6
+corner_radius_bottom_right = 6
+corner_radius_bottom_left  = 6
+content_margin_left        = 12.0
+content_margin_right       = 8.0
 
-[sub_resource type="StyleBoxFlat" id="SBFlat_item"]
-bg_color            = Color(0.08, 0.10, 0.22, 0.0)
-border_width_bottom = 1
-border_color        = Color(0.18, 0.22, 0.38, 0.4)
+[sub_resource type="StyleBoxFlat" id="SBFlat_hr"]
+bg_color                   = Color(0.08, 0.08, 0.18, 0.95)
+border_width_left          = 3
+border_color               = Color(0.506, 0.780, 0.518, 1.0)
+corner_radius_top_left     = 6
+corner_radius_top_right    = 6
+corner_radius_bottom_right = 6
+corner_radius_bottom_left  = 6
+content_margin_left        = 12.0
+content_margin_right       = 8.0
 
-[sub_resource type="StyleBoxFlat" id="SBFlat_close"]
-bg_color                   = Color(0.08, 0.18, 0.44, 0.92)
-border_width_left          = 1
-border_width_top           = 1
-border_width_right         = 1
-border_width_bottom        = 1
-border_color               = Color(0.4, 0.65, 1.0, 0.9)
-corner_radius_top_left     = 4
-corner_radius_top_right    = 4
-corner_radius_bottom_right = 4
-corner_radius_bottom_left  = 4
+[sub_resource type="StyleBoxFlat" id="SBFlat_corp"]
+bg_color                   = Color(0.08, 0.08, 0.18, 0.95)
+border_width_left          = 3
+border_color               = Color(1.0, 0.718, 0.302, 1.0)
+corner_radius_top_left     = 6
+corner_radius_top_right    = 6
+corner_radius_bottom_right = 6
+corner_radius_bottom_left  = 6
+content_margin_left        = 12.0
+content_margin_right       = 8.0
+
+[sub_resource type="StyleBoxFlat" id="SBFlat_lists"]
+bg_color                   = Color(0.08, 0.08, 0.18, 0.95)
+border_width_left          = 3
+border_color               = Color(0.808, 0.576, 0.847, 1.0)
+corner_radius_top_left     = 6
+corner_radius_top_right    = 6
+corner_radius_bottom_right = 6
+corner_radius_bottom_left  = 6
+content_margin_left        = 12.0
+content_margin_right       = 8.0
+
+[sub_resource type="StyleBoxFlat" id="SBFlat_system"]
+bg_color                   = Color(0.08, 0.08, 0.18, 0.95)
+border_width_left          = 3
+border_color               = Color(0.957, 0.561, 0.694, 1.0)
+corner_radius_top_left     = 6
+corner_radius_top_right    = 6
+corner_radius_bottom_right = 6
+corner_radius_bottom_left  = 6
+content_margin_left        = 12.0
+content_margin_right       = 8.0
 
 [node name="PauseMenu" type="CanvasLayer"]
 layer        = 20
@@ -52,274 +78,289 @@ anchor_bottom   = 1.0
 grow_horizontal = 2
 grow_vertical   = 2
 mouse_filter    = 0
-color           = Color(0.0, 0.0, 0.0, 0.55)
+color           = Color(0.0, 0.0, 0.0, 0.6)
 
-[node name="Center" type="CenterContainer" parent="Root"]
+[node name="ButtonsContainer" type="VBoxContainer" parent="Root"]
 layout_mode     = 1
-anchors_preset  = 15
+anchor_left     = 1.0
+anchor_top      = 0.0
 anchor_right    = 1.0
 anchor_bottom   = 1.0
-grow_horizontal = 2
+offset_left     = -168.0
+offset_top      = 72.0
+offset_right    = -8.0
+offset_bottom   = -64.0
+grow_horizontal = 0
 grow_vertical   = 2
 mouse_filter    = 2
-
-[node name="PanelBox" type="PanelContainer" parent="Root/Center"]
-layout_mode             = 2
-custom_minimum_size     = Vector2(300, 0)
-theme_override_styles/panel = SubResource("SBFlat_panel")
-
-[node name="Margin" type="MarginContainer" parent="Root/Center/PanelBox"]
-layout_mode = 2
-theme_override_constants/margin_left   = 16
-theme_override_constants/margin_top    = 20
-theme_override_constants/margin_right  = 16
-theme_override_constants/margin_bottom = 16
-
-[node name="VBox" type="VBoxContainer" parent="Root/Center/PanelBox/Margin"]
-layout_mode = 2
 theme_override_constants/separation = 6
 
-[node name="TitleLabel" type="Label" parent="Root/Center/PanelBox/Margin/VBox"]
-layout_mode          = 2
-text                 = "MENU"
-horizontal_alignment = 1
-theme_override_colors/font_color    = Color(0.82, 0.9, 1.0, 1.0)
-theme_override_font_sizes/font_size = 20
+[node name="BuildBtn" type="Button" parent="Root/ButtonsContainer"]
+layout_mode             = 2
+custom_minimum_size     = Vector2(160, 44)
+text                    = "Build"
+alignment               = 0
+theme_override_colors/font_color    = Color(1.0, 1.0, 1.0, 1.0)
+theme_override_font_sizes/font_size = 13
+theme_override_styles/normal        = SubResource("SBFlat_build")
+theme_override_styles/hover         = SubResource("SBFlat_build")
+theme_override_styles/pressed       = SubResource("SBFlat_build")
 
-[node name="Sep1" type="HSeparator" parent="Root/Center/PanelBox/Margin/VBox"]
-layout_mode = 2
+[node name="HRBtn" type="Button" parent="Root/ButtonsContainer"]
+layout_mode             = 2
+custom_minimum_size     = Vector2(160, 44)
+text                    = "HR"
+alignment               = 0
+theme_override_colors/font_color    = Color(1.0, 1.0, 1.0, 1.0)
+theme_override_font_sizes/font_size = 13
+theme_override_styles/normal        = SubResource("SBFlat_hr")
+theme_override_styles/hover         = SubResource("SBFlat_hr")
+theme_override_styles/pressed       = SubResource("SBFlat_hr")
 
-[node name="Scroll" type="ScrollContainer" parent="Root/Center/PanelBox/Margin/VBox"]
-layout_mode         = 2
-custom_minimum_size = Vector2(268, 40)
+[node name="HRSub" type="MarginContainer" parent="Root/ButtonsContainer"]
+layout_mode  = 2
+visible      = false
+mouse_filter = 2
+theme_override_constants/margin_left = 20
 
-[node name="ItemsVBox" type="VBoxContainer" parent="Root/Center/PanelBox/Margin/VBox/Scroll"]
+[node name="HRSubVBox" type="VBoxContainer" parent="Root/ButtonsContainer/HRSub"]
+layout_mode  = 2
+mouse_filter = 2
+theme_override_constants/separation = 4
+
+[node name="RecruitBtn" type="Button" parent="Root/ButtonsContainer/HRSub/HRSubVBox"]
 layout_mode           = 2
+custom_minimum_size   = Vector2(0, 40)
 size_flags_horizontal = 3
-theme_override_constants/separation = 0
+text                  = "Recruit"
+alignment             = 0
+theme_override_colors/font_color    = Color(1.0, 1.0, 1.0, 1.0)
+theme_override_font_sizes/font_size = 13
+theme_override_styles/normal        = SubResource("SBFlat_hr")
+theme_override_styles/hover         = SubResource("SBFlat_hr")
+theme_override_styles/pressed       = SubResource("SBFlat_hr")
 
-[node name="BuildBtn" type="Button" parent="Root/Center/PanelBox/Margin/VBox/Scroll/ItemsVBox"]
+[node name="TrainingBtn" type="Button" parent="Root/ButtonsContainer/HRSub/HRSubVBox"]
 layout_mode           = 2
+custom_minimum_size   = Vector2(0, 40)
 size_flags_horizontal = 3
-text                  = "Build"
-theme_override_colors/font_color    = Color(0.82, 0.9, 1.0, 1.0)
-theme_override_font_sizes/font_size = 15
-theme_override_styles/normal        = SubResource("SBFlat_item")
-theme_override_styles/hover         = SubResource("SBFlat_item")
-theme_override_styles/pressed       = SubResource("SBFlat_item")
+text                  = "Training"
+alignment             = 0
+theme_override_colors/font_color    = Color(1.0, 1.0, 1.0, 1.0)
+theme_override_font_sizes/font_size = 13
+theme_override_styles/normal        = SubResource("SBFlat_hr")
+theme_override_styles/hover         = SubResource("SBFlat_hr")
+theme_override_styles/pressed       = SubResource("SBFlat_hr")
 
-[node name="HRBtn" type="Button" parent="Root/Center/PanelBox/Margin/VBox/Scroll/ItemsVBox"]
+[node name="HRItemsBtn" type="Button" parent="Root/ButtonsContainer/HRSub/HRSubVBox"]
 layout_mode           = 2
+custom_minimum_size   = Vector2(0, 40)
 size_flags_horizontal = 3
-text                  = "HR >"
-theme_override_colors/font_color    = Color(0.82, 0.9, 1.0, 1.0)
-theme_override_font_sizes/font_size = 15
-theme_override_styles/normal        = SubResource("SBFlat_item")
-theme_override_styles/hover         = SubResource("SBFlat_item")
-theme_override_styles/pressed       = SubResource("SBFlat_item")
+text                  = "Items"
+alignment             = 0
+theme_override_colors/font_color    = Color(1.0, 1.0, 1.0, 1.0)
+theme_override_font_sizes/font_size = 13
+theme_override_styles/normal        = SubResource("SBFlat_hr")
+theme_override_styles/hover         = SubResource("SBFlat_hr")
+theme_override_styles/pressed       = SubResource("SBFlat_hr")
 
-[node name="HRSub" type="VBoxContainer" parent="Root/Center/PanelBox/Margin/VBox/Scroll/ItemsVBox"]
-layout_mode = 2
-visible     = false
-theme_override_constants/separation = 0
+[node name="CorporateBtn" type="Button" parent="Root/ButtonsContainer"]
+layout_mode             = 2
+custom_minimum_size     = Vector2(160, 44)
+text                    = "Corporate"
+alignment               = 0
+theme_override_colors/font_color    = Color(1.0, 1.0, 1.0, 1.0)
+theme_override_font_sizes/font_size = 13
+theme_override_styles/normal        = SubResource("SBFlat_corp")
+theme_override_styles/hover         = SubResource("SBFlat_corp")
+theme_override_styles/pressed       = SubResource("SBFlat_corp")
 
-[node name="RecruitBtn" type="Button" parent="Root/Center/PanelBox/Margin/VBox/Scroll/ItemsVBox/HRSub"]
+[node name="CorporateSub" type="MarginContainer" parent="Root/ButtonsContainer"]
+layout_mode  = 2
+visible      = false
+mouse_filter = 2
+theme_override_constants/margin_left = 20
+
+[node name="CorporateSubVBox" type="VBoxContainer" parent="Root/ButtonsContainer/CorporateSub"]
+layout_mode  = 2
+mouse_filter = 2
+theme_override_constants/separation = 4
+
+[node name="ResearchBtn" type="Button" parent="Root/ButtonsContainer/CorporateSub/CorporateSubVBox"]
 layout_mode           = 2
+custom_minimum_size   = Vector2(0, 40)
 size_flags_horizontal = 3
-text                  = "  Recruit"
-theme_override_colors/font_color    = Color(0.65, 0.78, 1.0, 1.0)
-theme_override_font_sizes/font_size = 14
-theme_override_styles/normal        = SubResource("SBFlat_item")
-theme_override_styles/hover         = SubResource("SBFlat_item")
-theme_override_styles/pressed       = SubResource("SBFlat_item")
+text                  = "Research"
+alignment             = 0
+theme_override_colors/font_color    = Color(1.0, 1.0, 1.0, 1.0)
+theme_override_font_sizes/font_size = 13
+theme_override_styles/normal        = SubResource("SBFlat_corp")
+theme_override_styles/hover         = SubResource("SBFlat_corp")
+theme_override_styles/pressed       = SubResource("SBFlat_corp")
 
-[node name="TrainingBtn" type="Button" parent="Root/Center/PanelBox/Margin/VBox/Scroll/ItemsVBox/HRSub"]
+[node name="AssignBtn" type="Button" parent="Root/ButtonsContainer/CorporateSub/CorporateSubVBox"]
 layout_mode           = 2
+custom_minimum_size   = Vector2(0, 40)
 size_flags_horizontal = 3
-text                  = "  Training"
-theme_override_colors/font_color    = Color(0.65, 0.78, 1.0, 1.0)
-theme_override_font_sizes/font_size = 14
-theme_override_styles/normal        = SubResource("SBFlat_item")
-theme_override_styles/hover         = SubResource("SBFlat_item")
-theme_override_styles/pressed       = SubResource("SBFlat_item")
+text                  = "Assign Tasks"
+alignment             = 0
+theme_override_colors/font_color    = Color(1.0, 1.0, 1.0, 1.0)
+theme_override_font_sizes/font_size = 13
+theme_override_styles/normal        = SubResource("SBFlat_corp")
+theme_override_styles/hover         = SubResource("SBFlat_corp")
+theme_override_styles/pressed       = SubResource("SBFlat_corp")
 
-[node name="HRItemsBtn" type="Button" parent="Root/Center/PanelBox/Margin/VBox/Scroll/ItemsVBox/HRSub"]
+[node name="InfoBtn" type="Button" parent="Root/ButtonsContainer/CorporateSub/CorporateSubVBox"]
 layout_mode           = 2
+custom_minimum_size   = Vector2(0, 40)
 size_flags_horizontal = 3
-text                  = "  Items"
-theme_override_colors/font_color    = Color(0.65, 0.78, 1.0, 1.0)
-theme_override_font_sizes/font_size = 14
-theme_override_styles/normal        = SubResource("SBFlat_item")
-theme_override_styles/hover         = SubResource("SBFlat_item")
-theme_override_styles/pressed       = SubResource("SBFlat_item")
+text                  = "Info"
+alignment             = 0
+theme_override_colors/font_color    = Color(1.0, 1.0, 1.0, 1.0)
+theme_override_font_sizes/font_size = 13
+theme_override_styles/normal        = SubResource("SBFlat_corp")
+theme_override_styles/hover         = SubResource("SBFlat_corp")
+theme_override_styles/pressed       = SubResource("SBFlat_corp")
 
-[node name="CorporateBtn" type="Button" parent="Root/Center/PanelBox/Margin/VBox/Scroll/ItemsVBox"]
+[node name="ListsBtn" type="Button" parent="Root/ButtonsContainer"]
+layout_mode             = 2
+custom_minimum_size     = Vector2(160, 44)
+text                    = "Lists"
+alignment               = 0
+theme_override_colors/font_color    = Color(1.0, 1.0, 1.0, 1.0)
+theme_override_font_sizes/font_size = 13
+theme_override_styles/normal        = SubResource("SBFlat_lists")
+theme_override_styles/hover         = SubResource("SBFlat_lists")
+theme_override_styles/pressed       = SubResource("SBFlat_lists")
+
+[node name="ListsSub" type="MarginContainer" parent="Root/ButtonsContainer"]
+layout_mode  = 2
+visible      = false
+mouse_filter = 2
+theme_override_constants/margin_left = 20
+
+[node name="ListsSubVBox" type="VBoxContainer" parent="Root/ButtonsContainer/ListsSub"]
+layout_mode  = 2
+mouse_filter = 2
+theme_override_constants/separation = 4
+
+[node name="EmployeeBtn" type="Button" parent="Root/ButtonsContainer/ListsSub/ListsSubVBox"]
 layout_mode           = 2
+custom_minimum_size   = Vector2(0, 40)
 size_flags_horizontal = 3
-text                  = "Corporate >"
-theme_override_colors/font_color    = Color(0.82, 0.9, 1.0, 1.0)
-theme_override_font_sizes/font_size = 15
-theme_override_styles/normal        = SubResource("SBFlat_item")
-theme_override_styles/hover         = SubResource("SBFlat_item")
-theme_override_styles/pressed       = SubResource("SBFlat_item")
+text                  = "Employee"
+alignment             = 0
+theme_override_colors/font_color    = Color(1.0, 1.0, 1.0, 1.0)
+theme_override_font_sizes/font_size = 13
+theme_override_styles/normal        = SubResource("SBFlat_lists")
+theme_override_styles/hover         = SubResource("SBFlat_lists")
+theme_override_styles/pressed       = SubResource("SBFlat_lists")
 
-[node name="CorporateSub" type="VBoxContainer" parent="Root/Center/PanelBox/Margin/VBox/Scroll/ItemsVBox"]
-layout_mode = 2
-visible     = false
-theme_override_constants/separation = 0
-
-[node name="ResearchBtn" type="Button" parent="Root/Center/PanelBox/Margin/VBox/Scroll/ItemsVBox/CorporateSub"]
+[node name="ComboBtn" type="Button" parent="Root/ButtonsContainer/ListsSub/ListsSubVBox"]
 layout_mode           = 2
+custom_minimum_size   = Vector2(0, 40)
 size_flags_horizontal = 3
-text                  = "  Research"
-theme_override_colors/font_color    = Color(0.65, 0.78, 1.0, 1.0)
-theme_override_font_sizes/font_size = 14
-theme_override_styles/normal        = SubResource("SBFlat_item")
-theme_override_styles/hover         = SubResource("SBFlat_item")
-theme_override_styles/pressed       = SubResource("SBFlat_item")
+text                  = "Combo"
+alignment             = 0
+theme_override_colors/font_color    = Color(1.0, 1.0, 1.0, 1.0)
+theme_override_font_sizes/font_size = 13
+theme_override_styles/normal        = SubResource("SBFlat_lists")
+theme_override_styles/hover         = SubResource("SBFlat_lists")
+theme_override_styles/pressed       = SubResource("SBFlat_lists")
 
-[node name="AssignBtn" type="Button" parent="Root/Center/PanelBox/Margin/VBox/Scroll/ItemsVBox/CorporateSub"]
+[node name="RevenueBtn" type="Button" parent="Root/ButtonsContainer/ListsSub/ListsSubVBox"]
 layout_mode           = 2
+custom_minimum_size   = Vector2(0, 40)
 size_flags_horizontal = 3
-text                  = "  Assign Tasks"
-theme_override_colors/font_color    = Color(0.65, 0.78, 1.0, 1.0)
-theme_override_font_sizes/font_size = 14
-theme_override_styles/normal        = SubResource("SBFlat_item")
-theme_override_styles/hover         = SubResource("SBFlat_item")
-theme_override_styles/pressed       = SubResource("SBFlat_item")
+text                  = "Revenue"
+alignment             = 0
+theme_override_colors/font_color    = Color(1.0, 1.0, 1.0, 1.0)
+theme_override_font_sizes/font_size = 13
+theme_override_styles/normal        = SubResource("SBFlat_lists")
+theme_override_styles/hover         = SubResource("SBFlat_lists")
+theme_override_styles/pressed       = SubResource("SBFlat_lists")
 
-[node name="InfoBtn" type="Button" parent="Root/Center/PanelBox/Margin/VBox/Scroll/ItemsVBox/CorporateSub"]
+[node name="SystemBtn" type="Button" parent="Root/ButtonsContainer"]
+layout_mode             = 2
+custom_minimum_size     = Vector2(160, 44)
+text                    = "System"
+alignment               = 0
+theme_override_colors/font_color    = Color(1.0, 1.0, 1.0, 1.0)
+theme_override_font_sizes/font_size = 13
+theme_override_styles/normal        = SubResource("SBFlat_system")
+theme_override_styles/hover         = SubResource("SBFlat_system")
+theme_override_styles/pressed       = SubResource("SBFlat_system")
+
+[node name="SystemSub" type="MarginContainer" parent="Root/ButtonsContainer"]
+layout_mode  = 2
+visible      = false
+mouse_filter = 2
+theme_override_constants/margin_left = 20
+
+[node name="SystemSubVBox" type="VBoxContainer" parent="Root/ButtonsContainer/SystemSub"]
+layout_mode  = 2
+mouse_filter = 2
+theme_override_constants/separation = 4
+
+[node name="SaveMenuBtn" type="Button" parent="Root/ButtonsContainer/SystemSub/SystemSubVBox"]
 layout_mode           = 2
+custom_minimum_size   = Vector2(0, 40)
 size_flags_horizontal = 3
-text                  = "  Info"
-theme_override_colors/font_color    = Color(0.65, 0.78, 1.0, 1.0)
-theme_override_font_sizes/font_size = 14
-theme_override_styles/normal        = SubResource("SBFlat_item")
-theme_override_styles/hover         = SubResource("SBFlat_item")
-theme_override_styles/pressed       = SubResource("SBFlat_item")
+text                  = "Save"
+alignment             = 0
+theme_override_colors/font_color    = Color(1.0, 1.0, 1.0, 1.0)
+theme_override_font_sizes/font_size = 13
+theme_override_styles/normal        = SubResource("SBFlat_system")
+theme_override_styles/hover         = SubResource("SBFlat_system")
+theme_override_styles/pressed       = SubResource("SBFlat_system")
 
-[node name="ListsBtn" type="Button" parent="Root/Center/PanelBox/Margin/VBox/Scroll/ItemsVBox"]
+[node name="SettingsBtn" type="Button" parent="Root/ButtonsContainer/SystemSub/SystemSubVBox"]
 layout_mode           = 2
+custom_minimum_size   = Vector2(0, 40)
 size_flags_horizontal = 3
-text                  = "Lists >"
-theme_override_colors/font_color    = Color(0.82, 0.9, 1.0, 1.0)
-theme_override_font_sizes/font_size = 15
-theme_override_styles/normal        = SubResource("SBFlat_item")
-theme_override_styles/hover         = SubResource("SBFlat_item")
-theme_override_styles/pressed       = SubResource("SBFlat_item")
+text                  = "Settings"
+alignment             = 0
+theme_override_colors/font_color    = Color(1.0, 1.0, 1.0, 1.0)
+theme_override_font_sizes/font_size = 13
+theme_override_styles/normal        = SubResource("SBFlat_system")
+theme_override_styles/hover         = SubResource("SBFlat_system")
+theme_override_styles/pressed       = SubResource("SBFlat_system")
 
-[node name="ListsSub" type="VBoxContainer" parent="Root/Center/PanelBox/Margin/VBox/Scroll/ItemsVBox"]
-layout_mode = 2
-visible     = false
-theme_override_constants/separation = 0
-
-[node name="EmployeeBtn" type="Button" parent="Root/Center/PanelBox/Margin/VBox/Scroll/ItemsVBox/ListsSub"]
+[node name="IndexBtn" type="Button" parent="Root/ButtonsContainer/SystemSub/SystemSubVBox"]
 layout_mode           = 2
+custom_minimum_size   = Vector2(0, 40)
 size_flags_horizontal = 3
-text                  = "  Employee"
-theme_override_colors/font_color    = Color(0.65, 0.78, 1.0, 1.0)
-theme_override_font_sizes/font_size = 14
-theme_override_styles/normal        = SubResource("SBFlat_item")
-theme_override_styles/hover         = SubResource("SBFlat_item")
-theme_override_styles/pressed       = SubResource("SBFlat_item")
+text                  = "Index"
+alignment             = 0
+theme_override_colors/font_color    = Color(1.0, 1.0, 1.0, 1.0)
+theme_override_font_sizes/font_size = 13
+theme_override_styles/normal        = SubResource("SBFlat_system")
+theme_override_styles/hover         = SubResource("SBFlat_system")
+theme_override_styles/pressed       = SubResource("SBFlat_system")
 
-[node name="ComboBtn" type="Button" parent="Root/Center/PanelBox/Margin/VBox/Scroll/ItemsVBox/ListsSub"]
+[node name="ScoreBtn" type="Button" parent="Root/ButtonsContainer/SystemSub/SystemSubVBox"]
 layout_mode           = 2
+custom_minimum_size   = Vector2(0, 40)
 size_flags_horizontal = 3
-text                  = "  Combo"
-theme_override_colors/font_color    = Color(0.65, 0.78, 1.0, 1.0)
-theme_override_font_sizes/font_size = 14
-theme_override_styles/normal        = SubResource("SBFlat_item")
-theme_override_styles/hover         = SubResource("SBFlat_item")
-theme_override_styles/pressed       = SubResource("SBFlat_item")
+text                  = "Score"
+alignment             = 0
+theme_override_colors/font_color    = Color(1.0, 1.0, 1.0, 1.0)
+theme_override_font_sizes/font_size = 13
+theme_override_styles/normal        = SubResource("SBFlat_system")
+theme_override_styles/hover         = SubResource("SBFlat_system")
+theme_override_styles/pressed       = SubResource("SBFlat_system")
 
-[node name="RevenueBtn" type="Button" parent="Root/Center/PanelBox/Margin/VBox/Scroll/ItemsVBox/ListsSub"]
+[node name="QuitBtn" type="Button" parent="Root/ButtonsContainer/SystemSub/SystemSubVBox"]
 layout_mode           = 2
+custom_minimum_size   = Vector2(0, 40)
 size_flags_horizontal = 3
-text                  = "  Revenue"
-theme_override_colors/font_color    = Color(0.65, 0.78, 1.0, 1.0)
-theme_override_font_sizes/font_size = 14
-theme_override_styles/normal        = SubResource("SBFlat_item")
-theme_override_styles/hover         = SubResource("SBFlat_item")
-theme_override_styles/pressed       = SubResource("SBFlat_item")
-
-[node name="SystemBtn" type="Button" parent="Root/Center/PanelBox/Margin/VBox/Scroll/ItemsVBox"]
-layout_mode           = 2
-size_flags_horizontal = 3
-text                  = "System >"
-theme_override_colors/font_color    = Color(0.82, 0.9, 1.0, 1.0)
-theme_override_font_sizes/font_size = 15
-theme_override_styles/normal        = SubResource("SBFlat_item")
-theme_override_styles/hover         = SubResource("SBFlat_item")
-theme_override_styles/pressed       = SubResource("SBFlat_item")
-
-[node name="SystemSub" type="VBoxContainer" parent="Root/Center/PanelBox/Margin/VBox/Scroll/ItemsVBox"]
-layout_mode = 2
-visible     = false
-theme_override_constants/separation = 0
-
-[node name="SaveMenuBtn" type="Button" parent="Root/Center/PanelBox/Margin/VBox/Scroll/ItemsVBox/SystemSub"]
-layout_mode           = 2
-size_flags_horizontal = 3
-text                  = "  Save"
-theme_override_colors/font_color    = Color(0.65, 0.78, 1.0, 1.0)
-theme_override_font_sizes/font_size = 14
-theme_override_styles/normal        = SubResource("SBFlat_item")
-theme_override_styles/hover         = SubResource("SBFlat_item")
-theme_override_styles/pressed       = SubResource("SBFlat_item")
-
-[node name="SettingsBtn" type="Button" parent="Root/Center/PanelBox/Margin/VBox/Scroll/ItemsVBox/SystemSub"]
-layout_mode           = 2
-size_flags_horizontal = 3
-text                  = "  Settings"
-theme_override_colors/font_color    = Color(0.65, 0.78, 1.0, 1.0)
-theme_override_font_sizes/font_size = 14
-theme_override_styles/normal        = SubResource("SBFlat_item")
-theme_override_styles/hover         = SubResource("SBFlat_item")
-theme_override_styles/pressed       = SubResource("SBFlat_item")
-
-[node name="IndexBtn" type="Button" parent="Root/Center/PanelBox/Margin/VBox/Scroll/ItemsVBox/SystemSub"]
-layout_mode           = 2
-size_flags_horizontal = 3
-text                  = "  Index"
-theme_override_colors/font_color    = Color(0.65, 0.78, 1.0, 1.0)
-theme_override_font_sizes/font_size = 14
-theme_override_styles/normal        = SubResource("SBFlat_item")
-theme_override_styles/hover         = SubResource("SBFlat_item")
-theme_override_styles/pressed       = SubResource("SBFlat_item")
-
-[node name="ScoreBtn" type="Button" parent="Root/Center/PanelBox/Margin/VBox/Scroll/ItemsVBox/SystemSub"]
-layout_mode           = 2
-size_flags_horizontal = 3
-text                  = "  Score"
-theme_override_colors/font_color    = Color(0.65, 0.78, 1.0, 1.0)
-theme_override_font_sizes/font_size = 14
-theme_override_styles/normal        = SubResource("SBFlat_item")
-theme_override_styles/hover         = SubResource("SBFlat_item")
-theme_override_styles/pressed       = SubResource("SBFlat_item")
-
-[node name="QuitBtn" type="Button" parent="Root/Center/PanelBox/Margin/VBox/Scroll/ItemsVBox/SystemSub"]
-layout_mode           = 2
-size_flags_horizontal = 3
-text                  = "  Quit"
-theme_override_colors/font_color    = Color(0.65, 0.78, 1.0, 1.0)
-theme_override_font_sizes/font_size = 14
-theme_override_styles/normal        = SubResource("SBFlat_item")
-theme_override_styles/hover         = SubResource("SBFlat_item")
-theme_override_styles/pressed       = SubResource("SBFlat_item")
-
-[node name="Sep2" type="HSeparator" parent="Root/Center/PanelBox/Margin/VBox"]
-layout_mode = 2
-
-[node name="CloseBtn" type="Button" parent="Root/Center/PanelBox/Margin/VBox"]
-layout_mode           = 2
-size_flags_horizontal = 3
-text                  = "CLOSE"
-theme_override_colors/font_color    = Color(0.82, 0.9, 1.0, 1.0)
-theme_override_font_sizes/font_size = 14
-theme_override_styles/normal        = SubResource("SBFlat_close")
-theme_override_styles/hover         = SubResource("SBFlat_close")
-theme_override_styles/pressed       = SubResource("SBFlat_close")
+text                  = "Quit"
+alignment             = 0
+theme_override_colors/font_color    = Color(1.0, 1.0, 1.0, 1.0)
+theme_override_font_sizes/font_size = 13
+theme_override_styles/normal        = SubResource("SBFlat_system")
+theme_override_styles/hover         = SubResource("SBFlat_system")
+theme_override_styles/pressed       = SubResource("SBFlat_system")
 
 [node name="Toast" type="Label" parent="Root"]
 layout_mode     = 1
@@ -337,23 +378,22 @@ theme_override_colors/font_color    = Color(1.0, 0.85, 0.3, 1.0)
 theme_override_font_sizes/font_size = 16
 
 [connection signal="gui_input" from="Root/Overlay" to="." method="_on_overlay_input"]
-[connection signal="pressed" from="Root/Center/PanelBox/Margin/VBox/Scroll/ItemsVBox/BuildBtn" to="." method="_on_build_pressed"]
-[connection signal="pressed" from="Root/Center/PanelBox/Margin/VBox/Scroll/ItemsVBox/HRBtn" to="." method="_on_hr_pressed"]
-[connection signal="pressed" from="Root/Center/PanelBox/Margin/VBox/Scroll/ItemsVBox/HRSub/RecruitBtn" to="." method="_on_recruit_pressed"]
-[connection signal="pressed" from="Root/Center/PanelBox/Margin/VBox/Scroll/ItemsVBox/HRSub/TrainingBtn" to="." method="_on_coming_soon"]
-[connection signal="pressed" from="Root/Center/PanelBox/Margin/VBox/Scroll/ItemsVBox/HRSub/HRItemsBtn" to="." method="_on_coming_soon"]
-[connection signal="pressed" from="Root/Center/PanelBox/Margin/VBox/Scroll/ItemsVBox/CorporateBtn" to="." method="_on_corporate_pressed"]
-[connection signal="pressed" from="Root/Center/PanelBox/Margin/VBox/Scroll/ItemsVBox/CorporateSub/ResearchBtn" to="." method="_on_coming_soon"]
-[connection signal="pressed" from="Root/Center/PanelBox/Margin/VBox/Scroll/ItemsVBox/CorporateSub/AssignBtn" to="." method="_on_coming_soon"]
-[connection signal="pressed" from="Root/Center/PanelBox/Margin/VBox/Scroll/ItemsVBox/CorporateSub/InfoBtn" to="." method="_on_coming_soon"]
-[connection signal="pressed" from="Root/Center/PanelBox/Margin/VBox/Scroll/ItemsVBox/ListsBtn" to="." method="_on_lists_pressed"]
-[connection signal="pressed" from="Root/Center/PanelBox/Margin/VBox/Scroll/ItemsVBox/ListsSub/EmployeeBtn" to="." method="_on_coming_soon"]
-[connection signal="pressed" from="Root/Center/PanelBox/Margin/VBox/Scroll/ItemsVBox/ListsSub/ComboBtn" to="." method="_on_coming_soon"]
-[connection signal="pressed" from="Root/Center/PanelBox/Margin/VBox/Scroll/ItemsVBox/ListsSub/RevenueBtn" to="." method="_on_coming_soon"]
-[connection signal="pressed" from="Root/Center/PanelBox/Margin/VBox/Scroll/ItemsVBox/SystemBtn" to="." method="_on_system_pressed"]
-[connection signal="pressed" from="Root/Center/PanelBox/Margin/VBox/Scroll/ItemsVBox/SystemSub/SaveMenuBtn" to="." method="_on_menu_save_pressed"]
-[connection signal="pressed" from="Root/Center/PanelBox/Margin/VBox/Scroll/ItemsVBox/SystemSub/SettingsBtn" to="." method="_on_coming_soon"]
-[connection signal="pressed" from="Root/Center/PanelBox/Margin/VBox/Scroll/ItemsVBox/SystemSub/IndexBtn" to="." method="_on_coming_soon"]
-[connection signal="pressed" from="Root/Center/PanelBox/Margin/VBox/Scroll/ItemsVBox/SystemSub/ScoreBtn" to="." method="_on_coming_soon"]
-[connection signal="pressed" from="Root/Center/PanelBox/Margin/VBox/Scroll/ItemsVBox/SystemSub/QuitBtn" to="." method="_on_quit_pressed"]
-[connection signal="pressed" from="Root/Center/PanelBox/Margin/VBox/CloseBtn" to="." method="_on_close_pressed"]
+[connection signal="pressed" from="Root/ButtonsContainer/BuildBtn" to="." method="_on_build_pressed"]
+[connection signal="pressed" from="Root/ButtonsContainer/HRBtn" to="." method="_on_hr_pressed"]
+[connection signal="pressed" from="Root/ButtonsContainer/HRSub/HRSubVBox/RecruitBtn" to="." method="_on_recruit_pressed"]
+[connection signal="pressed" from="Root/ButtonsContainer/HRSub/HRSubVBox/TrainingBtn" to="." method="_on_coming_soon"]
+[connection signal="pressed" from="Root/ButtonsContainer/HRSub/HRSubVBox/HRItemsBtn" to="." method="_on_coming_soon"]
+[connection signal="pressed" from="Root/ButtonsContainer/CorporateBtn" to="." method="_on_corporate_pressed"]
+[connection signal="pressed" from="Root/ButtonsContainer/CorporateSub/CorporateSubVBox/ResearchBtn" to="." method="_on_coming_soon"]
+[connection signal="pressed" from="Root/ButtonsContainer/CorporateSub/CorporateSubVBox/AssignBtn" to="." method="_on_coming_soon"]
+[connection signal="pressed" from="Root/ButtonsContainer/CorporateSub/CorporateSubVBox/InfoBtn" to="." method="_on_coming_soon"]
+[connection signal="pressed" from="Root/ButtonsContainer/ListsBtn" to="." method="_on_lists_pressed"]
+[connection signal="pressed" from="Root/ButtonsContainer/ListsSub/ListsSubVBox/EmployeeBtn" to="." method="_on_coming_soon"]
+[connection signal="pressed" from="Root/ButtonsContainer/ListsSub/ListsSubVBox/ComboBtn" to="." method="_on_coming_soon"]
+[connection signal="pressed" from="Root/ButtonsContainer/ListsSub/ListsSubVBox/RevenueBtn" to="." method="_on_coming_soon"]
+[connection signal="pressed" from="Root/ButtonsContainer/SystemBtn" to="." method="_on_system_pressed"]
+[connection signal="pressed" from="Root/ButtonsContainer/SystemSub/SystemSubVBox/SaveMenuBtn" to="." method="_on_menu_save_pressed"]
+[connection signal="pressed" from="Root/ButtonsContainer/SystemSub/SystemSubVBox/SettingsBtn" to="." method="_on_coming_soon"]
+[connection signal="pressed" from="Root/ButtonsContainer/SystemSub/SystemSubVBox/IndexBtn" to="." method="_on_coming_soon"]
+[connection signal="pressed" from="Root/ButtonsContainer/SystemSub/SystemSubVBox/ScoreBtn" to="." method="_on_coming_soon"]
+[connection signal="pressed" from="Root/ButtonsContainer/SystemSub/SystemSubVBox/QuitBtn" to="." method="_on_quit_pressed"]

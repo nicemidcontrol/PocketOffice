@@ -6,8 +6,5 @@ extends Control
 func _ready() -> void:
 	_bottom_bar.menu_requested.connect(_on_menu_requested)
 
-func _on_hire_btn_pressed() -> void:
-	get_tree().change_scene_to_file("res://scenes/HireScreen.tscn")
-
 func _on_menu_requested() -> void:
 	_pause_menu.open()
