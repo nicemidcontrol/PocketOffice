@@ -27,7 +27,7 @@ var is_paused: bool     = false
 # 1 in-game day = 8 real seconds = 480 in-game minutes
 # => 1 in-game minute = 8.0 / 480.0 real seconds
 var _second_acc: float = 0.0
-const _SECONDS_PER_MINUTE: float = 8.0 / 480.0
+const _SECONDS_PER_MINUTE: float = 60.0 / 480.0
 
 # ------------------------------------------
 #  LIFECYCLE
