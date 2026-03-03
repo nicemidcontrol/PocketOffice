@@ -8,6 +8,7 @@ extends CanvasLayer
 @onready var date_label:    Label = $TopBar/Margin/HBox/DateSection/DateLabel
 @onready var clock_label:   Label = $TopBar/Margin/HBox/ClockSection/ClockLabel
 @onready var day_label:     Label = $TopBar/Margin/HBox/ClockSection/DayLabel
+@onready var cp_label:      Label = $TopBar/Margin/HBox/ClockSection/CpLabel
 @onready var message_panel: Panel = $MessagePanel
 @onready var message_label: Label = $MessagePanel/Margin/MessageLabel
 @onready var message_timer: Timer = $MessageTimer
@@ -36,6 +37,7 @@ func _ready() -> void:
 	_gm.economy.cash_changed.connect(_on_cash_changed)
 	_gm.day_passed.connect(_on_day_passed)
 	_gm.month_passed.connect(_on_month_passed)
+	_gm.corp_points_changed.connect(_on_corp_points_changed)
 
 	_cm = get_node_or_null("/root/ClockManager")
 	if _cm != null:
@@ -50,6 +52,7 @@ func _refresh_all() -> void:
 	_update_cash(_gm.economy.current_cash)
 	_update_reputation()
 	_update_date()
+	_update_cp(_gm.corp_points)
 
 func _update_cash(amount: int) -> void:
 	cash_label.text = "$" + _format_number(amount)
@@ -61,6 +64,9 @@ func _update_date() -> void:
 	var month: int = _gm.company_data.get("current_month", 1)
 	var year: int  = _gm.company_data.get("current_year", 2024)
 	date_label.text = "M%d  Y%d" % [month, year]
+
+func _update_cp(amount: int) -> void:
+	cp_label.text = "[CP] %d" % amount
 
 func _format_number(n: int) -> String:
 	if n >= 1_000_000:
@@ -81,6 +87,9 @@ func _on_day_passed(_day: int) -> void:
 
 func _on_month_passed(_month: int) -> void:
 	_update_date()
+
+func _on_corp_points_changed(new_val: int) -> void:
+	_update_cp(new_val)
 
 func _on_game_message(message: String) -> void:
 	message_label.text = message

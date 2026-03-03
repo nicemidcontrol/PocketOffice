@@ -1,10 +1,22 @@
-[gd_scene load_steps=6 format=3 uid="uid://main390x844po"]
+[gd_scene load_steps=7 format=3 uid="uid://main390x844po"]
 
 [ext_resource type="Script"      path="res://scripts/ui/Main.gd"       id="1_mainscript"]
 [ext_resource type="PackedScene" path="res://scenes/HUD.tscn"           id="2_hudscene"]
 [ext_resource type="PackedScene" path="res://scenes/OfficeView.tscn"    id="3_ovscene"]
 [ext_resource type="PackedScene" path="res://scenes/BottomBar.tscn"     id="4_bbscene"]
 [ext_resource type="PackedScene" path="res://scenes/PauseMenu.tscn"     id="5_pmscene"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_notif"]
+bg_color = Color(0.047, 0.047, 0.11, 0.97)
+border_width_top = 2
+border_width_left = 2
+border_width_bottom = 2
+border_width_right = 2
+border_color = Color(0.12, 0.78, 0.35, 1.0)
+corner_radius_top_left = 8
+corner_radius_top_right = 8
+corner_radius_bottom_right = 8
+corner_radius_bottom_left = 8
 
 [node name="Main" type="Control"]
 anchor_right    = 1.0
@@ -36,3 +48,44 @@ offset_bottom   = -56.0
 [node name="BottomBar" parent="." instance=ExtResource("4_bbscene")]
 
 [node name="PauseMenu" parent="." instance=ExtResource("5_pmscene")]
+
+[node name="NotifLayer" type="CanvasLayer" parent="."]
+layer = 20
+
+[node name="NotifPanel" type="Panel" parent="NotifLayer"]
+anchor_left = 0.05
+anchor_top = 0.35
+anchor_right = 0.95
+anchor_bottom = 0.58
+grow_horizontal = 2
+grow_vertical = 2
+visible = false
+theme_override_styles/panel = SubResource("StyleBoxFlat_notif")
+
+[node name="Margin" type="MarginContainer" parent="NotifLayer/NotifPanel"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/margin_left = 16
+theme_override_constants/margin_top = 12
+theme_override_constants/margin_right = 16
+theme_override_constants/margin_bottom = 12
+
+[node name="VBox" type="VBoxContainer" parent="NotifLayer/NotifPanel/Margin"]
+layout_mode = 2
+alignment = 1
+
+[node name="NotifLabel" type="Label" parent="NotifLayer/NotifPanel/Margin/VBox"]
+layout_mode = 2
+text = ""
+horizontal_alignment = 1
+autowrap_mode = 3
+theme_override_colors/font_color = Color(0.12, 0.78, 0.35, 1.0)
+theme_override_font_sizes/font_size = 14
+
+[node name="NotifTimer" type="Timer" parent="NotifLayer/NotifPanel"]
+wait_time = 3.0
+one_shot = true
