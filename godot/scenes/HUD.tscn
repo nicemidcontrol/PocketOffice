@@ -2,34 +2,25 @@
 
 [ext_resource type="Script" path="res://scripts/ui/HUD.gd" id="1_hudscript"]
 
-; ── Dark navy panel for the top stat bar (bottom border accent) ──────────────
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_topbar"]
 bg_color = Color(0.047, 0.047, 0.11, 0.97)
 border_width_bottom = 2
 border_color = Color(0.18, 0.42, 0.78, 1.0)
 
-; ── Semi-transparent panel for the slide-up message feed ─────────────────────
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_msg"]
 bg_color = Color(0.047, 0.047, 0.11, 0.9)
 border_width_top = 1
 border_color = Color(0.18, 0.42, 0.78, 0.6)
 
-; ── Thin blue line used by both VSeparators ───────────────────────────────────
 [sub_resource type="StyleBoxLine" id="StyleBoxLine_sep"]
 color = Color(0.18, 0.42, 0.78, 0.4)
 thickness = 1
 vertical = true
 
-; ═════════════════════════════════════════════════════════════════════════════
-;  ROOT  –  CanvasLayer renders above the game world
-; ═════════════════════════════════════════════════════════════════════════════
 [node name="HUD" type="CanvasLayer"]
 layer = 10
 script = ExtResource("1_hudscript")
 
-; ─────────────────────────────────────────
-;  TOP BAR  (full-width, 64 px tall)
-; ─────────────────────────────────────────
 [node name="TopBar" type="Panel" parent="."]
 anchors_preset = 10
 anchor_right = 1.0
@@ -52,7 +43,6 @@ theme_override_constants/margin_bottom = 6
 [node name="HBox" type="HBoxContainer" parent="TopBar/Margin"]
 layout_mode = 2
 
-; ── CASH ─────────────────────────────────
 [node name="CashSection" type="VBoxContainer" parent="TopBar/Margin/HBox"]
 layout_mode = 2
 size_flags_horizontal = 3
@@ -73,14 +63,12 @@ horizontal_alignment = 1
 theme_override_colors/font_color = Color(0.22, 0.9, 0.42, 1.0)
 theme_override_font_sizes/font_size = 17
 
-; ── separator ────────────────────────────
 [node name="VSep1" type="VSeparator" parent="TopBar/Margin/HBox"]
 layout_mode = 2
 custom_minimum_size = Vector2(10, 0)
 size_flags_vertical = 3
 theme_override_styles/separator = SubResource("StyleBoxLine_sep")
 
-; ── REPUTATION ───────────────────────────
 [node name="RepSection" type="VBoxContainer" parent="TopBar/Margin/HBox"]
 layout_mode = 2
 size_flags_horizontal = 3
@@ -101,14 +89,12 @@ horizontal_alignment = 1
 theme_override_colors/font_color = Color(1.0, 0.82, 0.1, 1.0)
 theme_override_font_sizes/font_size = 17
 
-; ── separator ────────────────────────────
 [node name="VSep2" type="VSeparator" parent="TopBar/Margin/HBox"]
 layout_mode = 2
 custom_minimum_size = Vector2(10, 0)
 size_flags_vertical = 3
 theme_override_styles/separator = SubResource("StyleBoxLine_sep")
 
-; ── DATE ─────────────────────────────────
 [node name="DateSection" type="VBoxContainer" parent="TopBar/Margin/HBox"]
 layout_mode = 2
 size_flags_horizontal = 3
@@ -129,10 +115,39 @@ horizontal_alignment = 1
 theme_override_colors/font_color = Color(0.2, 0.85, 0.94, 1.0)
 theme_override_font_sizes/font_size = 14
 
-; ═════════════════════════════════════════════════════════════════════════════
-;  MESSAGE PANEL  (sticks to bottom, hidden until a game_message fires)
-;  Height: 52 px  —  fades in/out via Tween in HUD.gd
-; ═════════════════════════════════════════════════════════════════════════════
+[node name="VSep3" type="VSeparator" parent="TopBar/Margin/HBox"]
+layout_mode = 2
+custom_minimum_size = Vector2(10, 0)
+size_flags_vertical = 3
+theme_override_styles/separator = SubResource("StyleBoxLine_sep")
+
+[node name="ClockSection" type="VBoxContainer" parent="TopBar/Margin/HBox"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 4
+alignment = 1
+
+[node name="TimeHeader" type="Label" parent="TopBar/Margin/HBox/ClockSection"]
+layout_mode = 2
+text = "TIME"
+horizontal_alignment = 1
+theme_override_colors/font_color = Color(0.5, 0.51, 0.62, 1.0)
+theme_override_font_sizes/font_size = 9
+
+[node name="ClockLabel" type="Label" parent="TopBar/Margin/HBox/ClockSection"]
+layout_mode = 2
+text = "08:00"
+horizontal_alignment = 1
+theme_override_colors/font_color = Color(0.22, 0.9, 0.42, 1.0)
+theme_override_font_sizes/font_size = 17
+
+[node name="DayLabel" type="Label" parent="TopBar/Margin/HBox/ClockSection"]
+layout_mode = 2
+text = "D1"
+horizontal_alignment = 1
+theme_override_colors/font_color = Color(0.5, 0.51, 0.62, 1.0)
+theme_override_font_sizes/font_size = 9
+
 [node name="MessagePanel" type="Panel" parent="."]
 anchors_preset = 12
 anchor_top = 1.0
@@ -163,9 +178,6 @@ autowrap_mode = 3
 theme_override_colors/font_color = Color(0.92, 0.92, 0.95, 1.0)
 theme_override_font_sizes/font_size = 12
 
-; ═════════════════════════════════════════════════════════════════════════════
-;  TIMER  –  controls how long each message stays visible (4 s)
-; ═════════════════════════════════════════════════════════════════════════════
 [node name="MessageTimer" type="Timer" parent="."]
 wait_time = 4.0
 one_shot = true
