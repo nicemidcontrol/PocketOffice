@@ -3,12 +3,12 @@ extends CanvasLayer
 # ─────────────────────────────────────────
 #  NODE REFS
 # ─────────────────────────────────────────
-@onready var _root:          Control       = $Root
-@onready var _hr_sub:        VBoxContainer = $Root/Center/PanelBox/Margin/VBox/Scroll/ItemsVBox/HRSub
-@onready var _corporate_sub: VBoxContainer = $Root/Center/PanelBox/Margin/VBox/Scroll/ItemsVBox/CorporateSub
-@onready var _lists_sub:     VBoxContainer = $Root/Center/PanelBox/Margin/VBox/Scroll/ItemsVBox/ListsSub
-@onready var _system_sub:    VBoxContainer = $Root/Center/PanelBox/Margin/VBox/Scroll/ItemsVBox/SystemSub
-@onready var _toast:         Label         = $Root/Toast
+@onready var _root:          Control         = $Root
+@onready var _hr_sub:        MarginContainer = $Root/ButtonsContainer/HRSub
+@onready var _corporate_sub: MarginContainer = $Root/ButtonsContainer/CorporateSub
+@onready var _lists_sub:     MarginContainer = $Root/ButtonsContainer/ListsSub
+@onready var _system_sub:    MarginContainer = $Root/ButtonsContainer/SystemSub
+@onready var _toast:         Label           = $Root/Toast
 
 # ─────────────────────────────────────────
 #  STATE
@@ -47,7 +47,7 @@ func _close_all_subs() -> void:
 	_lists_sub.visible     = false
 	_system_sub.visible    = false
 
-func _toggle_sub(sub: VBoxContainer) -> void:
+func _toggle_sub(sub: MarginContainer) -> void:
 	var was_open: bool = sub.visible
 	_close_all_subs()
 	sub.visible = !was_open
@@ -106,5 +106,3 @@ func _on_quit_pressed() -> void:
 	get_tree().paused = false
 	get_tree().quit()
 
-func _on_close_pressed() -> void:
-	_close()
