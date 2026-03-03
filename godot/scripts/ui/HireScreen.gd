@@ -123,7 +123,7 @@ func _on_hire_pressed(idx: int) -> void:
 	var emp: Object = _candidates[idx]
 	_gm.employees.hire(emp)
 	_gm.broadcast("%s joined the team!" % emp.full_name())
-	_hire_btns[idx].text     = "✓ HIRED"
+	_hire_btns[idx].text     = "HIRED"
 	_hire_btns[idx].disabled = true
 	_hire_btns[idx].modulate = Color(0.4, 0.4, 0.4, 1.0)
 

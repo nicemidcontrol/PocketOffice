@@ -3,8 +3,6 @@ extends CanvasLayer
 # ─────────────────────────────────────────
 #  NODE REFS
 # ─────────────────────────────────────────
-@onready var _save_btn:  Button = $Bar/Margin/HBox/SaveBtn
-@onready var _menu_btn:  Button = $Bar/Margin/HBox/MenuBtn
 @onready var _saved_lbl: Label  = $Bar/SavedLabel
 
 # ─────────────────────────────────────────
