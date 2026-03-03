@@ -146,7 +146,7 @@ func _advance_year() -> void:
 	year_passed.emit(company_data["current_year"])
 
 	var score := _calculate_annual_score()
-	company_data["reputation"] = mini(1000, company_data["reputation"] + score / 10)
+	company_data["reputation"] = mini(1000, company_data["reputation"] + roundi(score / 10.0))
 	broadcast("📊 Annual Review: Score %d/100 — Year %d" % [score, company_data["current_year"]])
 
 # ─────────────────────────────────────────

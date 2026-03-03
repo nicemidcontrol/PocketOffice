@@ -9,7 +9,6 @@ extends Control
 @onready var _assign_popup: Panel         = $AssignPopup
 @onready var _popup_title:  Label         = $AssignPopup/PopupVBox/PopupTitle
 @onready var _popup_list:   VBoxContainer = $AssignPopup/PopupVBox/PopupScroll/PopupList
-@onready var _popup_close:  Button        = $AssignPopup/PopupVBox/PopupClose
 
 # ------------------------------------------
 #  STATE

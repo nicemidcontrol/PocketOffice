@@ -181,6 +181,8 @@ func load_projects(data: Array) -> void:
 	_available.clear()
 	_active.clear()
 	for d in data:
+		if not d.has("required_role"):
+			continue
 		if d.get("is_active", false) and not d.get("is_complete", false):
 			_active.append(d)
 		elif not d.get("is_active", false) and not d.get("is_complete", false):
