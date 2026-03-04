@@ -1,0 +1,144 @@
+[gd_scene load_steps=4 format=3 uid="uid://b4buildscreen01"]
+
+[ext_resource type="Script" uid="uid://depbuildscr01" path="res://scripts/ui/BuildScreen.gd" id="1_bsscript"]
+
+[sub_resource type="StyleBoxFlat" id="SBFlat_header"]
+bg_color = Color(0.047, 0.047, 0.11, 0.97)
+border_width_bottom = 2
+border_color = Color(0.18, 0.42, 0.78, 1)
+
+[sub_resource type="StyleBoxFlat" id="SBFlat_tab"]
+bg_color = Color(0.055, 0.055, 0.13, 0.95)
+border_width_bottom = 2
+border_color = Color(0.18, 0.18, 0.28, 0.6)
+
+[node name="BuildScreen" type="Control"]
+layout_mode = 2
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_bsscript")
+
+[node name="Background" type="ColorRect" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0.047, 0.047, 0.11, 1)
+
+[node name="Header" type="Panel" parent="."]
+layout_mode = 1
+anchors_preset = 10
+anchor_right = 1.0
+grow_horizontal = 2
+offset_bottom = 60.0
+theme_override_styles/panel = SubResource("SBFlat_header")
+
+[node name="HBox" type="HBoxContainer" parent="Header"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/separation = 8
+
+[node name="BackBtn" type="Button" parent="Header/HBox"]
+custom_minimum_size = Vector2(80, 0)
+layout_mode = 2
+theme_override_colors/font_color = Color(0.5, 0.7, 1, 1)
+theme_override_font_sizes/font_size = 12
+text = "< BACK"
+
+[node name="TitleLabel" type="Label" parent="Header/HBox"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_colors/font_color = Color(0.92, 0.92, 0.95, 1)
+theme_override_font_sizes/font_size = 15
+text = "BUILD"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="CashLabel" type="Label" parent="Header/HBox"]
+custom_minimum_size = Vector2(72, 0)
+layout_mode = 2
+theme_override_colors/font_color = Color(0.22, 0.9, 0.42, 1)
+theme_override_font_sizes/font_size = 14
+text = "$0"
+horizontal_alignment = 2
+vertical_alignment = 1
+
+[node name="TabBar" type="HBoxContainer" parent="."]
+layout_mode = 1
+anchor_right = 1.0
+offset_top = 60.0
+offset_bottom = 104.0
+grow_horizontal = 2
+theme_override_constants/separation = 0
+
+[node name="FacilitiesTab" type="Button" parent="TabBar"]
+layout_mode = 2
+size_flags_horizontal = 3
+custom_minimum_size = Vector2(0, 44)
+text = "FACILITIES"
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_font_sizes/font_size = 13
+theme_override_styles/normal = SubResource("SBFlat_tab")
+theme_override_styles/hover = SubResource("SBFlat_tab")
+theme_override_styles/pressed = SubResource("SBFlat_tab")
+
+[node name="CombosTab" type="Button" parent="TabBar"]
+layout_mode = 2
+size_flags_horizontal = 3
+custom_minimum_size = Vector2(0, 44)
+text = "COMBOS"
+theme_override_colors/font_color = Color(0.48, 0.48, 0.58, 1)
+theme_override_font_sizes/font_size = 13
+theme_override_styles/normal = SubResource("SBFlat_tab")
+theme_override_styles/hover = SubResource("SBFlat_tab")
+theme_override_styles/pressed = SubResource("SBFlat_tab")
+
+[node name="FacilitiesScroll" type="ScrollContainer" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+offset_left = 8.0
+offset_top = 108.0
+offset_right = -8.0
+offset_bottom = -8.0
+horizontal_scroll_mode = 0
+
+[node name="FacilitiesList" type="VBoxContainer" parent="FacilitiesScroll"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/separation = 8
+
+[node name="CombosScroll" type="ScrollContainer" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+offset_left = 8.0
+offset_top = 108.0
+offset_right = -8.0
+offset_bottom = -8.0
+horizontal_scroll_mode = 0
+visible = false
+
+[node name="CombosList" type="VBoxContainer" parent="CombosScroll"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/separation = 8
+
+[connection signal="pressed" from="Header/HBox/BackBtn" to="." method="_on_back_pressed"]
+[connection signal="pressed" from="TabBar/FacilitiesTab" to="." method="_on_facilities_tab_pressed"]
+[connection signal="pressed" from="TabBar/CombosTab" to="." method="_on_combos_tab_pressed"]

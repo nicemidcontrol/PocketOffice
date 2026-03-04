@@ -12,6 +12,7 @@ func _ready() -> void:
 	_bottom_bar.menu_requested.connect(_on_menu_requested)
 	_pause_menu.hire_requested.connect(_on_hire_requested)
 	_pause_menu.project_board_requested.connect(_on_project_board_requested)
+	_pause_menu.build_requested.connect(_on_build_requested)
 	_notif_timer.timeout.connect(_on_notif_timer_timeout)
 
 	await get_tree().process_frame
@@ -32,6 +33,9 @@ func _on_hire_requested() -> void:
 
 func _on_project_board_requested() -> void:
 	get_tree().change_scene_to_file("res://scenes/ProjectBoard.tscn")
+
+func _on_build_requested() -> void:
+	get_tree().change_scene_to_file("res://scenes/BuildScreen.tscn")
 
 func _on_project_completed(proj: Dictionary) -> void:
 	var proj_name: String = proj.get("name", "Project")
