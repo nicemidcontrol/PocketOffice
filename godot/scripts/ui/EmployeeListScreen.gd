@@ -6,7 +6,15 @@ extends Control
 var _gm: Node = null
 
 func _ready() -> void:
+	await get_tree().process_frame
 	_gm = get_node_or_null("/root/GameManager")
+	if _gm == null:
+		push_error("[EmployeeListScreen] GameManager not found.")
+		return
+	_gm.employees.employee_burnout.connect(_on_employee_burnout)
+	_build_list()
+
+func _on_employee_burnout(_emp_name: String) -> void:
 	_build_list()
 
 # ─────────────────────────────────────────
@@ -97,6 +105,24 @@ func _make_card(emp: Employee) -> PanelContainer:
 		hero_badge.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
 		name_row.add_child(hero_badge)
 
+	if emp.is_burned_out:
+		var burnout_badge: Label = Label.new()
+		burnout_badge.text = "BURNOUT"
+		burnout_badge.add_theme_color_override("font_color", Color(1.0, 0.2, 0.2, 1.0))
+		burnout_badge.add_theme_font_size_override("font_size", 9)
+		burnout_badge.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+		name_row.add_child(burnout_badge)
+	elif emp.ot_level > 0:
+		var ot_badge: Label = Label.new()
+		match emp.ot_level:
+			1: ot_badge.text = "OT"
+			2: ot_badge.text = "HEAVY OT"
+			3: ot_badge.text = "CRUNCH"
+		ot_badge.add_theme_color_override("font_color", _ot_badge_color(emp.ot_level))
+		ot_badge.add_theme_font_size_override("font_size", 9)
+		ot_badge.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+		name_row.add_child(ot_badge)
+
 	var role_badge: Label = Label.new()
 	role_badge.text = _role_str(emp.role)
 	role_badge.add_theme_color_override("font_color", _role_color(emp.role))
@@ -134,6 +160,54 @@ func _make_card(emp: Employee) -> PanelContainer:
 
 	stats_row.add_child(_make_stat_bar(float(emp.motivation), Color(1.0, 0.75, 0.1, 1.0)))
 
+	# ── Stress bar ──
+	var stress_row: HBoxContainer = HBoxContainer.new()
+	stress_row.add_theme_constant_override("separation", 6)
+	vbox.add_child(stress_row)
+
+	var stress_lbl: Label = Label.new()
+	stress_lbl.text = "Stress"
+	stress_lbl.add_theme_font_size_override("font_size", 10)
+	stress_lbl.add_theme_color_override("font_color", Color(0.52, 0.52, 0.62, 1.0))
+	stress_lbl.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+	stress_row.add_child(stress_lbl)
+
+	var stress_bar: ProgressBar = ProgressBar.new()
+	stress_bar.min_value = 0
+	stress_bar.max_value = 100
+	stress_bar.value = emp.stress
+	stress_bar.show_percentage = false
+	stress_bar.custom_minimum_size = Vector2(0, 10)
+	stress_bar.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	stress_bar.size_flags_vertical   = Control.SIZE_SHRINK_CENTER
+	var sfill: StyleBoxFlat = StyleBoxFlat.new()
+	if emp.stress >= 70:
+		sfill.bg_color = Color(0.9, 0.2, 0.2, 1.0)
+	elif emp.stress >= 40:
+		sfill.bg_color = Color(0.9, 0.7, 0.1, 1.0)
+	else:
+		sfill.bg_color = Color(0.2, 0.8, 0.3, 1.0)
+	sfill.corner_radius_top_left     = 3
+	sfill.corner_radius_top_right    = 3
+	sfill.corner_radius_bottom_right = 3
+	sfill.corner_radius_bottom_left  = 3
+	var sbg: StyleBoxFlat = StyleBoxFlat.new()
+	sbg.bg_color = Color(0.08, 0.08, 0.18, 1.0)
+	sbg.corner_radius_top_left     = 3
+	sbg.corner_radius_top_right    = 3
+	sbg.corner_radius_bottom_right = 3
+	sbg.corner_radius_bottom_left  = 3
+	stress_bar.add_theme_stylebox_override("fill", sfill)
+	stress_bar.add_theme_stylebox_override("background", sbg)
+	stress_row.add_child(stress_bar)
+
+	var stress_val: Label = Label.new()
+	stress_val.text = str(emp.stress)
+	stress_val.add_theme_font_size_override("font_size", 10)
+	stress_val.add_theme_color_override("font_color", Color(0.52, 0.52, 0.62, 1.0))
+	stress_val.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+	stress_row.add_child(stress_val)
+
 	# ── Salary ──
 	var salary_label: Label = Label.new()
 	salary_label.text = "$%d / mo" % emp.monthly_salary
@@ -146,6 +220,13 @@ func _make_card(emp: Employee) -> PanelContainer:
 # ─────────────────────────────────────────
 #  HELPERS
 # ─────────────────────────────────────────
+func _ot_badge_color(level: int) -> Color:
+	match level:
+		1: return Color(1.0, 0.9, 0.2, 1.0)
+		2: return Color(1.0, 0.55, 0.1, 1.0)
+		3: return Color(1.0, 0.2, 0.2, 1.0)
+		_: return Color(0.5, 0.51, 0.62, 1.0)
+
 func _make_stat_bar(value: float, fill_color: Color) -> ProgressBar:
 	var bar: ProgressBar = ProgressBar.new()
 	bar.value = value

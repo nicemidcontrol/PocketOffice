@@ -89,6 +89,7 @@ func _init_sub_managers() -> void:
 	# Connect event popup to UI (UI listens to this signal)
 	events.event_triggered.connect(_on_event_triggered)
 	economy.went_bankrupt.connect(_on_bankrupt)
+	employees.employee_burnout.connect(_on_employee_burnout)
 
 # ─────────────────────────────────────────
 #  NEW GAME
@@ -214,8 +215,11 @@ func _on_event_triggered(event_data: Dictionary) -> void:
 	print("[GameManager] Event triggered: %s" % event_data["title"])
 
 func _on_bankrupt() -> void:
-	broadcast("💀 BANKRUPT! Game Over.")
+	broadcast("BANKRUPT! Game Over.")
 	is_paused = true
+
+func _on_employee_burnout(emp_name: String) -> void:
+	broadcast("[WARNING] %s has burned out! Reduce their workload." % emp_name)
 
 # ─────────────────────────────────────────
 #  SAVE / LOAD

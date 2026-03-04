@@ -144,14 +144,51 @@ func _make_active_card(proj: Dictionary) -> Control:
 		vbox.add_child(no_emp)
 	else:
 		var names: Array = []
+		var assigned_emps: Array = []
 		for emp in _gm.employees.get_hired_employees():
 			if emp.id in ids:
 				names.append(emp.first_name + " " + emp.last_name)
+				assigned_emps.append(emp)
 		var emp_lbl: Label = Label.new()
 		emp_lbl.text = "Team: " + ", ".join(names)
 		emp_lbl.add_theme_color_override("font_color", Color(0.22, 0.9, 0.42))
 		emp_lbl.add_theme_font_size_override("font_size", 10)
 		vbox.add_child(emp_lbl)
+
+		var ot_sep: HSeparator = HSeparator.new()
+		vbox.add_child(ot_sep)
+
+		var ot_hdr: Label = Label.new()
+		ot_hdr.text = "OT:"
+		ot_hdr.add_theme_font_size_override("font_size", 10)
+		ot_hdr.add_theme_color_override("font_color", Color(0.6, 0.6, 0.7))
+		vbox.add_child(ot_hdr)
+
+		for ot_emp in assigned_emps:
+			var ot_row: HBoxContainer = HBoxContainer.new()
+			ot_row.add_theme_constant_override("separation", 6)
+			vbox.add_child(ot_row)
+
+			var n_lbl: Label = Label.new()
+			n_lbl.text = ot_emp.first_name
+			n_lbl.add_theme_font_size_override("font_size", 10)
+			n_lbl.add_theme_color_override("font_color", Color(0.7, 0.71, 0.82))
+			n_lbl.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+			ot_row.add_child(n_lbl)
+
+			var ot_col: Color = _ot_color(ot_emp.ot_level)
+			var border_col: Color = Color(ot_col.r, ot_col.g, ot_col.b, 0.5)
+			var ot_btn: Button = Button.new()
+			ot_btn.text = _ot_label(ot_emp.ot_level)
+			ot_btn.add_theme_font_size_override("font_size", 10)
+			ot_btn.add_theme_color_override("font_color", ot_col)
+			ot_btn.add_theme_stylebox_override("normal",  _btn_style(Color(0.06, 0.06, 0.14), border_col))
+			ot_btn.add_theme_stylebox_override("hover",   _btn_style(Color(0.08, 0.08, 0.18), border_col))
+			ot_btn.add_theme_stylebox_override("pressed", _btn_style(Color(0.04, 0.04, 0.10), border_col))
+			ot_btn.custom_minimum_size = Vector2(110, 26)
+			var eid: String = ot_emp.id
+			ot_btn.pressed.connect(func() -> void: _cycle_ot(eid))
+			ot_row.add_child(ot_btn)
 
 	var assign_btn: Button = Button.new()
 	assign_btn.text = "ASSIGN"
@@ -282,6 +319,30 @@ func _btn_style(bg: Color, border: Color) -> StyleBoxFlat:
 	s.content_margin_right  = 8.0
 	s.content_margin_bottom = 4.0
 	return s
+
+# ------------------------------------------
+#  OT HELPERS
+# ------------------------------------------
+func _ot_label(level: int) -> String:
+	match level:
+		1: return "Light OT +2h"
+		2: return "Heavy OT +4h"
+		3: return "CRUNCH +8h"
+		_: return "No OT"
+
+func _ot_color(level: int) -> Color:
+	match level:
+		1: return Color(1.0, 0.9, 0.2)
+		2: return Color(1.0, 0.55, 0.1)
+		3: return Color(1.0, 0.2, 0.2)
+		_: return Color(0.5, 0.51, 0.62)
+
+func _cycle_ot(emp_id: String) -> void:
+	for emp in _gm.employees.get_hired_employees():
+		if emp.id == emp_id:
+			emp.ot_level = (emp.ot_level + 1) % 4
+			_refresh_board()
+			return
 
 # ------------------------------------------
 #  ROLE HELPERS

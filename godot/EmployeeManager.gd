@@ -6,6 +6,15 @@ extends Node
 signal employee_hired(employee: Employee)
 signal employee_fired(employee: Employee)
 signal hero_unlocked(hero_name: String)
+signal employee_burnout(employee_name: String)
+
+# ─────────────────────────────────────────
+#  OT CONSTANTS
+# ─────────────────────────────────────────
+const OT_NONE: int   = 0
+const OT_LIGHT: int  = 1
+const OT_HEAVY: int  = 2
+const OT_CRUNCH: int = 3
 
 # ─────────────────────────────────────────
 #  HERO TEMPLATES  (id, role int, personality int)
@@ -266,6 +275,8 @@ func create_hero_employee(template: Dictionary) -> Employee:
 	emp.experience_points = 0
 	emp.is_hired = false
 	emp.is_burned_out = false
+	emp.ot_level = 0
+	emp.stress = 0
 	emp.current_project_id = ""
 	emp.is_assigned_to_project = false
 	return emp
@@ -277,10 +288,32 @@ func tick_motivation() -> void:
 	for emp in _all_employees:
 		if not emp.is_hired:
 			continue
+		var was_burnout: bool = emp.is_burned_out
 		if emp.is_burned_out:
-			emp.adjust_motivation(2)   # slow recovery
+			if emp.ot_level == 0:
+				emp.adjust_motivation(5)
+				emp.stress = clampi(emp.stress - 5, 0, 100)
+			else:
+				emp.adjust_motivation(-5)
+				emp.stress = clampi(emp.stress + 5, 0, 100)
+		elif emp.ot_level > 0:
+			var mot_cost: int = 0
+			match emp.ot_level:
+				OT_LIGHT:  mot_cost = 5
+				OT_HEAVY:  mot_cost = 15
+				OT_CRUNCH: mot_cost = 30
+			emp.adjust_motivation(-mot_cost)
+			emp.stress = clampi(emp.stress + emp.ot_level * 10, 0, 100)
+			if emp.stress >= 90:
+				emp.adjust_motivation(-20)
 		elif emp.personality == Employee.Personality.WORKAHOLIC:
-			emp.adjust_motivation(-1)  # overwork decay
+			emp.adjust_motivation(-1)
+			emp.stress = clampi(emp.stress - 5, 0, 100)
+		else:
+			emp.adjust_motivation(3)
+			emp.stress = clampi(emp.stress - 10, 0, 100)
+		if emp.is_burned_out and not was_burnout:
+			employee_burnout.emit(emp.full_name())
 
 # ─────────────────────────────────────────
 #  SAVE / LOAD
