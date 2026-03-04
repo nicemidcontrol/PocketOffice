@@ -23,6 +23,7 @@ SaveSystem="*res://SaveSystem.gd"
 ClockManager="*res://ClockManager.gd"
 GameManager="*res://GameManager.gd"
 EventManager="*res://scripts/EventManager.gd"
+FacilityManager="*res://scripts/FacilityManager.gd"
 
 [display]
 
