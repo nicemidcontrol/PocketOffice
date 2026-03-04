@@ -1,15 +1,143 @@
 extends Node
 
 # ─────────────────────────────────────────
-#  SIGNALS  (replaces C# static events)
+#  SIGNALS
 # ─────────────────────────────────────────
 signal employee_hired(employee: Employee)
 signal employee_fired(employee: Employee)
+signal hero_unlocked(hero_name: String)
+
+# ─────────────────────────────────────────
+#  HERO TEMPLATES  (id, role int, personality int)
+#  Role:        DEVELOPER=0 DESIGNER=1 MARKETER=2 HR_SPECIALIST=3
+#               ACCOUNTANT=4 MANAGER=5 INTERN=6
+#  Personality: NORMAL=0 WORKAHOLIC=1 LAZY=2 GOSSIP=3
+#               PERFECTIONIST=4 TEAM_PLAYER=5 LONE_STAR=6
+# ─────────────────────────────────────────
+const _HERO_TEMPLATES: Array = [
+	{
+		"id": "thoksin_s",
+		"first_name": "Thoksin",
+		"last_name": "S.",
+		"role": 5,
+		"personality": 3,
+		"personality_label": "Brown-noser",
+		"skill": 85,
+		"motivation": 80,
+		"salary": 8500,
+		"description": "Former executive with controversial methods but undeniable results.",
+		"unlock_condition": "research_government",
+		"unlock_hint": "Unlock via Corporate > Research: Government Relations"
+	},
+	{
+		"id": "prayui_c",
+		"first_name": "Prayui",
+		"last_name": "C.",
+		"role": 5,
+		"personality": 4,
+		"personality_label": "Perfectionist",
+		"skill": 80,
+		"motivation": 75,
+		"salary": 9000,
+		"description": "Military-trained manager. Everything must be orderly. No exceptions.",
+		"unlock_condition": "special_event",
+		"unlock_hint": "May appear during a special office event"
+	},
+	{
+		"id": "peta_l",
+		"first_name": "Peta",
+		"last_name": "L.",
+		"role": 5,
+		"personality": 5,
+		"personality_label": "Team Player",
+		"skill": 78,
+		"motivation": 90,
+		"salary": 7500,
+		"description": "Young progressive manager loved by the team but feared by old guard.",
+		"unlock_condition": "donor_unlock",
+		"unlock_hint": "Win a Government Donor to unlock"
+	},
+	{
+		"id": "burapol_k",
+		"first_name": "Burapol",
+		"last_name": "K.",
+		"role": 6,
+		"personality": 1,
+		"personality_label": "Workaholic",
+		"skill": 90,
+		"motivation": 95,
+		"salary": 6000,
+		"description": "World-class discipline. Will outwork everyone. Literally everyone.",
+		"unlock_condition": "special_event",
+		"unlock_hint": "May appear during a special office event"
+	},
+	{
+		"id": "somrak_p",
+		"first_name": "Somrak",
+		"last_name": "P.",
+		"role": 5,
+		"personality": 4,
+		"personality_label": "Perfectionist",
+		"skill": 88,
+		"motivation": 85,
+		"salary": 8000,
+		"description": "Olympic-level dedication. Trains the team like champions.",
+		"unlock_condition": "special_event",
+		"unlock_hint": "May appear during a special office event"
+	},
+	{
+		"id": "liza_m",
+		"first_name": "Liza",
+		"last_name": "M.",
+		"role": 1,
+		"personality": 1,
+		"personality_label": "Workaholic",
+		"skill": 92,
+		"motivation": 88,
+		"salary": 9500,
+		"description": "Chart-topping creative. Her designs go viral every time.",
+		"unlock_condition": "donor_entertainment",
+		"unlock_hint": "Win an Entertainment Donor to unlock"
+	},
+	{
+		"id": "derek_anan",
+		"first_name": "Derek Anan",
+		"last_name": "Boonphun",
+		"role": 5,
+		"personality": 6,
+		"personality_label": "Legendary",
+		"skill": 100,
+		"motivation": 100,
+		"salary": 15000,
+		"description": "The one who built everything from nothing. A true legend. Some say he never sleeps.",
+		"unlock_condition": "ultimate",
+		"unlock_hint": "???"
+	}
+]
 
 # ─────────────────────────────────────────
 #  STATE
 # ─────────────────────────────────────────
 var _all_employees: Array[Employee] = []
+var hero_roster: Array = []
+var unlocked_heroes: Array[String] = []
+var total_hired_ever: int = 0
+
+# ─────────────────────────────────────────
+#  LIFECYCLE
+# ─────────────────────────────────────────
+func _ready() -> void:
+	for template in _HERO_TEMPLATES:
+		hero_roster.append(template.duplicate())
+	var cm: Node = get_node_or_null("/root/ClockManager")
+	if cm != null:
+		cm.work_day_started.connect(_on_work_day_started)
+
+func _on_work_day_started() -> void:
+	var gm: Node = get_node_or_null("/root/GameManager")
+	if gm == null:
+		return
+	check_hero_unlocks(gm)
 
 # ─────────────────────────────────────────
 #  COMPUTED PROPERTIES
@@ -40,6 +168,7 @@ func hire(employee: Employee) -> bool:
 	if not _all_employees.has(employee):
 		_all_employees.append(employee)
 	employee.is_hired = true
+	total_hired_ever += 1
 	employee_hired.emit(employee)
 	print("[EmployeeManager] Hired: %s" % employee.full_name())
 	return true
@@ -64,6 +193,82 @@ func get_all_employees() -> Array[Employee]:
 
 func get_hired_employees() -> Array[Employee]:
 	return _all_employees.filter(func(e): return e.is_hired)
+
+# ─────────────────────────────────────────
+#  HERO SYSTEM
+# ─────────────────────────────────────────
+func check_hero_unlocks(gm: Node) -> void:
+	for template in hero_roster:
+		var hero_id: String = template["id"]
+		if unlocked_heroes.has(hero_id):
+			continue
+		match template["unlock_condition"]:
+			"ultimate":
+				var year: int = gm.company_data.get("current_year", 2024)
+				var cp: int = gm.corp_points
+				if total_hired_ever >= 15 and year >= 2026 and cp >= 500:
+					_unlock_hero(hero_id)
+
+func _unlock_hero(hero_id: String) -> void:
+	unlocked_heroes.append(hero_id)
+	for template in hero_roster:
+		if template["id"] == hero_id:
+			var name: String = template["first_name"] + " " + template["last_name"]
+			hero_unlocked.emit(name)
+			return
+
+func trigger_hero_unlock(unlock_condition: String) -> void:
+	for template in hero_roster:
+		var hero_id: String = template["id"]
+		if template["unlock_condition"] == unlock_condition and not unlocked_heroes.has(hero_id):
+			_unlock_hero(hero_id)
+
+func get_available_heroes() -> Array:
+	var result: Array = []
+	for template in hero_roster:
+		var hero_id: String = template["id"]
+		if not unlocked_heroes.has(hero_id):
+			continue
+		var already_hired: bool = false
+		for emp in _all_employees:
+			if emp.id == hero_id and emp.is_hired:
+				already_hired = true
+				break
+		if not already_hired:
+			result.append(template)
+	return result
+
+func is_hero_employee(emp_id: String) -> bool:
+	for h in hero_roster:
+		if h["id"] == emp_id:
+			return true
+	return false
+
+func get_hero_template(emp_id: String) -> Dictionary:
+	for h in hero_roster:
+		if h["id"] == emp_id:
+			return h
+	return {}
+
+func create_hero_employee(template: Dictionary) -> Employee:
+	var emp: Employee = Employee.new()
+	emp.id = template["id"]
+	emp.first_name = template["first_name"]
+	emp.last_name = template["last_name"]
+	emp.role = int(template["role"])
+	emp.personality = int(template["personality"])
+	emp.skill = int(template["skill"])
+	emp.motivation = int(template["motivation"])
+	emp.monthly_salary = int(template["salary"])
+	emp.teamwork = 70
+	emp.creativity = 70
+	emp.level = 1
+	emp.experience_points = 0
+	emp.is_hired = false
+	emp.is_burned_out = false
+	emp.current_project_id = ""
+	emp.is_assigned_to_project = false
+	return emp
 
 # ─────────────────────────────────────────
 #  DAILY TICK  (called by GameManager)

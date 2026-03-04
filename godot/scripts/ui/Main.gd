@@ -11,6 +11,7 @@ func _ready() -> void:
 	_bottom_bar.menu_requested.connect(_on_menu_requested)
 	_pause_menu.hire_requested.connect(_on_hire_requested)
 	_pause_menu.project_board_requested.connect(_on_project_board_requested)
+	_pause_menu.employee_list_requested.connect(_on_employee_list_requested)
 	_notif_timer.timeout.connect(_on_notif_timer_timeout)
 
 	await get_tree().process_frame
@@ -19,6 +20,7 @@ func _ready() -> void:
 		gm.projects.project_completed.connect(_on_project_completed)
 		gm.corp_points_changed.connect(_on_cp_changed)
 		_cp_value.text = str(gm.corp_points)
+		gm.employees.hero_unlocked.connect(_on_hero_unlocked)
 
 func _on_menu_requested() -> void:
 	_pause_menu.open()
@@ -28,6 +30,9 @@ func _on_hire_requested() -> void:
 
 func _on_project_board_requested() -> void:
 	get_tree().change_scene_to_file("res://scenes/ProjectBoard.tscn")
+
+func _on_employee_list_requested() -> void:
+	get_tree().change_scene_to_file("res://scenes/EmployeeListScreen.tscn")
 
 func _on_project_completed(proj: Dictionary) -> void:
 	var proj_name: String = proj.get("name", "Project")
@@ -39,6 +44,11 @@ func _on_project_completed(proj: Dictionary) -> void:
 
 func _on_notif_timer_timeout() -> void:
 	_notif_panel.visible = false
+
+func _on_hero_unlocked(_hero_name: String) -> void:
+	_notif_label.text = "A legendary employee is now available!\nCheck HR > Recruit."
+	_notif_panel.visible = true
+	_notif_timer.start()
 
 func _on_cp_changed(new_val: int) -> void:
 	_cp_value.text = str(new_val)
