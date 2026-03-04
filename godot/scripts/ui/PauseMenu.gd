@@ -3,6 +3,7 @@ extends CanvasLayer
 signal hire_requested
 signal project_board_requested
 signal employee_list_requested
+signal build_requested
 
 # ─────────────────────────────────────────
 #  NODE REFS
@@ -80,7 +81,8 @@ func _on_overlay_input(event: InputEvent) -> void:
 #  MENU ITEM HANDLERS (wired in .tscn)
 # ─────────────────────────────────────────
 func _on_build_pressed() -> void:
-	_show_toast("Coming Soon")
+	_close()
+	build_requested.emit()
 
 func _on_hr_pressed() -> void:
 	_toggle_sub(_hr_sub)
@@ -117,4 +119,3 @@ func _on_menu_save_pressed() -> void:
 func _on_quit_pressed() -> void:
 	get_tree().paused = false
 	get_tree().quit()
-
