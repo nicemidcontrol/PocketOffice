@@ -107,9 +107,10 @@ func _on_work_day_started() -> void:
 		return
 	var to_complete: Array = []
 	for proj in _active:
-		var base: float = 1.0 / float(proj["duration_days"])
-		var has_match: bool = _has_role_match(proj, gm)
-		var daily: float = base * (1.5 if has_match else 1.0)
+		var base: float      = 1.0 / float(proj["duration_days"])
+		var role_mult: float = 1.5 if _has_role_match(proj, gm) else 1.0
+		var ot_mult: float   = _get_ot_multiplier(proj, gm)
+		var daily: float     = base * role_mult * ot_mult
 		proj["progress"] = minf(1.0, proj["progress"] + daily)
 		if proj["progress"] >= 1.0:
 			to_complete.append(proj["id"])
@@ -118,6 +119,28 @@ func _on_work_day_started() -> void:
 		_complete_by_id(pid, gm)
 	if any_completed:
 		projects_updated.emit()
+
+func _get_ot_multiplier(proj: Dictionary, gm: Node) -> float:
+	var ids: Array = proj["assigned_employee_ids"]
+	if ids.is_empty():
+		return 1.0
+	var total_mult: float = 0.0
+	var count: int = 0
+	for emp in gm.employees.get_hired_employees():
+		if emp.id not in ids:
+			continue
+		count += 1
+		if emp.is_burned_out:
+			total_mult += 0.2
+		else:
+			match emp.ot_level:
+				1: total_mult += 1.3
+				2: total_mult += 1.5
+				3: total_mult += 1.7
+				_: total_mult += 1.0
+	if count == 0:
+		return 1.0
+	return total_mult / float(count)
 
 func _has_role_match(proj: Dictionary, gm: Node) -> bool:
 	var ids: Array = proj["assigned_employee_ids"]

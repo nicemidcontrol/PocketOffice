@@ -23,6 +23,7 @@ func _ready() -> void:
 		gm.corp_points_changed.connect(_on_cp_changed)
 		_cp_value.text = str(gm.corp_points)
 		gm.employees.hero_unlocked.connect(_on_hero_unlocked)
+		gm.employees.employee_burnout.connect(_on_employee_burnout)
 	var em: Node = get_node_or_null("/root/EventManager")
 	if em != null:
 		em.event_fired.connect(_on_event_fired)
@@ -52,6 +53,26 @@ func _on_project_completed(proj: Dictionary) -> void:
 
 func _on_notif_timer_timeout() -> void:
 	_notif_panel.visible = false
+	_notif_label.remove_theme_color_override("font_color")
+	_notif_panel.remove_theme_stylebox_override("panel")
+
+func _on_employee_burnout(emp_name: String) -> void:
+	_notif_label.text = emp_name + " is burned out!\nRemove OT immediately."
+	var red_style: StyleBoxFlat = StyleBoxFlat.new()
+	red_style.bg_color = Color(0.15, 0.04, 0.04, 0.97)
+	red_style.border_width_left   = 2
+	red_style.border_width_top    = 2
+	red_style.border_width_right  = 2
+	red_style.border_width_bottom = 2
+	red_style.border_color = Color(0.9, 0.2, 0.2, 1.0)
+	red_style.corner_radius_top_left     = 8
+	red_style.corner_radius_top_right    = 8
+	red_style.corner_radius_bottom_right = 8
+	red_style.corner_radius_bottom_left  = 8
+	_notif_panel.add_theme_stylebox_override("panel", red_style)
+	_notif_label.add_theme_color_override("font_color", Color(1.0, 0.35, 0.35, 1.0))
+	_notif_panel.visible = true
+	_notif_timer.start()
 
 func _on_hero_unlocked(_hero_name: String) -> void:
 	_notif_label.text = "A legendary employee is now available!\nCheck HR > Recruit."

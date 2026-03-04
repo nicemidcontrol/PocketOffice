@@ -9,6 +9,7 @@ extends Node
 # ------------------------------------------
 signal work_day_started
 signal work_day_ended
+signal ot_day_ended
 signal month_changed(month: int, year: int)
 signal time_updated(hour: int, minute: int)
 

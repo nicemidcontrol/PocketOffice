@@ -65,6 +65,8 @@ func experience_to_next_level() -> int:
 @export var is_assigned_to_project: bool = false
 @export var current_project_id: String = ""
 @export var is_burned_out: bool = false
+@export var ot_level: int = 0
+@export var stress: int = 0
 
 # ─────────────────────────────────────────
 #  CONSTRUCTOR
@@ -80,6 +82,8 @@ static func create(p_first: String, p_last: String, p_role: Role, p_personality:
 	emp.experience_points = 0
 	emp.is_hired = false
 	emp.is_burned_out = false
+	emp.ot_level = 0
+	emp.stress   = 0
 
 	# Randomise base stats
 	var rng := RandomNumberGenerator.new()
@@ -185,7 +189,8 @@ func to_dict() -> Dictionary:
 		"monthly_salary": monthly_salary,
 		"is_hired": is_hired, "is_burned_out": is_burned_out,
 		"is_assigned_to_project": is_assigned_to_project,
-		"current_project_id": current_project_id
+		"current_project_id": current_project_id,
+		"ot_level": ot_level, "stress": stress
 	}
 
 static func from_dict(d: Dictionary) -> Employee:
@@ -206,4 +211,6 @@ static func from_dict(d: Dictionary) -> Employee:
 	emp.is_burned_out          = d.get("is_burned_out", false)
 	emp.is_assigned_to_project = d.get("is_assigned_to_project", false)
 	emp.current_project_id     = d.get("current_project_id", "")
+	emp.ot_level               = d.get("ot_level", 0)
+	emp.stress                 = d.get("stress", 0)
 	return emp
