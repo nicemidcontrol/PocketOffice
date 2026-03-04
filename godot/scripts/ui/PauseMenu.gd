@@ -2,6 +2,7 @@ extends CanvasLayer
 
 signal hire_requested
 signal project_board_requested
+signal employee_list_requested
 signal build_requested
 
 # ─────────────────────────────────────────
@@ -90,6 +91,10 @@ func _on_recruit_pressed() -> void:
 	_close()
 	hire_requested.emit()
 
+func _on_employee_list_pressed() -> void:
+	_close()
+	employee_list_requested.emit()
+
 func _on_coming_soon() -> void:
 	_show_toast("Coming Soon")
 
@@ -114,4 +119,3 @@ func _on_menu_save_pressed() -> void:
 func _on_quit_pressed() -> void:
 	get_tree().paused = false
 	get_tree().quit()
-

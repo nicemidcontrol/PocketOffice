@@ -1,0 +1,88 @@
+[gd_scene load_steps=3 format=3 uid="uid://b5emplist01"]
+
+[ext_resource type="Script" uid="uid://depemplist01" path="res://scripts/ui/EmployeeListScreen.gd" id="1_elscript"]
+
+[sub_resource type="StyleBoxFlat" id="SBFlat_header"]
+bg_color = Color(0.047, 0.047, 0.11, 0.97)
+border_width_bottom = 2
+border_color = Color(0.18, 0.42, 0.78, 1)
+
+[node name="EmployeeListScreen" type="Control"]
+layout_mode = 2
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_elscript")
+
+[node name="Background" type="ColorRect" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0.047, 0.047, 0.11, 1)
+
+[node name="Header" type="Panel" parent="."]
+layout_mode = 1
+anchors_preset = 10
+anchor_right = 1.0
+grow_horizontal = 2
+offset_bottom = 60.0
+theme_override_styles/panel = SubResource("SBFlat_header")
+
+[node name="HBox" type="HBoxContainer" parent="Header"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/separation = 8
+
+[node name="BackBtn" type="Button" parent="Header/HBox"]
+custom_minimum_size = Vector2(80, 0)
+layout_mode = 2
+theme_override_colors/font_color = Color(0.5, 0.7, 1, 1)
+theme_override_font_sizes/font_size = 12
+text = "< BACK"
+
+[node name="TitleLabel" type="Label" parent="Header/HBox"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_colors/font_color = Color(0.92, 0.92, 0.95, 1)
+theme_override_font_sizes/font_size = 15
+text = "EMPLOYEES"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="CountLabel" type="Label" parent="Header/HBox"]
+custom_minimum_size = Vector2(72, 0)
+layout_mode = 2
+theme_override_colors/font_color = Color(0.52, 0.52, 0.62, 1)
+theme_override_font_sizes/font_size = 13
+text = "0 / 20"
+horizontal_alignment = 2
+vertical_alignment = 1
+
+[node name="Body" type="ScrollContainer" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+offset_left = 8.0
+offset_top = 64.0
+offset_right = -8.0
+offset_bottom = -8.0
+horizontal_scroll_mode = 0
+
+[node name="CardList" type="VBoxContainer" parent="Body"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/separation = 8
+
+[connection signal="pressed" from="Header/HBox/BackBtn" to="." method="_on_back_pressed"]

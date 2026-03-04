@@ -5,8 +5,9 @@ const REFRESH_COST: int = 500
 # ─────────────────────────────────────────
 #  HEADER / FOOTER
 # ─────────────────────────────────────────
-@onready var _cash_label: Label   = $Header/HBox/CashLabel
-@onready var _refresh_btn: Button = $Footer/RefreshButton
+@onready var _cash_label:  Label          = $Header/HBox/CashLabel
+@onready var _refresh_btn: Button         = $Footer/RefreshButton
+@onready var _body_vbox:   VBoxContainer  = $Body/VBox
 
 # ─────────────────────────────────────────
 #  CARD 0
@@ -44,9 +45,10 @@ const REFRESH_COST: int = 500
 # ─────────────────────────────────────────
 #  STATE
 # ─────────────────────────────────────────
-var _gm: Node       = null
-var _em: GDScript   = null
+var _gm: Node          = null
+var _em: GDScript      = null
 var _candidates: Array = []
+var _hero_cards: Array = []
 
 # Indexed arrays built from @onready refs — used by populate_candidates()
 var _name_labels:   Array[Label]       = []
@@ -97,6 +99,110 @@ func populate_candidates() -> void:
 		_candidates.append(_em.generate_random_candidate())
 	for i: int in range(3):
 		_fill_card(i, _candidates[i])
+	_add_hero_candidates()
+
+func _add_hero_candidates() -> void:
+	for card in _hero_cards:
+		if is_instance_valid(card):
+			card.queue_free()
+	_hero_cards.clear()
+	if _gm == null:
+		return
+	var heroes: Array = _gm.employees.get_available_heroes()
+	for template in heroes:
+		var hero_emp: Object = _gm.employees.create_hero_employee(template)
+		var card: PanelContainer = _make_hero_card(hero_emp)
+		_hero_cards.append(card)
+		_body_vbox.add_child(card)
+
+func _make_hero_card(hero_emp: Object) -> PanelContainer:
+	var panel: PanelContainer = PanelContainer.new()
+	panel.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+
+	var card_style: StyleBoxFlat = StyleBoxFlat.new()
+	card_style.bg_color = Color(0.10, 0.09, 0.05, 1.0)
+	card_style.border_width_left = 2
+	card_style.border_width_top = 2
+	card_style.border_width_right = 2
+	card_style.border_width_bottom = 2
+	card_style.border_color = Color(1.0, 0.78, 0.15, 1.0)
+	card_style.corner_radius_top_left = 6
+	card_style.corner_radius_top_right = 6
+	card_style.corner_radius_bottom_right = 6
+	card_style.corner_radius_bottom_left = 6
+	panel.add_theme_stylebox_override("panel", card_style)
+
+	var margin: MarginContainer = MarginContainer.new()
+	margin.add_theme_constant_override("margin_left", 12)
+	margin.add_theme_constant_override("margin_top", 10)
+	margin.add_theme_constant_override("margin_right", 12)
+	margin.add_theme_constant_override("margin_bottom", 10)
+	panel.add_child(margin)
+
+	var vbox: VBoxContainer = VBoxContainer.new()
+	vbox.add_theme_constant_override("separation", 4)
+	margin.add_child(vbox)
+
+	var top_row: HBoxContainer = HBoxContainer.new()
+	top_row.add_theme_constant_override("separation", 6)
+	vbox.add_child(top_row)
+
+	var name_lbl: Label = Label.new()
+	name_lbl.text = hero_emp.full_name()
+	name_lbl.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	name_lbl.add_theme_color_override("font_color", Color(1.0, 1.0, 1.0, 1.0))
+	name_lbl.add_theme_font_size_override("font_size", 14)
+	top_row.add_child(name_lbl)
+
+	var hero_tag: Label = Label.new()
+	hero_tag.text = "HERO"
+	hero_tag.add_theme_color_override("font_color", Color(1.0, 0.78, 0.15, 1.0))
+	hero_tag.add_theme_font_size_override("font_size", 11)
+	hero_tag.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+	top_row.add_child(hero_tag)
+
+	var role_lbl: Label = Label.new()
+	role_lbl.text = _role_str(hero_emp.role)
+	role_lbl.modulate = _role_color(hero_emp.role)
+	role_lbl.add_theme_font_size_override("font_size", 12)
+	role_lbl.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+	top_row.add_child(role_lbl)
+
+	var skill_lbl: Label = Label.new()
+	skill_lbl.text = "SKL %d  MOT %d" % [hero_emp.skill, hero_emp.motivation]
+	skill_lbl.add_theme_color_override("font_color", Color(0.60, 0.60, 0.70, 1.0))
+	skill_lbl.add_theme_font_size_override("font_size", 11)
+	vbox.add_child(skill_lbl)
+
+	var bot_row: HBoxContainer = HBoxContainer.new()
+	bot_row.add_theme_constant_override("separation", 8)
+	vbox.add_child(bot_row)
+
+	var salary_lbl: Label = Label.new()
+	salary_lbl.text = "$%s / mo" % _fmt(hero_emp.monthly_salary)
+	salary_lbl.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	salary_lbl.add_theme_color_override("font_color", Color(0.80, 0.80, 0.90, 1.0))
+	salary_lbl.add_theme_font_size_override("font_size", 12)
+	salary_lbl.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+	bot_row.add_child(salary_lbl)
+
+	var hire_btn: Button = Button.new()
+	hire_btn.text = "HIRE"
+	hire_btn.add_theme_color_override("font_color", Color(1.0, 0.78, 0.15, 1.0))
+	hire_btn.add_theme_font_size_override("font_size", 12)
+	hire_btn.custom_minimum_size = Vector2(72, 34)
+	bot_row.add_child(hire_btn)
+
+	hire_btn.pressed.connect(func() -> void:
+		if _gm == null:
+			return
+		_gm.employees.hire(hero_emp)
+		_gm.broadcast("%s has joined the team!" % hero_emp.full_name())
+		hire_btn.text = "HIRED"
+		hire_btn.disabled = true
+	)
+
+	return panel
 
 func _fill_card(idx: int, emp: Object) -> void:
 	_name_labels[idx].text     = emp.full_name()

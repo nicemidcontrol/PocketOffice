@@ -388,7 +388,7 @@ theme_override_font_sizes/font_size = 16
 [connection signal="pressed" from="Root/ButtonsContainer/CorporateSub/CorporateSubVBox/AssignBtn" to="." method="_on_assign_pressed"]
 [connection signal="pressed" from="Root/ButtonsContainer/CorporateSub/CorporateSubVBox/InfoBtn" to="." method="_on_coming_soon"]
 [connection signal="pressed" from="Root/ButtonsContainer/ListsBtn" to="." method="_on_lists_pressed"]
-[connection signal="pressed" from="Root/ButtonsContainer/ListsSub/ListsSubVBox/EmployeeBtn" to="." method="_on_coming_soon"]
+[connection signal="pressed" from="Root/ButtonsContainer/ListsSub/ListsSubVBox/EmployeeBtn" to="." method="_on_employee_list_pressed"]
 [connection signal="pressed" from="Root/ButtonsContainer/ListsSub/ListsSubVBox/ComboBtn" to="." method="_on_coming_soon"]
 [connection signal="pressed" from="Root/ButtonsContainer/ListsSub/ListsSubVBox/RevenueBtn" to="." method="_on_coming_soon"]
 [connection signal="pressed" from="Root/ButtonsContainer/SystemBtn" to="." method="_on_system_pressed"]
