@@ -126,7 +126,6 @@ layout_mode = 2
 size_flags_horizontal = 3
 size_flags_vertical = 4
 alignment = 1
-theme_override_constants/separation = 1
 
 [node name="TimeHeader" type="Label" parent="TopBar/Margin/HBox/ClockSection"]
 layout_mode = 2
@@ -148,13 +147,6 @@ text = "D1"
 horizontal_alignment = 1
 theme_override_colors/font_color = Color(0.5, 0.51, 0.62, 1.0)
 theme_override_font_sizes/font_size = 9
-
-[node name="CpLabel" type="Label" parent="TopBar/Margin/HBox/ClockSection"]
-layout_mode = 2
-text = "[CP] 0"
-horizontal_alignment = 1
-theme_override_colors/font_color = Color(1.0, 0.82, 0.1, 1.0)
-theme_override_font_sizes/font_size = 8
 
 [node name="MessagePanel" type="Panel" parent="."]
 anchors_preset = 12

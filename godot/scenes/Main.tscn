@@ -1,4 +1,4 @@
-[gd_scene load_steps=7 format=3 uid="uid://main390x844po"]
+[gd_scene load_steps=8 format=3 uid="uid://main390x844po"]
 
 [ext_resource type="Script"      path="res://scripts/ui/Main.gd"       id="1_mainscript"]
 [ext_resource type="PackedScene" path="res://scenes/HUD.tscn"           id="2_hudscene"]
@@ -13,6 +13,18 @@ border_width_left = 2
 border_width_bottom = 2
 border_width_right = 2
 border_color = Color(0.12, 0.78, 0.35, 1.0)
+corner_radius_top_left = 8
+corner_radius_top_right = 8
+corner_radius_bottom_right = 8
+corner_radius_bottom_left = 8
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_cp"]
+bg_color = Color(0.047, 0.047, 0.11, 0.92)
+border_width_top = 2
+border_width_left = 2
+border_width_bottom = 2
+border_width_right = 2
+border_color = Color(0.18, 0.42, 0.78, 1.0)
 corner_radius_top_left = 8
 corner_radius_top_right = 8
 corner_radius_bottom_right = 8
@@ -48,6 +60,42 @@ offset_bottom   = -56.0
 [node name="BottomBar" parent="." instance=ExtResource("4_bbscene")]
 
 [node name="PauseMenu" parent="." instance=ExtResource("5_pmscene")]
+
+[node name="CpIndicator" type="CanvasLayer" parent="."]
+layer = 5
+
+[node name="CpPanel" type="Panel" parent="CpIndicator"]
+anchors_preset = 7
+anchor_top = 1.0
+anchor_bottom = 1.0
+offset_left = 12.0
+offset_top = -108.0
+offset_right = 120.0
+offset_bottom = -72.0
+theme_override_styles/panel = SubResource("StyleBoxFlat_cp")
+
+[node name="HBox" type="HBoxContainer" parent="CpIndicator/CpPanel"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/separation = 4
+
+[node name="CpIcon" type="Label" parent="CpIndicator/CpPanel/HBox"]
+layout_mode = 2
+text = "[CP]"
+vertical_alignment = 1
+theme_override_colors/font_color = Color(1.0, 0.82, 0.1, 1.0)
+theme_override_font_sizes/font_size = 11
+
+[node name="CpValue" type="Label" parent="CpIndicator/CpPanel/HBox"]
+layout_mode = 2
+text = "0"
+vertical_alignment = 1
+theme_override_colors/font_color = Color(1.0, 0.82, 0.1, 1.0)
+theme_override_font_sizes/font_size = 14
 
 [node name="NotifLayer" type="CanvasLayer" parent="."]
 layer = 20
