@@ -1,10 +1,11 @@
-[gd_scene load_steps=8 format=3 uid="uid://oa2c387kjige"]
+[gd_scene load_steps=9 format=3 uid="uid://oa2c387kjige"]
 
 [ext_resource type="Script" uid="uid://4kd85xnol5ow" path="res://scripts/ui/Main.gd" id="1_mainscript"]
 [ext_resource type="PackedScene" uid="uid://c7hud4a0x844" path="res://scenes/HUD.tscn" id="2_hudscene"]
 [ext_resource type="PackedScene" uid="uid://wdpdeyn2xxt0" path="res://scenes/OfficeView.tscn" id="3_ovscene"]
 [ext_resource type="PackedScene" uid="uid://7ri57iomnyvg" path="res://scenes/BottomBar.tscn" id="4_bbscene"]
 [ext_resource type="PackedScene" uid="uid://s8ffqu7vqkey" path="res://scenes/PauseMenu.tscn" id="5_pmscene"]
+[ext_resource type="PackedScene" uid="uid://b3eventpopup1" path="res://scenes/EventPopup.tscn" id="6_epscene"]
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_cp"]
 bg_color = Color(0.047, 0.047, 0.11, 0.92)
@@ -137,3 +138,5 @@ autowrap_mode = 3
 [node name="NotifTimer" type="Timer" parent="NotifLayer/NotifPanel"]
 wait_time = 3.0
 one_shot = true
+
+[node name="EventPopup" parent="." instance=ExtResource("6_epscene")]
