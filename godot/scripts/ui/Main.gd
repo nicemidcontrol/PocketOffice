@@ -2,6 +2,7 @@ extends Control
 
 @onready var _bottom_bar:   Node  = $BottomBar
 @onready var _pause_menu:   Node  = $PauseMenu
+@onready var _cp_value:     Label = $CpIndicator/CpPanel/HBox/CpValue
 @onready var _notif_panel:  Panel = $NotifLayer/NotifPanel
 @onready var _notif_label:  Label = $NotifLayer/NotifPanel/Margin/VBox/NotifLabel
 @onready var _notif_timer:  Timer = $NotifLayer/NotifPanel/NotifTimer
@@ -16,6 +17,8 @@ func _ready() -> void:
 	var gm: Node = get_node_or_null("/root/GameManager")
 	if gm != null:
 		gm.projects.project_completed.connect(_on_project_completed)
+		gm.corp_points_changed.connect(_on_cp_changed)
+		_cp_value.text = str(gm.corp_points)
 
 func _on_menu_requested() -> void:
 	_pause_menu.open()
@@ -36,3 +39,6 @@ func _on_project_completed(proj: Dictionary) -> void:
 
 func _on_notif_timer_timeout() -> void:
 	_notif_panel.visible = false
+
+func _on_cp_changed(new_val: int) -> void:
+	_cp_value.text = str(new_val)
