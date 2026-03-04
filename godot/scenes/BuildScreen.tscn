@@ -1,4 +1,4 @@
-[gd_scene load_steps=4 format=3 uid="uid://b4buildscreen01"]
+[gd_scene load_steps=4 format=3 uid="uid://coigki37idr7e"]
 
 [ext_resource type="Script" uid="uid://depbuildscr01" path="res://scripts/ui/BuildScreen.gd" id="1_bsscript"]
 
