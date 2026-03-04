@@ -1,5 +1,5 @@
 # 📋 Pocket Office — Game Bible
-> Last updated: 2026-03-02
+> Last updated: 2026-03-04
 > This file is the single source of truth for design decisions. Claude should read this before any design or code work.
 
 ---
@@ -207,23 +207,39 @@ Accessed via **HR → Items**. All items are **one-time use consumables**.
 
 ---
 
-## 🤝 Donor System
+## 🎯 Donor System (Planned — M4)
 
-Donors are the NGO equivalent of "winning a new major client." They represent real funding and project opportunities.
+Donors are the NGO equivalent of winning major clients.
+They represent real funding and unlock new content.
 
-**How it works:**
-- Accessed via **Corporate → Research**
-- Player spends **Corporate Points** to pursue a donor
-- Winning a donor has **additional requirements** beyond Corp Points (e.g., minimum Reputation, specific employee stat thresholds, completed prerequisite projects)
-- Successfully winning a donor unlocks:
-  - New projects tied to that donor's focus area
-  - New recruitable staff (specialists that come with the donor relationship)
+### How It Works
+- Accessed via Corporate > Research
+- Player spends Corporate Points to pursue a donor
+- Additional requirements: minimum Reputation, employee stat thresholds
+- Winning a donor unlocks:
+  - Monthly funding added to cash automatically
+  - Corporate Points bonus (one-time)
+  - New projects tied to donor focus
+  - Specific Hero employees (see Hero Roster)
+  - Special items for Shop
 
-**Design intent:**
-- Teaches players that NGOs cannot generate their own income — they depend on external funding
-- Forces cross-team cooperation (Charm for pitching, Organization for proposals, Technical for reporting back)
-- Annual HQ funding also arrives as a separate passive income stream (no donor required)
-- The Donor pipeline replaces the traditional "revenue from sales" model — players must plan for funding cycles
+### Planned Donor List
+
+| Donor | CP Cost | Requirements | Monthly Funding | Unlocks |
+|---|---|---|---|---|
+| Local NGO Partner | 50 CP | REP 20+ | $2,000/mo | Basic projects |
+| Government Agency | 150 CP | REP 50+, MGR on team | $5,000/mo | Thoksin S., Peta L. |
+| Entertainment Corp | 200 CP | REP 60+, DES on team | $4,000/mo | Liza M. |
+| International Foundation | 300 CP | REP 80+, Year 2+ | $8,000/mo | Advanced projects |
+| UN Partner | 500 CP | REP 100+, Year 3+ | $15,000/mo | Elite projects |
+
+### Annual HQ Funding
+- Separate from donors — arrives once per year automatically
+- Amount grows based on company tier:
+  - Startup: $10,000/year
+  - SME: $25,000/year
+  - Enterprise: $50,000/year
+  - Global Corp: $100,000/year
 
 ---
 
@@ -302,6 +318,104 @@ These should feel like people players have *actually worked with*:
 - **Burnout state** triggers at stress 90+ — employee becomes 20% productivity, spreads negativity
 - **Vacation events** reduce stress across the team
 - Player must balance pushing hard on deadline projects vs. protecting team wellbeing
+
+---
+
+## 🕐 OT System
+
+Employees work 08:00–16:00 by default.
+Player can assign OT after 16:00 via Corporate > Assign Tasks.
+
+| OT Level | Extra Hours | Productivity Bonus | Motivation Cost |
+|---|---|---|---|
+| None | +0 | 100% | 0/day |
+| Light OT | +2 hrs | +30% | -5/day |
+| Heavy OT | +4 hrs | +50% | -15/day |
+| Crunch | +8 hrs | +70% | -30/day |
+
+- If motivation reaches 0 → employee enters Burnout state
+- Burnout: productivity -80%, spreads negativity to nearby employees
+- Recovery: remove OT, motivation recovers +5/day naturally
+- Player must balance deadline pressure vs team wellbeing
+
+---
+
+## 📢 Recruitment System
+
+Accessed via HR > Recruit.
+Player selects advertisement type before seeing candidates.
+Higher tier ads = higher tier employee candidates.
+
+### Advertisement Tiers
+
+| # | Method | Cost | Candidate Tier | Candidates Shown |
+|---|---|---|---|---|
+| 1 | Milk Carton | $300 | E | 2 candidates |
+| 2 | Newspaper | $600 | D | 3 candidates |
+| 3 | Radio | $1,000 | C | 3 candidates |
+| 4 | Television | $1,800 | B | 4 candidates |
+| 5 | Online Ad | $2,200 | A | 4 candidates |
+| 6 | CHAMP's Recruitment | $3,500 | S | 3 candidates + Hero unlock chance |
+
+### Employee Tiers
+
+| Tier | SKL Range | MOT Range | Description |
+|---|---|---|---|
+| E | 10–25 | 10–30 | Entry level, needs training |
+| D | 25–40 | 25–45 | Below average, some potential |
+| C | 40–55 | 40–60 | Average office worker |
+| B | 55–70 | 55–75 | Above average, reliable |
+| A | 70–85 | 70–90 | High performer, expensive |
+| S | 85–100 | 85–100 | Elite, rare, top salary |
+
+### CHAMP — Universe Mascot
+- CHAMP is the mascot of CHAMP's Recruitment Agency
+- Appears as a short dialogue before showing S-tier candidates
+- CHAMP is an easter egg character that will appear in ALL future games made by this studio
+- CHAMP speaks with confidence and humor
+- Sample dialogues:
+  - "Hey hey hey! CHAMP here! Leave the recruiting to the BEST in the business. Stand by..."
+  - "You want the best? You came to the right place. CHAMP delivers."
+  - "Even I'm surprised by this one. You're welcome."
+  - "CHAMP's Guarantee: If you're not satisfied... well, no refunds. But you will be satisfied."
+- When CHAMP finds a Hero Employee candidate: special dialogue fires
+  - "Even I'm surprised. This one's special. You're welcome."
+
+---
+
+## 🏆 Hero Employee System
+
+Hero Employees are legendary characters that can be unlocked through special conditions.
+Once unlocked, they appear in the HireScreen candidate pool.
+
+### Unlock Methods
+- Special Events: certain random events trigger hero availability
+- Donor Unlock: winning specific donors unlocks specific heroes
+- Research: completing certain research paths unlocks heroes
+- Ultimate Condition: Derek Anan Boonphun requires all three:
+  - Total employees hired >= 15
+  - Current year >= 3
+  - Corporate Points >= 500
+
+### Hero Roster
+
+| Name | Role | Personality | SKL | MOT | Unlock |
+|---|---|---|---|---|---|
+| Thoksin S. | MGR | Brown-noser | 85 | 80 | Research: Government Relations |
+| Prayui C. | MGR | Perfectionist | 80 | 75 | Special Event |
+| Peta L. | MGR | Team Player | 78 | 90 | Donor: Government |
+| Burapol K. | INT | Workaholic | 90 | 95 | Special Event |
+| Somrak P. | MGR | Perfectionist | 88 | 85 | Special Event |
+| Liza M. | DES | Workaholic | 92 | 88 | Donor: Entertainment |
+| Derek Anan Boonphun | MGR | Legendary | 100 | 100 | Ultimate Condition |
+
+### Derek Anan Boonphun — The True Legend
+- Personal easter egg tribute
+- Hardest unlock in the game
+- All stats maxed at 100
+- Gold + rainbow card border in Employee List
+- Description: "The one who built everything from nothing. A true legend. Some say he never sleeps."
+- Salary: $15,000/mo — worth every penny
 
 ---
 
@@ -386,11 +500,11 @@ These should feel like people players have *actually worked with*:
 
 | Milestone | Status | Features |
 |---|---|---|
-| M1: Core Engine | ✅ Done | All managers, HUD, Save system |
-| M2: Core Loop UI | 🔄 In Progress | Hire screen, Project board, Office grid, Bottom nav |
-| M3: Content & Polish | ⏳ Pending | Pixel art, animations, event system UI, audio, facility combos |
-| M4: Campaign & Balance | ⏳ Pending | Competitor AI, annual evaluation, Year 5 ending, prestige, stat balancing |
-| M5: Launch | ⏳ Pending | Tutorial, app store submission, localization |
+| M1: Core Engine | ✅ Done | All managers, HUD, Save system, Clock |
+| M2: Core Loop UI | ✅ Done | Hire screen, Project board, Office grid, Bottom nav, CP system |
+| M3: Content & Polish | 🔄 In Progress | Event system, Facility combos, Employee list, Hero employees, OT system, Recruitment tiers |
+| M4: Campaign & Balance | ⏳ Pending | Donor system, Annual evaluation, Competitor AI, Year 5 ending, Prestige |
+| M5: Launch | ⏳ Pending | Tutorial, Pixel art, Audio, App store submission |
 
 ---
 
