@@ -141,12 +141,6 @@ horizontal_alignment = 1
 theme_override_colors/font_color = Color(0.22, 0.9, 0.42, 1.0)
 theme_override_font_sizes/font_size = 17
 
-[node name="DayLabel" type="Label" parent="TopBar/Margin/HBox/ClockSection"]
-layout_mode = 2
-text = "D1"
-horizontal_alignment = 1
-theme_override_colors/font_color = Color(0.5, 0.51, 0.62, 1.0)
-theme_override_font_sizes/font_size = 9
 
 [node name="MessagePanel" type="Panel" parent="."]
 anchors_preset = 12

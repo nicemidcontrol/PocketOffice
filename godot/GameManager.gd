@@ -15,7 +15,7 @@ enum CompanyTier { STARTUP, SME, ENTERPRISE, GLOBAL_CORP }
 # ─────────────────────────────────────────
 #  SIGNALS  (replaces C# static events)
 # ─────────────────────────────────────────
-signal day_passed(day: int)
+signal tick_passed(tick: int)
 signal month_passed(month: int)
 signal year_passed(year: int)
 signal tier_upgraded(new_tier: CompanyTier)
@@ -42,15 +42,15 @@ var company_data := {
 	"tier":                  CompanyTier.STARTUP,
 	"current_year":          2024,
 	"current_month":         1,
-	"current_day":           1,
+	"current_tick":          0,
 	"unlocked_departments":  ["General"],
 }
 
 # ─────────────────────────────────────────
 #  TIME
 # ─────────────────────────────────────────
-@export var day_duration_seconds: float = 10.0
-var _day_timer: float = 0.0
+@export var tick_duration_seconds: float = 10.0
+var _tick_timer: float = 0.0
 var is_paused: bool  = false
 var corp_points: int = 0
 
@@ -74,10 +74,10 @@ func _ready() -> void:
 func _process(delta: float) -> void:
 	if is_paused:
 		return
-	_day_timer += delta
-	if _day_timer >= day_duration_seconds:
-		_day_timer = 0.0
-		_advance_day()
+	_tick_timer += delta
+	if _tick_timer >= tick_duration_seconds:
+		_tick_timer = 0.0
+		_advance_tick()
 
 # ─────────────────────────────────────────
 #  SUB-MANAGER SETUP
@@ -107,7 +107,7 @@ func new_game(company_name: String) -> void:
 		"tier":                 CompanyTier.STARTUP,
 		"current_year":         2024,
 		"current_month":        1,
-		"current_day":          1,
+		"current_tick":         0,
 		"unlocked_departments": ["General"],
 	}
 	economy.initialize(10000)
@@ -120,16 +120,15 @@ func new_game(company_name: String) -> void:
 # ─────────────────────────────────────────
 #  TIME PROGRESSION
 # ─────────────────────────────────────────
-func _advance_day() -> void:
-	company_data["current_day"] += 1
-	day_passed.emit(company_data["current_day"])
+func _advance_tick() -> void:
+	company_data["current_tick"] += 1
+	tick_passed.emit(company_data["current_tick"])
 
 	employees.tick_motivation()
-	projects.tick_projects(self)
 	events.try_trigger_random_event()
 
-	if company_data["current_day"] > 30:
-		company_data["current_day"] = 1
+	if company_data["current_tick"] > 8:
+		company_data["current_tick"] = 0
 		_advance_month()
 
 func _advance_month() -> void:
@@ -251,7 +250,7 @@ func toggle_pause() -> void:
 	is_paused = !is_paused
 
 func set_speed(multiplier: float) -> void:
-	day_duration_seconds = 10.0 / clampf(multiplier, 0.5, 4.0)
+	tick_duration_seconds = 10.0 / clampf(multiplier, 0.5, 4.0)
 
 func get_current_date_string() -> String:
 	return "Month %d, Year %d" % [company_data["current_month"], company_data["current_year"]]
