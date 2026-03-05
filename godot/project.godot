@@ -24,6 +24,7 @@ ClockManager="*res://ClockManager.gd"
 GameManager="*res://GameManager.gd"
 EventManager="*res://scripts/EventManager.gd"
 FacilityManager="*res://scripts/FacilityManager.gd"
+DonorManager="*res://scripts/DonorManager.gd"
 
 [display]
 
