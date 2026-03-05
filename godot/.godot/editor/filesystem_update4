@@ -1,5 +1,1 @@
-res://scenes/Main.tscn
-res://scripts/ui/Main.gd
-res://scripts/ui/PauseMenu.gd
-res://EmployeeManager.gd
 res://scripts/ui/HireScreen.gd
