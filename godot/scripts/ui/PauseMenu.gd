@@ -2,6 +2,10 @@ extends CanvasLayer
 
 signal hire_requested
 signal project_board_requested
+signal employee_list_requested
+signal build_requested
+signal research_requested
+signal score_requested
 
 # ─────────────────────────────────────────
 #  NODE REFS
@@ -103,6 +107,10 @@ func _on_lists_pressed() -> void:
 
 func _on_system_pressed() -> void:
 	_toggle_sub(_system_sub)
+
+func _on_score_pressed() -> void:
+	_close()
+	score_requested.emit()
 
 func _on_menu_save_pressed() -> void:
 	if _gm != null:
