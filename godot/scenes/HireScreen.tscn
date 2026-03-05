@@ -1,68 +1,23 @@
-[gd_scene load_steps=9 format=3 uid="uid://b7dju0mjovits"]
+[gd_scene load_steps=4 format=3 uid="uid://b7dju0mjovits"]
 
 [ext_resource type="Script" uid="uid://byvf11epv1pfk" path="res://scripts/ui/HireScreen.gd" id="1_hirescript"]
 
-[sub_resource type="StyleBoxFlat" id="SBFlat_panel"]
+[sub_resource type="StyleBoxFlat" id="SBFlat_header"]
 bg_color = Color(0.047, 0.047, 0.11, 0.97)
 border_width_bottom = 2
 border_color = Color(0.18, 0.42, 0.78, 1)
 
-[sub_resource type="StyleBoxFlat" id="SBFlat_card"]
-bg_color = Color(0.078, 0.078, 0.172, 1)
-border_width_left = 1
-border_width_top = 1
-border_width_right = 1
-border_width_bottom = 1
-border_color = Color(0.18, 0.42, 0.78, 0.55)
-corner_radius_top_left = 6
-corner_radius_top_right = 6
-corner_radius_bottom_right = 6
-corner_radius_bottom_left = 6
-
-[sub_resource type="StyleBoxFlat" id="SBFlat_hire"]
-bg_color = Color(0.08, 0.36, 0.17, 1)
-border_width_left = 1
-border_width_top = 1
-border_width_right = 1
-border_width_bottom = 1
-border_color = Color(0.22, 0.9, 0.42, 0.7)
-corner_radius_top_left = 4
-corner_radius_top_right = 4
-corner_radius_bottom_right = 4
-corner_radius_bottom_left = 4
-
-[sub_resource type="StyleBoxFlat" id="SBFlat_refresh"]
-bg_color = Color(0.08, 0.18, 0.44, 1)
-border_width_left = 1
-border_width_top = 1
-border_width_right = 1
-border_width_bottom = 1
-border_color = Color(0.18, 0.42, 0.78, 0.8)
-corner_radius_top_left = 4
-corner_radius_top_right = 4
-corner_radius_bottom_right = 4
-corner_radius_bottom_left = 4
-
-[sub_resource type="StyleBoxFlat" id="SBFlat_bar_bg"]
-bg_color = Color(0.08, 0.08, 0.18, 1.0)
-corner_radius_top_left = 3
-corner_radius_top_right = 3
-corner_radius_bottom_right = 3
-corner_radius_bottom_left = 3
-
-[sub_resource type="StyleBoxFlat" id="SBFlat_skill_fill"]
-bg_color = Color(0.22, 0.9, 0.42, 1.0)
-corner_radius_top_left = 3
-corner_radius_top_right = 3
-corner_radius_bottom_right = 3
-corner_radius_bottom_left = 3
-
-[sub_resource type="StyleBoxFlat" id="SBFlat_mot_fill"]
-bg_color = Color(1.0, 0.75, 0.1, 1.0)
-corner_radius_top_left = 3
-corner_radius_top_right = 3
-corner_radius_bottom_right = 3
-corner_radius_bottom_left = 3
+[sub_resource type="StyleBoxFlat" id="SBFlat_champ"]
+bg_color = Color(0.08, 0.07, 0.03, 0.98)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(1.0, 0.78, 0.15, 1.0)
+corner_radius_top_left = 10
+corner_radius_top_right = 10
+corner_radius_bottom_right = 10
+corner_radius_bottom_left = 10
 
 [node name="HireScreen" type="Control"]
 layout_mode = 2
@@ -82,13 +37,80 @@ grow_horizontal = 2
 grow_vertical = 2
 color = Color(0.047, 0.047, 0.11, 1)
 
+[node name="AdSelectLayer" type="Control" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+offset_top = 60.0
+
+[node name="Scroll" type="ScrollContainer" parent="AdSelectLayer"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+offset_left = 8.0
+offset_right = -8.0
+offset_bottom = -40.0
+horizontal_scroll_mode = 0
+
+[node name="VBox" type="VBoxContainer" parent="AdSelectLayer/Scroll"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/separation = 12
+
+[node name="HintLabel" type="Label" parent="AdSelectLayer"]
+layout_mode = 1
+anchors_preset = 12
+anchor_right = 1.0
+anchor_top = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 0
+offset_top = -36.0
+theme_override_colors/font_color = Color(0.5, 0.51, 0.62, 1)
+theme_override_font_sizes/font_size = 11
+text = "Higher tier = better candidates"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="CandidateLayer" type="Control" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+offset_top = 60.0
+visible = false
+
+[node name="Scroll" type="ScrollContainer" parent="CandidateLayer"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+offset_left = 8.0
+offset_right = -8.0
+horizontal_scroll_mode = 0
+
+[node name="VBox" type="VBoxContainer" parent="CandidateLayer/Scroll"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/separation = 16
+
 [node name="Header" type="Panel" parent="."]
 layout_mode = 1
 anchors_preset = 10
 anchor_right = 1.0
 grow_horizontal = 2
 offset_bottom = 60.0
-theme_override_styles/panel = SubResource("SBFlat_panel")
+theme_override_styles/panel = SubResource("SBFlat_header")
 
 [node name="HBox" type="HBoxContainer" parent="Header"]
 layout_mode = 1
@@ -111,7 +133,7 @@ layout_mode = 2
 size_flags_horizontal = 3
 theme_override_colors/font_color = Color(0.92, 0.92, 0.95, 1)
 theme_override_font_sizes/font_size = 15
-text = "HIRE STAFF"
+text = "RECRUIT"
 horizontal_alignment = 1
 vertical_alignment = 1
 
@@ -124,374 +146,94 @@ text = "$0"
 horizontal_alignment = 2
 vertical_alignment = 1
 
-[node name="Body" type="ScrollContainer" parent="."]
+[node name="ChampDialogLayer" type="Control" parent="."]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
-offset_left = 8.0
-offset_top = 60.0
-offset_right = -8.0
-offset_bottom = -64.0
-horizontal_scroll_mode = 0
+visible = false
 
-[node name="VBox" type="VBoxContainer" parent="Body"]
-layout_mode = 2
-size_flags_horizontal = 3
-theme_override_constants/separation = 16
-
-[node name="HintLabel" type="Label" parent="Body/VBox"]
-layout_mode = 2
-theme_override_colors/font_color = Color(0.5, 0.51, 0.62, 1)
-theme_override_font_sizes/font_size = 11
-text = "3 candidates available - Refresh costs $500"
-horizontal_alignment = 1
-
-[node name="Card0" type="PanelContainer" parent="Body/VBox"]
-layout_mode = 2
-size_flags_horizontal = 3
-theme_override_styles/panel = SubResource("SBFlat_card")
-
-[node name="Margin" type="MarginContainer" parent="Body/VBox/Card0"]
-layout_mode = 2
-theme_override_constants/margin_left = 12
-theme_override_constants/margin_top = 12
-theme_override_constants/margin_right = 12
-theme_override_constants/margin_bottom = 12
-
-[node name="VBox" type="VBoxContainer" parent="Body/VBox/Card0/Margin"]
-layout_mode = 2
-size_flags_horizontal = 3
-theme_override_constants/separation = 8
-
-[node name="HBoxTop0" type="HBoxContainer" parent="Body/VBox/Card0/Margin/VBox"]
-layout_mode = 2
-theme_override_constants/separation = 8
-
-[node name="NameLabel0" type="Label" parent="Body/VBox/Card0/Margin/VBox/HBoxTop0"]
-layout_mode = 2
-size_flags_horizontal = 3
-theme_override_colors/font_color = Color(0.92, 0.92, 0.95, 1)
-theme_override_font_sizes/font_size = 15
-text = "Candidate"
-
-[node name="RoleLabel0" type="Label" parent="Body/VBox/Card0/Margin/VBox/HBoxTop0"]
-layout_mode = 2
-theme_override_colors/font_color = Color(0.4, 0.8, 1, 1)
-theme_override_font_sizes/font_size = 11
-text = "DEV"
-vertical_alignment = 1
-
-[node name="PersLabel0" type="Label" parent="Body/VBox/Card0/Margin/VBox"]
-layout_mode = 2
-theme_override_colors/font_color = Color(0.6, 0.62, 0.72, 1)
-theme_override_font_sizes/font_size = 12
-text = "Normal"
-
-[node name="HBoxSkl0" type="HBoxContainer" parent="Body/VBox/Card0/Margin/VBox"]
-layout_mode = 2
-theme_override_constants/separation = 8
-
-[node name="SklKey0" type="Label" parent="Body/VBox/Card0/Margin/VBox/HBoxSkl0"]
-custom_minimum_size = Vector2(32, 0)
-layout_mode = 2
-theme_override_colors/font_color = Color(0.5, 0.51, 0.62, 1)
-theme_override_font_sizes/font_size = 10
-text = "SKL"
-vertical_alignment = 1
-
-[node name="SkillBar0" type="ProgressBar" parent="Body/VBox/Card0/Margin/VBox/HBoxSkl0"]
-custom_minimum_size = Vector2(0, 14)
-layout_mode = 2
-size_flags_horizontal = 3
-size_flags_vertical = 4
-theme_override_styles/background = SubResource("SBFlat_bar_bg")
-theme_override_styles/fill = SubResource("SBFlat_skill_fill")
-value = 50.0
-show_percentage = false
-
-[node name="HBoxMot0" type="HBoxContainer" parent="Body/VBox/Card0/Margin/VBox"]
-layout_mode = 2
-theme_override_constants/separation = 8
-
-[node name="MotKey0" type="Label" parent="Body/VBox/Card0/Margin/VBox/HBoxMot0"]
-custom_minimum_size = Vector2(32, 0)
-layout_mode = 2
-theme_override_colors/font_color = Color(0.5, 0.51, 0.62, 1)
-theme_override_font_sizes/font_size = 10
-text = "MOT"
-vertical_alignment = 1
-
-[node name="MoralBar0" type="ProgressBar" parent="Body/VBox/Card0/Margin/VBox/HBoxMot0"]
-custom_minimum_size = Vector2(0, 14)
-layout_mode = 2
-size_flags_horizontal = 3
-size_flags_vertical = 4
-theme_override_styles/background = SubResource("SBFlat_bar_bg")
-theme_override_styles/fill = SubResource("SBFlat_mot_fill")
-value = 50.0
-show_percentage = false
-
-[node name="HBoxBot0" type="HBoxContainer" parent="Body/VBox/Card0/Margin/VBox"]
-layout_mode = 2
-theme_override_constants/separation = 8
-
-[node name="SalaryLabel0" type="Label" parent="Body/VBox/Card0/Margin/VBox/HBoxBot0"]
-layout_mode = 2
-size_flags_horizontal = 3
-theme_override_colors/font_color = Color(0.92, 0.92, 0.95, 1)
-theme_override_font_sizes/font_size = 13
-text = "$0 / mo"
-vertical_alignment = 1
-
-[node name="HireButton0" type="Button" parent="Body/VBox/Card0/Margin/VBox/HBoxBot0"]
-custom_minimum_size = Vector2(80, 36)
-layout_mode = 2
-theme_override_colors/font_color = Color(0.9, 0.98, 0.92, 1)
-theme_override_font_sizes/font_size = 13
-theme_override_styles/normal = SubResource("SBFlat_hire")
-text = "HIRE"
-
-[node name="Card1" type="PanelContainer" parent="Body/VBox"]
-layout_mode = 2
-size_flags_horizontal = 3
-theme_override_styles/panel = SubResource("SBFlat_card")
-
-[node name="Margin" type="MarginContainer" parent="Body/VBox/Card1"]
-layout_mode = 2
-theme_override_constants/margin_left = 12
-theme_override_constants/margin_top = 12
-theme_override_constants/margin_right = 12
-theme_override_constants/margin_bottom = 12
-
-[node name="VBox" type="VBoxContainer" parent="Body/VBox/Card1/Margin"]
-layout_mode = 2
-size_flags_horizontal = 3
-theme_override_constants/separation = 8
-
-[node name="HBoxTop1" type="HBoxContainer" parent="Body/VBox/Card1/Margin/VBox"]
-layout_mode = 2
-theme_override_constants/separation = 8
-
-[node name="NameLabel1" type="Label" parent="Body/VBox/Card1/Margin/VBox/HBoxTop1"]
-layout_mode = 2
-size_flags_horizontal = 3
-theme_override_colors/font_color = Color(0.92, 0.92, 0.95, 1)
-theme_override_font_sizes/font_size = 15
-text = "Candidate"
-
-[node name="RoleLabel1" type="Label" parent="Body/VBox/Card1/Margin/VBox/HBoxTop1"]
-layout_mode = 2
-theme_override_colors/font_color = Color(0.4, 0.8, 1, 1)
-theme_override_font_sizes/font_size = 11
-text = "DEV"
-vertical_alignment = 1
-
-[node name="PersLabel1" type="Label" parent="Body/VBox/Card1/Margin/VBox"]
-layout_mode = 2
-theme_override_colors/font_color = Color(0.6, 0.62, 0.72, 1)
-theme_override_font_sizes/font_size = 12
-text = "Normal"
-
-[node name="HBoxSkl1" type="HBoxContainer" parent="Body/VBox/Card1/Margin/VBox"]
-layout_mode = 2
-theme_override_constants/separation = 8
-
-[node name="SklKey1" type="Label" parent="Body/VBox/Card1/Margin/VBox/HBoxSkl1"]
-custom_minimum_size = Vector2(32, 0)
-layout_mode = 2
-theme_override_colors/font_color = Color(0.5, 0.51, 0.62, 1)
-theme_override_font_sizes/font_size = 10
-text = "SKL"
-vertical_alignment = 1
-
-[node name="SkillBar1" type="ProgressBar" parent="Body/VBox/Card1/Margin/VBox/HBoxSkl1"]
-custom_minimum_size = Vector2(0, 14)
-layout_mode = 2
-size_flags_horizontal = 3
-size_flags_vertical = 4
-theme_override_styles/background = SubResource("SBFlat_bar_bg")
-theme_override_styles/fill = SubResource("SBFlat_skill_fill")
-value = 50.0
-show_percentage = false
-
-[node name="HBoxMot1" type="HBoxContainer" parent="Body/VBox/Card1/Margin/VBox"]
-layout_mode = 2
-theme_override_constants/separation = 8
-
-[node name="MotKey1" type="Label" parent="Body/VBox/Card1/Margin/VBox/HBoxMot1"]
-custom_minimum_size = Vector2(32, 0)
-layout_mode = 2
-theme_override_colors/font_color = Color(0.5, 0.51, 0.62, 1)
-theme_override_font_sizes/font_size = 10
-text = "MOT"
-vertical_alignment = 1
-
-[node name="MoralBar1" type="ProgressBar" parent="Body/VBox/Card1/Margin/VBox/HBoxMot1"]
-custom_minimum_size = Vector2(0, 14)
-layout_mode = 2
-size_flags_horizontal = 3
-size_flags_vertical = 4
-theme_override_styles/background = SubResource("SBFlat_bar_bg")
-theme_override_styles/fill = SubResource("SBFlat_mot_fill")
-value = 50.0
-show_percentage = false
-
-[node name="HBoxBot1" type="HBoxContainer" parent="Body/VBox/Card1/Margin/VBox"]
-layout_mode = 2
-theme_override_constants/separation = 8
-
-[node name="SalaryLabel1" type="Label" parent="Body/VBox/Card1/Margin/VBox/HBoxBot1"]
-layout_mode = 2
-size_flags_horizontal = 3
-theme_override_colors/font_color = Color(0.92, 0.92, 0.95, 1)
-theme_override_font_sizes/font_size = 13
-text = "$0 / mo"
-vertical_alignment = 1
-
-[node name="HireButton1" type="Button" parent="Body/VBox/Card1/Margin/VBox/HBoxBot1"]
-custom_minimum_size = Vector2(80, 36)
-layout_mode = 2
-theme_override_colors/font_color = Color(0.9, 0.98, 0.92, 1)
-theme_override_font_sizes/font_size = 13
-theme_override_styles/normal = SubResource("SBFlat_hire")
-text = "HIRE"
-
-[node name="Card2" type="PanelContainer" parent="Body/VBox"]
-layout_mode = 2
-size_flags_horizontal = 3
-theme_override_styles/panel = SubResource("SBFlat_card")
-
-[node name="Margin" type="MarginContainer" parent="Body/VBox/Card2"]
-layout_mode = 2
-theme_override_constants/margin_left = 12
-theme_override_constants/margin_top = 12
-theme_override_constants/margin_right = 12
-theme_override_constants/margin_bottom = 12
-
-[node name="VBox" type="VBoxContainer" parent="Body/VBox/Card2/Margin"]
-layout_mode = 2
-size_flags_horizontal = 3
-theme_override_constants/separation = 8
-
-[node name="HBoxTop2" type="HBoxContainer" parent="Body/VBox/Card2/Margin/VBox"]
-layout_mode = 2
-theme_override_constants/separation = 8
-
-[node name="NameLabel2" type="Label" parent="Body/VBox/Card2/Margin/VBox/HBoxTop2"]
-layout_mode = 2
-size_flags_horizontal = 3
-theme_override_colors/font_color = Color(0.92, 0.92, 0.95, 1)
-theme_override_font_sizes/font_size = 15
-text = "Candidate"
-
-[node name="RoleLabel2" type="Label" parent="Body/VBox/Card2/Margin/VBox/HBoxTop2"]
-layout_mode = 2
-theme_override_colors/font_color = Color(0.4, 0.8, 1, 1)
-theme_override_font_sizes/font_size = 11
-text = "DEV"
-vertical_alignment = 1
-
-[node name="PersLabel2" type="Label" parent="Body/VBox/Card2/Margin/VBox"]
-layout_mode = 2
-theme_override_colors/font_color = Color(0.6, 0.62, 0.72, 1)
-theme_override_font_sizes/font_size = 12
-text = "Normal"
-
-[node name="HBoxSkl2" type="HBoxContainer" parent="Body/VBox/Card2/Margin/VBox"]
-layout_mode = 2
-theme_override_constants/separation = 8
-
-[node name="SklKey2" type="Label" parent="Body/VBox/Card2/Margin/VBox/HBoxSkl2"]
-custom_minimum_size = Vector2(32, 0)
-layout_mode = 2
-theme_override_colors/font_color = Color(0.5, 0.51, 0.62, 1)
-theme_override_font_sizes/font_size = 10
-text = "SKL"
-vertical_alignment = 1
-
-[node name="SkillBar2" type="ProgressBar" parent="Body/VBox/Card2/Margin/VBox/HBoxSkl2"]
-custom_minimum_size = Vector2(0, 14)
-layout_mode = 2
-size_flags_horizontal = 3
-size_flags_vertical = 4
-theme_override_styles/background = SubResource("SBFlat_bar_bg")
-theme_override_styles/fill = SubResource("SBFlat_skill_fill")
-value = 50.0
-show_percentage = false
-
-[node name="HBoxMot2" type="HBoxContainer" parent="Body/VBox/Card2/Margin/VBox"]
-layout_mode = 2
-theme_override_constants/separation = 8
-
-[node name="MotKey2" type="Label" parent="Body/VBox/Card2/Margin/VBox/HBoxMot2"]
-custom_minimum_size = Vector2(32, 0)
-layout_mode = 2
-theme_override_colors/font_color = Color(0.5, 0.51, 0.62, 1)
-theme_override_font_sizes/font_size = 10
-text = "MOT"
-vertical_alignment = 1
-
-[node name="MoralBar2" type="ProgressBar" parent="Body/VBox/Card2/Margin/VBox/HBoxMot2"]
-custom_minimum_size = Vector2(0, 14)
-layout_mode = 2
-size_flags_horizontal = 3
-size_flags_vertical = 4
-theme_override_styles/background = SubResource("SBFlat_bar_bg")
-theme_override_styles/fill = SubResource("SBFlat_mot_fill")
-value = 50.0
-show_percentage = false
-
-[node name="HBoxBot2" type="HBoxContainer" parent="Body/VBox/Card2/Margin/VBox"]
-layout_mode = 2
-theme_override_constants/separation = 8
-
-[node name="SalaryLabel2" type="Label" parent="Body/VBox/Card2/Margin/VBox/HBoxBot2"]
-layout_mode = 2
-size_flags_horizontal = 3
-theme_override_colors/font_color = Color(0.92, 0.92, 0.95, 1)
-theme_override_font_sizes/font_size = 13
-text = "$0 / mo"
-vertical_alignment = 1
-
-[node name="HireButton2" type="Button" parent="Body/VBox/Card2/Margin/VBox/HBoxBot2"]
-custom_minimum_size = Vector2(80, 36)
-layout_mode = 2
-theme_override_colors/font_color = Color(0.9, 0.98, 0.92, 1)
-theme_override_font_sizes/font_size = 13
-theme_override_styles/normal = SubResource("SBFlat_hire")
-text = "HIRE"
-
-[node name="Footer" type="Panel" parent="."]
+[node name="Overlay" type="ColorRect" parent="ChampDialogLayer"]
 layout_mode = 1
-anchors_preset = 12
+anchors_preset = 15
 anchor_right = 1.0
-anchor_top = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
-grow_vertical = 0
-offset_top = -64.0
-theme_override_styles/panel = SubResource("SBFlat_panel")
+grow_vertical = 2
+color = Color(0.0, 0.0, 0.0, 0.85)
 
-[node name="RefreshButton" type="Button" parent="Footer"]
+[node name="ChampPanel" type="PanelContainer" parent="ChampDialogLayer"]
 layout_mode = 1
 anchors_preset = 8
 anchor_left = 0.5
 anchor_top = 0.5
 anchor_right = 0.5
 anchor_bottom = 0.5
-offset_left = -130.0
-offset_top = -20.0
-offset_right = 130.0
-offset_bottom = 20.0
+offset_left = -160.0
+offset_top = -200.0
+offset_right = 160.0
+offset_bottom = 200.0
 grow_horizontal = 2
 grow_vertical = 2
-theme_override_colors/font_color = Color(0.5, 0.7, 1, 1)
+theme_override_styles/panel = SubResource("SBFlat_champ")
+
+[node name="Margin" type="MarginContainer" parent="ChampDialogLayer/ChampPanel"]
+layout_mode = 2
+theme_override_constants/margin_left = 24
+theme_override_constants/margin_top = 24
+theme_override_constants/margin_right = 24
+theme_override_constants/margin_bottom = 24
+
+[node name="VBox" type="VBoxContainer" parent="ChampDialogLayer/ChampPanel/Margin"]
+layout_mode = 2
+theme_override_constants/separation = 10
+
+[node name="ChampTitle" type="Label" parent="ChampDialogLayer/ChampPanel/Margin/VBox"]
+layout_mode = 2
+theme_override_colors/font_color = Color(1.0, 0.78, 0.15, 1.0)
+theme_override_font_sizes/font_size = 32
+text = "CHAMP"
+horizontal_alignment = 1
+
+[node name="ChampSubtitle" type="Label" parent="ChampDialogLayer/ChampPanel/Margin/VBox"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.6, 0.6, 0.6, 1)
+theme_override_font_sizes/font_size = 12
+text = "Recruitment Agency"
+horizontal_alignment = 1
+
+[node name="ChampDivider" type="HSeparator" parent="ChampDialogLayer/ChampPanel/Margin/VBox"]
+layout_mode = 2
+
+[node name="ChampDialogue" type="Label" parent="ChampDialogLayer/ChampPanel/Margin/VBox"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.92, 0.92, 0.95, 1)
 theme_override_font_sizes/font_size = 13
-theme_override_styles/normal = SubResource("SBFlat_refresh")
-text = "REFRESH CANDIDATES"
+text = ""
+horizontal_alignment = 1
+vertical_alignment = 1
+autowrap_mode = 3
+
+[node name="ChampDots" type="Label" parent="ChampDialogLayer/ChampPanel/Margin/VBox"]
+layout_mode = 2
+theme_override_colors/font_color = Color(1.0, 0.78, 0.15, 1.0)
+theme_override_font_sizes/font_size = 18
+text = "..."
+horizontal_alignment = 1
+
+[node name="ContinueBtn" type="Button" parent="ChampDialogLayer/ChampPanel/Margin/VBox"]
+layout_mode = 2
+visible = false
+theme_override_colors/font_color = Color(1.0, 0.78, 0.15, 1.0)
+theme_override_font_sizes/font_size = 14
+text = "CONTINUE"
+
+[node name="ChampTimer" type="Timer" parent="ChampDialogLayer"]
+wait_time = 2.0
+one_shot = true
 
 [connection signal="pressed" from="Header/HBox/BackButton" to="." method="_on_back_pressed"]
-[connection signal="pressed" from="Footer/RefreshButton" to="." method="_on_refresh_pressed"]
+[connection signal="pressed" from="ChampDialogLayer/ChampPanel/Margin/VBox/ContinueBtn" to="." method="_on_champ_continue_pressed"]
+[connection signal="timeout" from="ChampDialogLayer/ChampTimer" to="." method="_on_champ_timer_timeout"]
