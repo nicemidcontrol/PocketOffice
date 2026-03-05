@@ -7,7 +7,6 @@ extends CanvasLayer
 @onready var rep_label:     Label = $TopBar/Margin/HBox/RepSection/RepLabel
 @onready var date_label:    Label = $TopBar/Margin/HBox/DateSection/DateLabel
 @onready var clock_label:   Label = $TopBar/Margin/HBox/ClockSection/ClockLabel
-@onready var day_label:     Label = $TopBar/Margin/HBox/ClockSection/DayLabel
 @onready var message_panel: Panel = $MessagePanel
 @onready var message_label: Label = $MessagePanel/Margin/MessageLabel
 @onready var message_timer: Timer = $MessageTimer
@@ -34,7 +33,6 @@ func _ready() -> void:
 
 	_gm.game_message.connect(_on_game_message)
 	_gm.economy.cash_changed.connect(_on_cash_changed)
-	_gm.day_passed.connect(_on_day_passed)
 	_gm.month_passed.connect(_on_month_passed)
 
 	_cm = get_node_or_null("/root/ClockManager")
@@ -75,11 +73,8 @@ func _format_number(n: int) -> String:
 func _on_cash_changed(new_cash: int) -> void:
 	_update_cash(new_cash)
 
-func _on_day_passed(_day: int) -> void:
-	_update_reputation()
-	_update_date()
-
 func _on_month_passed(_month: int) -> void:
+	_update_reputation()
 	_update_date()
 
 func _on_game_message(message: String) -> void:
@@ -98,9 +93,7 @@ func _on_message_timer_timeout() -> void:
 
 func _on_time_updated(hour: int, minute: int) -> void:
 	clock_label.text = "%02d:%02d" % [hour, minute]
-	if _cm != null and _cm.is_work_time:
+	if hour < 16:
 		clock_label.add_theme_color_override("font_color", Color(0.22, 0.9, 0.42))
 	else:
 		clock_label.add_theme_color_override("font_color", Color(0.5, 0.51, 0.62))
-	if _cm != null:
-		day_label.text = "D%d" % _cm.current_day

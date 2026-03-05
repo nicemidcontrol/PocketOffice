@@ -1,15 +1,14 @@
 extends Node
 
 # ClockManager - Autoload singleton
-# Tracks in-game time with 1 in-game day = 8 real seconds at game_speed 1.0.
-# Work hours: 08:00 to 16:00 (480 in-game minutes per day, 22 days per month).
+# 1 month = 8 ticks, each tick = 60 real seconds
+# 1 year = 96 real minutes (12 months x 8 ticks x 60s)
+# 5-year campaign = ~8 hours total playtime
 
 # ------------------------------------------
 #  SIGNALS
 # ------------------------------------------
 signal work_day_started
-signal work_day_ended
-signal ot_day_ended
 signal month_changed(month: int, year: int)
 signal time_updated(hour: int, minute: int)
 
@@ -18,23 +17,23 @@ signal time_updated(hour: int, minute: int)
 # ------------------------------------------
 var current_hour: int   = 8
 var current_minute: int = 0
-var current_day: int    = 1
 var current_month: int  = 1
 var current_year: int   = 2024
 var game_speed: float   = 1.0
-var is_work_time: bool  = false
 var is_paused: bool     = false
 
-# 1 in-game day = 8 real seconds = 480 in-game minutes
-# => 1 in-game minute = 8.0 / 480.0 real seconds
-var _second_acc: float = 0.0
+# 1 tick = 60 real seconds, simulated as 08:00-16:00 (480 in-game minutes)
+# => 1 in-game minute = 60.0 / 480.0 real seconds
 const _SECONDS_PER_MINUTE: float = 60.0 / 480.0
+const _TICKS_PER_MONTH: int      = 8
+
+var _second_acc: float = 0.0
+var _tick_count: int   = 0
 
 # ------------------------------------------
 #  LIFECYCLE
 # ------------------------------------------
 func _ready() -> void:
-	is_work_time = true
 	work_day_started.emit()
 	time_updated.emit(current_hour, current_minute)
 
@@ -56,21 +55,15 @@ func _tick_minute() -> void:
 		current_hour += 1
 	time_updated.emit(current_hour, current_minute)
 	if current_hour >= 16 and current_minute == 0:
-		_end_work_day()
+		_end_tick()
 
-func _end_work_day() -> void:
-	work_day_ended.emit()
-	is_work_time = false
-	_advance_day()
-
-func _advance_day() -> void:
-	current_day += 1
-	if current_day > 22:
-		current_day = 1
+func _end_tick() -> void:
+	_tick_count += 1
+	if _tick_count >= _TICKS_PER_MONTH:
+		_tick_count = 0
 		_advance_month()
 	current_hour = 8
 	current_minute = 0
-	is_work_time = true
 	work_day_started.emit()
 	time_updated.emit(current_hour, current_minute)
 

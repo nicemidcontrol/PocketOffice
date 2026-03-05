@@ -85,7 +85,14 @@ Hire staff → Assign to projects → Earn Corporate Points + Revenue
 Upgrade office ←── Spend Corp Points ←── Win Donors → More Projects
 ```
 
-**Daily loop (in-game time):**
+**Time system:**
+- 1 month = 8 ticks, each tick = 60 seconds real time
+- 1 year = ~96 minutes real time (12 months x 8 ticks x 60s)
+- 5-year campaign = ~8 hours total playtime
+- Each tick simulates a workday (08:00–16:00 clock display)
+- Project progress, OT penalties, and motivation changes apply once per tick
+
+**Tick loop (per tick = 60 real seconds):**
 1. Time advances automatically (chill — player doesn't need to watch every second but would love to anyway in case there is a pop-up)
 2. Employees work on assigned projects; productivity determined by stats + office buffs
 3. Employees walk around and use facilities (5–10 seconds per facility, then move on)
@@ -328,14 +335,14 @@ Player can assign OT after 16:00 via Corporate > Assign Tasks.
 
 | OT Level | Extra Hours | Productivity Bonus | Motivation Cost |
 |---|---|---|---|
-| None | +0 | 100% | 0/day |
-| Light OT | +2 hrs | +30% | -5/day |
-| Heavy OT | +4 hrs | +50% | -15/day |
-| Crunch | +8 hrs | +70% | -30/day |
+| None | +0 | 100% | 0/tick |
+| Light OT | +2 hrs | +30% | -5/tick |
+| Heavy OT | +4 hrs | +50% | -15/tick |
+| Crunch | +8 hrs | +70% | -30/tick |
 
 - If motivation reaches 0 → employee enters Burnout state
 - Burnout: productivity -80%, spreads negativity to nearby employees
-- Recovery: remove OT, motivation recovers +5/day naturally
+- Recovery: remove OT, motivation recovers +5/tick naturally
 - Player must balance deadline pressure vs team wellbeing
 
 ---

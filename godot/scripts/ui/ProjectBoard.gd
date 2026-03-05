@@ -224,7 +224,7 @@ func _make_avail_card(proj: Dictionary) -> Control:
 	vbox.add_child(name_lbl)
 
 	var info_lbl: Label = Label.new()
-	info_lbl.text = "%s  |  %d days" % [_role_name(role), proj["duration_days"]]
+	info_lbl.text = "%s  |  %d ticks" % [_role_name(role), proj["duration_ticks"]]
 	info_lbl.add_theme_color_override("font_color", _role_color(role))
 	info_lbl.add_theme_font_size_override("font_size", 10)
 	vbox.add_child(info_lbl)
