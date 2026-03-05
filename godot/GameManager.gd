@@ -21,6 +21,8 @@ signal year_passed(year: int)
 signal tier_upgraded(new_tier: CompanyTier)
 signal game_message(message: String)
 signal corp_points_changed(new_value: int)
+signal evaluation_ready(year: int, results: Array)
+signal game_over(final_rank: int)
 
 # ─────────────────────────────────────────
 #  SUB-MANAGERS  (child nodes)
@@ -51,6 +53,10 @@ var company_data := {
 var _day_timer: float = 0.0
 var is_paused: bool  = false
 var corp_points: int = 0
+
+var game_year:               int   = 1
+var last_evaluation_year:    int   = 0
+var last_evaluation_results: Array = []
 
 # ─────────────────────────────────────────
 #  LIFECYCLE
@@ -183,6 +189,57 @@ func _calculate_annual_score() -> int:
 	var employee_score := minf(employees.average_motivation() / 100.0 * 30.0, 30.0)
 	return roundi(rep_score + finance_score + employee_score)
 
+func _build_evaluation_results() -> Array:
+	var dm: Node = get_node_or_null("/root/DonorManager")
+	var cm: Node = get_node_or_null("/root/CompetitorManager")
+
+	var won_count: int    = 0
+	if dm != null:
+		won_count = dm.won_donors.size()
+	var reputation: int   = int(company_data.get("reputation", 0))
+	var total_earned: int = economy.total_earned
+
+	var p_donors_score:  float = clampf(float(won_count) / 5.0 * 100.0, 0.0, 100.0)
+	var p_revenue_score: float = clampf(float(total_earned) / 500000.0 * 100.0, 0.0, 100.0)
+	var p_rep_score:     float = clampf(float(reputation) / 200.0 * 100.0, 0.0, 100.0)
+	var p_total:         float = (p_donors_score + p_revenue_score + p_rep_score) / 3.0
+
+	var results: Array = []
+	results.append({
+		"name":          str(company_data.get("company_name", "Your Company")),
+		"is_player":     true,
+		"donors_score":  p_donors_score,
+		"revenue_score": p_revenue_score,
+		"rep_score":     p_rep_score,
+		"total":         p_total,
+	})
+
+	if cm != null:
+		for comp in cm.competitors:
+			var c_donors:  float = float(comp["donors"])
+			var c_revenue: float = float(comp["revenue"])
+			var c_rep:     float = float(comp["reputation"])
+			var c_donors_score:  float = clampf(floorf(c_donors) / 5.0 * 100.0, 0.0, 100.0)
+			var c_revenue_score: float = clampf(c_revenue / 500000.0 * 100.0, 0.0, 100.0)
+			var c_rep_score:     float = clampf(c_rep / 200.0 * 100.0, 0.0, 100.0)
+			var c_total:         float = (c_donors_score + c_revenue_score + c_rep_score) / 3.0
+			results.append({
+				"name":          str(comp["name"]),
+				"is_player":     false,
+				"donors_score":  c_donors_score,
+				"revenue_score": c_revenue_score,
+				"rep_score":     c_rep_score,
+				"total":         c_total,
+			})
+
+	results.sort_custom(func(a: Dictionary, b: Dictionary) -> bool:
+		return float(a["total"]) > float(b["total"])
+	)
+	for i in range(results.size()):
+		results[i]["rank"] = i + 1
+
+	return results
+
 # ─────────────────────────────────────────
 #  GAME CONTROLS
 # ─────────────────────────────────────────
@@ -273,3 +330,18 @@ func _on_clock_month_changed(_month: int, _year: int) -> void:
 		if hq_funding > 0:
 			economy.add_revenue(hq_funding, "Annual HQ Funding")
 			broadcast("Annual HQ funding received: $%d!" % hq_funding)
+
+		var results: Array = _build_evaluation_results()
+		last_evaluation_results = results
+		last_evaluation_year    = game_year
+		evaluation_ready.emit(game_year, results)
+
+		var player_rank: int = 1
+		for entry in results:
+			if bool(entry.get("is_player", false)):
+				player_rank = int(entry.get("rank", 1))
+				break
+		if game_year >= 5:
+			game_over.emit(player_rank)
+
+		game_year += 1
