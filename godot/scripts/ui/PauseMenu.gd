@@ -4,6 +4,7 @@ signal hire_requested
 signal project_board_requested
 signal employee_list_requested
 signal build_requested
+signal research_requested
 
 # ─────────────────────────────────────────
 #  NODE REFS
@@ -101,6 +102,10 @@ func _on_coming_soon() -> void:
 func _on_assign_pressed() -> void:
 	_close()
 	project_board_requested.emit()
+
+func _on_research_pressed() -> void:
+	_close()
+	research_requested.emit()
 
 func _on_corporate_pressed() -> void:
 	_toggle_sub(_corporate_sub)

@@ -254,3 +254,22 @@ func _on_clock_month_changed(_month: int, _year: int) -> void:
 	var total_salary: int = employees.get_total_monthly_salary()
 	economy.spend(total_salary, "Monthly Salaries")
 	print("[Economy] Monthly salary paid: $%d" % total_salary)
+
+	var dm: Node = get_node_or_null("/root/DonorManager")
+	if dm != null:
+		var donor_income: int = dm.get_monthly_total()
+		if donor_income > 0:
+			economy.add_revenue(donor_income, "Donor Monthly Funding")
+			broadcast("Donor funding received: $%d" % donor_income)
+
+	if _month == 12:
+		var tier: int        = int(company_data.get("tier", CompanyTier.STARTUP))
+		var hq_funding: int  = 0
+		match tier:
+			CompanyTier.STARTUP:     hq_funding = 10000
+			CompanyTier.SME:         hq_funding = 25000
+			CompanyTier.ENTERPRISE:  hq_funding = 50000
+			CompanyTier.GLOBAL_CORP: hq_funding = 100000
+		if hq_funding > 0:
+			economy.add_revenue(hq_funding, "Annual HQ Funding")
+			broadcast("Annual HQ funding received: $%d!" % hq_funding)

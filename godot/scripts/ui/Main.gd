@@ -14,6 +14,7 @@ func _ready() -> void:
 	_pause_menu.project_board_requested.connect(_on_project_board_requested)
 	_pause_menu.employee_list_requested.connect(_on_employee_list_requested)
 	_pause_menu.build_requested.connect(_on_build_requested)
+	_pause_menu.research_requested.connect(_on_research_requested)
 	_notif_timer.timeout.connect(_on_notif_timer_timeout)
 
 	await get_tree().process_frame
@@ -24,6 +25,9 @@ func _ready() -> void:
 		_cp_value.text = str(gm.corp_points)
 		gm.employees.hero_unlocked.connect(_on_hero_unlocked)
 		gm.employees.employee_burnout.connect(_on_employee_burnout)
+	var dm: Node = get_node_or_null("/root/DonorManager")
+	if dm != null:
+		dm.donor_won.connect(_on_donor_won)
 	var em: Node = get_node_or_null("/root/EventManager")
 	if em != null:
 		em.event_fired.connect(_on_event_fired)
@@ -42,6 +46,9 @@ func _on_employee_list_requested() -> void:
 
 func _on_build_requested() -> void:
 	get_tree().change_scene_to_file("res://scenes/BuildScreen.tscn")
+
+func _on_research_requested() -> void:
+	get_tree().change_scene_to_file("res://scenes/ResearchScreen.tscn")
 
 func _on_project_completed(proj: Dictionary) -> void:
 	var proj_name: String = proj.get("name", "Project")
@@ -81,6 +88,24 @@ func _on_hero_unlocked(_hero_name: String) -> void:
 
 func _on_event_fired(event: Dictionary) -> void:
 	_event_popup.show_event(event)
+
+func _on_donor_won(donor_name: String, monthly: int) -> void:
+	var green_style: StyleBoxFlat = StyleBoxFlat.new()
+	green_style.bg_color = Color(0.05, 0.14, 0.07, 0.97)
+	green_style.border_width_left   = 2
+	green_style.border_width_top    = 2
+	green_style.border_width_right  = 2
+	green_style.border_width_bottom = 2
+	green_style.border_color = Color(0.2, 0.85, 0.3, 1.0)
+	green_style.corner_radius_top_left     = 8
+	green_style.corner_radius_top_right    = 8
+	green_style.corner_radius_bottom_right = 8
+	green_style.corner_radius_bottom_left  = 8
+	_notif_panel.add_theme_stylebox_override("panel", green_style)
+	_notif_label.add_theme_color_override("font_color", Color(0.3, 1.0, 0.4, 1.0))
+	_notif_label.text = "%s secured!\n+$%d/mo funding" % [donor_name, monthly]
+	_notif_panel.visible = true
+	_notif_timer.start()
 
 func _on_cp_changed(new_val: int) -> void:
 	_cp_value.text = str(new_val)
