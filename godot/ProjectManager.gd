@@ -56,7 +56,7 @@ func _connect_clock() -> void:
 # ------------------------------------------
 func accept_project(pid: int) -> bool:
 	for i: int in range(_available.size()):
-		if _available[i]["id"] == pid:
+		if _available[i].get("id", -1) == pid:
 			var proj: Dictionary = _available[i]
 			_available.remove_at(i)
 			proj["is_active"] = true
@@ -69,8 +69,8 @@ func accept_project(pid: int) -> bool:
 
 func assign_employee(project_id: int, employee_id: String, gm: Node) -> bool:
 	for proj in _active:
-		if proj["id"] == project_id:
-			var ids: Array = proj["assigned_employee_ids"]
+		if proj.get("id", -1) == project_id:
+			var ids: Array = proj.get("assigned_employee_ids", [])
 			if employee_id not in ids:
 				ids.append(employee_id)
 				proj["assigned_employee_ids"] = ids
@@ -107,13 +107,13 @@ func _on_work_day_started() -> void:
 		return
 	var to_complete: Array = []
 	for proj in _active:
-		var base: float      = 1.0 / float(proj["duration_ticks"])
+		var base: float      = 1.0 / float(proj.get("duration_ticks", 1))
 		var role_mult: float = 1.5 if _has_role_match(proj, gm) else 1.0
 		var ot_mult: float   = _get_ot_multiplier(proj, gm)
 		var daily: float     = base * role_mult * ot_mult
-		proj["progress"] = minf(1.0, proj["progress"] + daily)
+		proj["progress"] = minf(1.0, proj.get("progress", 0.0) + daily)
 		if proj["progress"] >= 1.0:
-			to_complete.append(proj["id"])
+			to_complete.append(proj.get("id", -1))
 	var any_completed: bool = not to_complete.is_empty()
 	for pid in to_complete:
 		_complete_by_id(pid, gm)
@@ -121,7 +121,7 @@ func _on_work_day_started() -> void:
 		projects_updated.emit()
 
 func _get_ot_multiplier(proj: Dictionary, gm: Node) -> float:
-	var ids: Array = proj["assigned_employee_ids"]
+	var ids: Array = proj.get("assigned_employee_ids", [])
 	if ids.is_empty():
 		return 1.0
 	var total_mult: float = 0.0
@@ -143,26 +143,26 @@ func _get_ot_multiplier(proj: Dictionary, gm: Node) -> float:
 	return total_mult / float(count)
 
 func _has_role_match(proj: Dictionary, gm: Node) -> bool:
-	var ids: Array = proj["assigned_employee_ids"]
+	var ids: Array = proj.get("assigned_employee_ids", [])
 	if ids.is_empty():
 		return false
 	for emp in gm.employees.get_hired_employees():
-		if emp.id in ids and emp.role == proj["required_role"]:
+		if emp.id in ids and emp.role == proj.get("required_role", 0):
 			return true
 	return false
 
 func _complete_by_id(pid: int, gm: Node) -> void:
 	for i: int in range(_active.size()):
-		if _active[i]["id"] == pid:
+		if _active[i].get("id", -1) == pid:
 			var proj: Dictionary = _active[i]
 			_active.remove_at(i)
 			proj["is_complete"] = true
 			proj["is_active"]   = false
-			gm.economy.add_revenue(proj["reward_cash"], "Project: " + proj["name"])
-			gm.add_corp_points(proj["reward_corp_points"])
+			gm.economy.add_revenue(proj.get("reward_cash", 0), "Project: " + proj.get("name", "Project"))
+			gm.add_corp_points(proj.get("reward_corp_points", 0))
 			_available.append(_next_from_pool())
 			print("[Project] %s completed! +$%d +%d CP" % [
-				proj["name"], proj["reward_cash"], proj["reward_corp_points"]
+				proj.get("name", "Project"), proj.get("reward_cash", 0), proj.get("reward_corp_points", 0)
 			])
 			project_completed.emit(proj)
 			return
