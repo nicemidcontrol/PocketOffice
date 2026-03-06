@@ -1,0 +1,170 @@
+[gd_scene load_steps=4 format=3 uid="uid://debugmenu001po"]
+
+[ext_resource type="Script" path="res://scripts/ui/DebugMenu.gd" id="1_dbgscript"]
+
+[sub_resource type="StyleBoxFlat" id="SBFlat_panel"]
+bg_color              = Color(0.05, 0.05, 0.15, 0.97)
+border_width_left     = 2
+border_width_top      = 2
+border_width_right    = 2
+border_width_bottom   = 2
+border_color          = Color(0.9, 0.2, 0.2, 1.0)
+corner_radius_top_left     = 8
+corner_radius_top_right    = 8
+corner_radius_bottom_right = 8
+corner_radius_bottom_left  = 8
+
+[sub_resource type="StyleBoxFlat" id="SBFlat_btn"]
+bg_color              = Color(0.08, 0.08, 0.20, 0.95)
+border_width_left     = 1
+border_width_top      = 1
+border_width_right    = 1
+border_width_bottom   = 1
+border_color          = Color(0.4, 0.41, 0.52, 0.5)
+corner_radius_top_left     = 4
+corner_radius_top_right    = 4
+corner_radius_bottom_right = 4
+corner_radius_bottom_left  = 4
+
+[sub_resource type="StyleBoxFlat" id="SBFlat_closebtn"]
+bg_color              = Color(0.18, 0.04, 0.04, 0.95)
+border_width_left     = 1
+border_width_top      = 1
+border_width_right    = 1
+border_width_bottom   = 1
+border_color          = Color(0.9, 0.2, 0.2, 0.7)
+corner_radius_top_left     = 4
+corner_radius_top_right    = 4
+corner_radius_bottom_right = 4
+corner_radius_bottom_left  = 4
+
+[node name="DebugMenu" type="CanvasLayer"]
+layer  = 20
+script = ExtResource("1_dbgscript")
+
+[node name="Root" type="Control" parent="."]
+layout_mode     = 1
+anchors_preset  = 15
+anchor_right    = 1.0
+anchor_bottom   = 1.0
+grow_horizontal = 2
+grow_vertical   = 2
+visible         = false
+
+[node name="Panel" type="PanelContainer" parent="Root"]
+layout_mode    = 1
+anchor_left    = 0.5
+anchor_top     = 0.1
+anchor_right   = 0.5
+anchor_bottom  = 0.9
+offset_left    = -130.0
+offset_right   = 130.0
+grow_horizontal = 2
+grow_vertical   = 2
+theme_override_styles/panel = SubResource("SBFlat_panel")
+
+[node name="Margin" type="MarginContainer" parent="Root/Panel"]
+layout_mode = 2
+theme_override_constants/margin_left   = 12
+theme_override_constants/margin_top    = 12
+theme_override_constants/margin_right  = 12
+theme_override_constants/margin_bottom = 12
+
+[node name="VBox" type="VBoxContainer" parent="Root/Panel/Margin"]
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="TitleLabel" type="Label" parent="Root/Panel/Margin/VBox"]
+layout_mode          = 2
+text                 = "DEBUG MENU"
+horizontal_alignment = 1
+theme_override_font_sizes/font_size  = 14
+theme_override_colors/font_color     = Color(1.0, 0.3, 0.3, 1.0)
+
+[node name="Sep" type="HSeparator" parent="Root/Panel/Margin/VBox"]
+layout_mode = 2
+
+[node name="CashBtn" type="Button" parent="Root/Panel/Margin/VBox"]
+layout_mode         = 2
+custom_minimum_size = Vector2(0, 36)
+text                = "+$10,000 Cash"
+theme_override_styles/normal  = SubResource("SBFlat_btn")
+theme_override_styles/hover   = SubResource("SBFlat_btn")
+theme_override_styles/pressed = SubResource("SBFlat_btn")
+
+[node name="CpBtn" type="Button" parent="Root/Panel/Margin/VBox"]
+layout_mode         = 2
+custom_minimum_size = Vector2(0, 36)
+text                = "+100 Corporate Points"
+theme_override_styles/normal  = SubResource("SBFlat_btn")
+theme_override_styles/hover   = SubResource("SBFlat_btn")
+theme_override_styles/pressed = SubResource("SBFlat_btn")
+
+[node name="RepBtn" type="Button" parent="Root/Panel/Margin/VBox"]
+layout_mode         = 2
+custom_minimum_size = Vector2(0, 36)
+text                = "+20 Reputation"
+theme_override_styles/normal  = SubResource("SBFlat_btn")
+theme_override_styles/hover   = SubResource("SBFlat_btn")
+theme_override_styles/pressed = SubResource("SBFlat_btn")
+
+[node name="SkipMonthBtn" type="Button" parent="Root/Panel/Margin/VBox"]
+layout_mode         = 2
+custom_minimum_size = Vector2(0, 36)
+text                = "Skip 1 Month"
+theme_override_styles/normal  = SubResource("SBFlat_btn")
+theme_override_styles/hover   = SubResource("SBFlat_btn")
+theme_override_styles/pressed = SubResource("SBFlat_btn")
+
+[node name="SkipYearBtn" type="Button" parent="Root/Panel/Margin/VBox"]
+layout_mode         = 2
+custom_minimum_size = Vector2(0, 36)
+text                = "Skip 1 Year"
+theme_override_styles/normal  = SubResource("SBFlat_btn")
+theme_override_styles/hover   = SubResource("SBFlat_btn")
+theme_override_styles/pressed = SubResource("SBFlat_btn")
+
+[node name="BurnoutBtn" type="Button" parent="Root/Panel/Margin/VBox"]
+layout_mode         = 2
+custom_minimum_size = Vector2(0, 36)
+text                = "Force Burnout (Employee 1)"
+theme_override_styles/normal  = SubResource("SBFlat_btn")
+theme_override_styles/hover   = SubResource("SBFlat_btn")
+theme_override_styles/pressed = SubResource("SBFlat_btn")
+
+[node name="ResetTutorialBtn" type="Button" parent="Root/Panel/Margin/VBox"]
+layout_mode         = 2
+custom_minimum_size = Vector2(0, 36)
+text                = "Reset Tutorial"
+theme_override_styles/normal  = SubResource("SBFlat_btn")
+theme_override_styles/hover   = SubResource("SBFlat_btn")
+theme_override_styles/pressed = SubResource("SBFlat_btn")
+
+[node name="Sep2" type="HSeparator" parent="Root/Panel/Margin/VBox"]
+layout_mode = 2
+
+[node name="FeedbackLabel" type="Label" parent="Root/Panel/Margin/VBox"]
+layout_mode          = 2
+text                 = ""
+horizontal_alignment = 1
+autowrap_mode        = 3
+theme_override_font_sizes/font_size = 11
+theme_override_colors/font_color    = Color(0.3, 1.0, 0.4, 1.0)
+
+[node name="CloseBtn" type="Button" parent="Root/Panel/Margin/VBox"]
+layout_mode         = 2
+custom_minimum_size = Vector2(0, 36)
+text                = "CLOSE"
+theme_override_colors/font_color    = Color(1.0, 0.3, 0.3, 1.0)
+theme_override_styles/normal        = SubResource("SBFlat_closebtn")
+theme_override_styles/hover         = SubResource("SBFlat_closebtn")
+theme_override_styles/pressed       = SubResource("SBFlat_closebtn")
+
+[connection signal="pressed" from="Root/Panel/Margin/VBox/CashBtn" to="." method="_on_cash_btn_pressed"]
+[connection signal="pressed" from="Root/Panel/Margin/VBox/CpBtn" to="." method="_on_cp_btn_pressed"]
+[connection signal="pressed" from="Root/Panel/Margin/VBox/RepBtn" to="." method="_on_rep_btn_pressed"]
+[connection signal="pressed" from="Root/Panel/Margin/VBox/SkipMonthBtn" to="." method="_on_skip_month_btn_pressed"]
+[connection signal="pressed" from="Root/Panel/Margin/VBox/SkipYearBtn" to="." method="_on_skip_year_btn_pressed"]
+[connection signal="pressed" from="Root/Panel/Margin/VBox/BurnoutBtn" to="." method="_on_burnout_btn_pressed"]
+[connection signal="pressed" from="Root/Panel/Margin/VBox/ResetTutorialBtn" to="." method="_on_reset_tutorial_btn_pressed"]
+[connection signal="pressed" from="Root/Panel/Margin/VBox/CloseBtn" to="." method="_on_close_btn_pressed"]
