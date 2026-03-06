@@ -15,7 +15,7 @@ func _ready() -> void:
 	_pause_menu.employee_list_requested.connect(_on_employee_list_requested)
 	_pause_menu.build_requested.connect(_on_build_requested)
 	_pause_menu.research_requested.connect(_on_research_requested)
-	_pause_menu.score_requested.connect(_on_score_requested)
+	_pause_menu.shop_requested.connect(_on_shop_requested)
 	_notif_timer.timeout.connect(_on_notif_timer_timeout)
 
 	await get_tree().process_frame
@@ -33,6 +33,20 @@ func _ready() -> void:
 	var em: Node = get_node_or_null("/root/EventManager")
 	if em != null:
 		em.event_fired.connect(_on_event_fired)
+	_maybe_show_tutorial()
+
+func _on_shop_requested() -> void:
+	get_tree().change_scene_to_file("res://scenes/ShopScreen.tscn")
+
+func _maybe_show_tutorial() -> void:
+	var tut_script: GDScript = load("res://scripts/ui/TutorialOverlay.gd")
+	if tut_script == null:
+		return
+	if tut_script.is_tutorial_seen():
+		return
+	var overlay: Node = load("res://scenes/TutorialOverlay.tscn").instantiate()
+	add_child(overlay)
+	overlay.show_tutorial()
 
 func _on_menu_requested() -> void:
 	_pause_menu.open()

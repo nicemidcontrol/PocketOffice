@@ -5,7 +5,7 @@ signal project_board_requested
 signal employee_list_requested
 signal build_requested
 signal research_requested
-signal score_requested
+signal shop_requested
 
 # ─────────────────────────────────────────
 #  NODE REFS
@@ -92,6 +92,10 @@ func _on_hr_pressed() -> void:
 func _on_recruit_pressed() -> void:
 	_close()
 	hire_requested.emit()
+
+func _on_items_pressed() -> void:
+	_close()
+	shop_requested.emit()
 
 func _on_employee_list_pressed() -> void:
 	_close()

@@ -1,0 +1,178 @@
+[gd_scene load_steps=8 format=3 uid="uid://tutorialoverlay001po"]
+
+[ext_resource type="Script" path="res://scripts/ui/TutorialOverlay.gd" id="1_tutscript"]
+
+[sub_resource type="StyleBoxFlat" id="SBFlat_card"]
+bg_color              = Color(0.06, 0.06, 0.16, 1.0)
+border_width_left     = 2
+border_width_top      = 2
+border_width_right    = 2
+border_width_bottom   = 2
+border_color          = Color(1.0, 0.82, 0.1, 0.75)
+corner_radius_top_left     = 10
+corner_radius_top_right    = 10
+corner_radius_bottom_right = 10
+corner_radius_bottom_left  = 10
+
+[sub_resource type="StyleBoxFlat" id="SBFlat_skip"]
+bg_color              = Color(0.08, 0.08, 0.18, 0.95)
+border_width_left     = 1
+border_width_top      = 1
+border_width_right    = 1
+border_width_bottom   = 1
+border_color          = Color(0.4, 0.41, 0.52, 0.5)
+corner_radius_top_left     = 5
+corner_radius_top_right    = 5
+corner_radius_bottom_right = 5
+corner_radius_bottom_left  = 5
+
+[sub_resource type="StyleBoxFlat" id="SBFlat_next"]
+bg_color              = Color(0.08, 0.28, 0.14, 0.95)
+border_width_left     = 1
+border_width_top      = 1
+border_width_right    = 1
+border_width_bottom   = 1
+border_color          = Color(0.22, 0.9, 0.42, 0.7)
+corner_radius_top_left     = 5
+corner_radius_top_right    = 5
+corner_radius_bottom_right = 5
+corner_radius_bottom_left  = 5
+
+[sub_resource type="StyleBoxFlat" id="SBFlat_nexthov"]
+bg_color              = Color(0.10, 0.36, 0.18, 0.95)
+border_width_left     = 1
+border_width_top      = 1
+border_width_right    = 1
+border_width_bottom   = 1
+border_color          = Color(0.22, 0.9, 0.42, 0.9)
+corner_radius_top_left     = 5
+corner_radius_top_right    = 5
+corner_radius_bottom_right = 5
+corner_radius_bottom_left  = 5
+
+[sub_resource type="StyleBoxFlat" id="SBFlat_nextprs"]
+bg_color              = Color(0.06, 0.20, 0.10, 0.95)
+border_width_left     = 1
+border_width_top      = 1
+border_width_right    = 1
+border_width_bottom   = 1
+border_color          = Color(0.22, 0.9, 0.42, 0.5)
+corner_radius_top_left     = 5
+corner_radius_top_right    = 5
+corner_radius_bottom_right = 5
+corner_radius_bottom_left  = 5
+
+[node name="TutorialOverlay" type="CanvasLayer"]
+layer  = 10
+script = ExtResource("1_tutscript")
+
+[node name="Root" type="Control" parent="."]
+layout_mode     = 1
+anchors_preset  = 15
+anchor_right    = 1.0
+anchor_bottom   = 1.0
+grow_horizontal = 2
+grow_vertical   = 2
+visible         = false
+
+[node name="Overlay" type="ColorRect" parent="Root"]
+layout_mode     = 1
+anchors_preset  = 15
+anchor_right    = 1.0
+anchor_bottom   = 1.0
+grow_horizontal = 2
+grow_vertical   = 2
+mouse_filter    = 2
+color           = Color(0.0, 0.0, 0.05, 0.82)
+
+[node name="Card" type="PanelContainer" parent="Root"]
+layout_mode    = 1
+anchor_left    = 0.05
+anchor_top     = 0.18
+anchor_right   = 0.95
+anchor_bottom  = 0.85
+grow_horizontal = 2
+grow_vertical   = 2
+theme_override_styles/panel = SubResource("SBFlat_card")
+
+[node name="CardMargin" type="MarginContainer" parent="Root/Card"]
+layout_mode = 2
+theme_override_constants/margin_left   = 4
+theme_override_constants/margin_top    = 8
+theme_override_constants/margin_right  = 4
+theme_override_constants/margin_bottom = 8
+
+[node name="CardVBox" type="VBoxContainer" parent="Root/Card/CardMargin"]
+layout_mode = 2
+theme_override_constants/separation = 10
+
+[node name="TopRow" type="HBoxContainer" parent="Root/Card/CardMargin/CardVBox"]
+layout_mode = 2
+theme_override_constants/separation = 6
+
+[node name="ChampBadge" type="Label" parent="Root/Card/CardMargin/CardVBox/TopRow"]
+layout_mode = 2
+text        = "C"
+theme_override_font_sizes/font_size = 20
+theme_override_colors/font_color    = Color(1.0, 0.82, 0.1, 1.0)
+
+[node name="SpeakerLabel" type="Label" parent="Root/Card/CardMargin/CardVBox/TopRow"]
+layout_mode           = 2
+size_flags_horizontal = 3
+text                  = "CHAMP"
+theme_override_font_sizes/font_size = 12
+theme_override_colors/font_color    = Color(1.0, 0.82, 0.1, 1.0)
+
+[node name="StepLabel" type="Label" parent="Root/Card/CardMargin/CardVBox/TopRow"]
+layout_mode = 2
+text        = "1 / 6"
+theme_override_font_sizes/font_size = 11
+theme_override_colors/font_color    = Color(0.4, 0.41, 0.52, 1.0)
+
+[node name="TitleLabel" type="Label" parent="Root/Card/CardMargin/CardVBox"]
+layout_mode   = 2
+text          = ""
+autowrap_mode = 3
+theme_override_font_sizes/font_size = 17
+theme_override_colors/font_color    = Color(0.92, 0.92, 0.95, 1.0)
+
+[node name="Sep" type="HSeparator" parent="Root/Card/CardMargin/CardVBox"]
+layout_mode = 2
+
+[node name="BodyLabel" type="Label" parent="Root/Card/CardMargin/CardVBox"]
+layout_mode           = 2
+size_flags_vertical   = 3
+text                  = ""
+autowrap_mode         = 3
+theme_override_font_sizes/font_size = 13
+theme_override_colors/font_color    = Color(0.65, 0.66, 0.77, 1.0)
+
+[node name="DotRow" type="HBoxContainer" parent="Root/Card/CardMargin/CardVBox"]
+layout_mode              = 2
+alignment                = 1
+theme_override_constants/separation = 6
+
+[node name="BtnRow" type="HBoxContainer" parent="Root/Card/CardMargin/CardVBox"]
+layout_mode = 2
+theme_override_constants/separation = 10
+
+[node name="SkipBtn" type="Button" parent="Root/Card/CardMargin/CardVBox/BtnRow"]
+layout_mode         = 2
+custom_minimum_size = Vector2(80, 40)
+text                = "SKIP"
+theme_override_font_sizes/font_size = 13
+theme_override_colors/font_color    = Color(0.5, 0.51, 0.62, 1.0)
+theme_override_styles/normal        = SubResource("SBFlat_skip")
+theme_override_styles/hover         = SubResource("SBFlat_skip")
+theme_override_styles/pressed       = SubResource("SBFlat_skip")
+
+[node name="NextBtn" type="Button" parent="Root/Card/CardMargin/CardVBox/BtnRow"]
+layout_mode           = 2
+size_flags_horizontal = 3
+custom_minimum_size   = Vector2(0, 40)
+text                  = "NEXT >"
+theme_override_font_sizes/font_size = 13
+theme_override_colors/font_color    = Color(0.22, 0.9, 0.42, 1.0)
+theme_override_styles/normal        = SubResource("SBFlat_next")
+theme_override_styles/hover         = SubResource("SBFlat_nexthov")
+theme_override_styles/pressed       = SubResource("SBFlat_nextprs")
