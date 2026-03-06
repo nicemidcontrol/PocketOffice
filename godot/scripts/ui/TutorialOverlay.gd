@@ -42,7 +42,7 @@ const STEPS: Array = [
 #  NODE REFS
 # ------------------------------------------
 @onready var _root:        Control       = $Root
-@onready var _step_lbl:    Label         = $Root/Card/CardMargin/CardVBox/StepLabel
+@onready var _step_lbl:    Label         = $Root/Card/CardMargin/CardVBox/TopRow/StepLabel
 @onready var _title_lbl:   Label         = $Root/Card/CardMargin/CardVBox/TitleLabel
 @onready var _body_lbl:    Label         = $Root/Card/CardMargin/CardVBox/BodyLabel
 @onready var _speaker_lbl: Label         = $Root/Card/CardMargin/CardVBox/TopRow/SpeakerLabel

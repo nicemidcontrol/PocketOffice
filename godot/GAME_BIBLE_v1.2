@@ -1,5 +1,5 @@
 # 📋 Pocket Office — Game Bible
-> Last updated: 2026-03-04
+> Last updated: 2026-03-06
 > This file is the single source of truth for design decisions. Claude should read this before any design or code work.
 
 ---
@@ -537,3 +537,226 @@ Once unlocked, they appear in the HireScreen candidate pool.
 2. GitHub → merge PR to main
 3. Git Bash → `git pull origin main`
 4. Godot → Reload + F5 test
+
+---
+
+## Development Philosophy
+- Core loop first: nothing gets built until the main loop is fun
+- System-driven design: each system is independent and testable alone
+- Scalable architecture: adding content never requires rewriting systems
+- Solo-dev scope control: if a feature takes more than 3 days, split it
+- No premature polish: gameplay feel before visual quality
+- Feature freeze before content: systems complete before data is added
+
+---
+
+## Expanded Core Loop (Addiction Layer)
+The core loop has 3 layers that must all feel satisfying:
+
+MICRO (every 60 seconds):
+  Tick fires -> employees work -> progress bar moves -> CP earned
+  Player feels: "something is always happening"
+
+MESO (every 8 ticks = 1 month):
+  Salary paid -> donor funding arrives -> new projects appear
+  Player feels: "I need to manage my resources"
+
+MACRO (every 12 months = 1 year):
+  Annual Evaluation -> rank vs competitors -> year goal revealed
+  Player feels: "I need a strategy to win"
+
+Every system in this Bible must feed into at least one of these layers.
+If a system does not connect to the loop, it should not be built.
+
+---
+
+## System Architecture
+Each system has one clear responsibility:
+
+ECONOMY SYSTEM
+  Owner: EconomyManager.gd
+  Responsibility: cash in/out, revenue tracking, bankruptcy check
+  Inputs: salaries, donor funding, project rewards, HQ funding
+  Outputs: current_cash, went_bankrupt signal
+
+EMPLOYEE SYSTEM
+  Owner: EmployeeManager.gd
+  Responsibility: hire/fire, stats, morale, burnout, OT
+  Inputs: player hire action, tick signal, OT level
+  Outputs: productivity score, burnout signal, hero_unlocked signal
+
+PROJECT SYSTEM
+  Owner: ProjectManager.gd
+  Responsibility: project pool, acceptance, progress, completion
+  Inputs: tick signal, assigned employees, OT multiplier
+  Outputs: project_completed signal with cash+CP rewards
+
+OFFICE SYSTEM
+  Owner: FacilityManager.gd + OfficeManager.gd
+  Responsibility: facility placement, combo detection, stat buffs
+  Inputs: player build action
+  Outputs: stat buff values applied to employees in range
+
+EVENT SYSTEM
+  Owner: EventManager.gd
+  Responsibility: random event firing, player choice handling
+  Inputs: tick signal, game state context
+  Outputs: stat changes, cash changes, morale changes
+
+MOTIVATION SYSTEM
+  Owner: part of EmployeeManager.gd
+  Responsibility: track morale per employee, Fever Mode trigger
+  Inputs: OT level, facility buffs, random events
+  Outputs: productivity multiplier, fever_mode_started signal
+
+EVALUATION SYSTEM
+  Owner: part of GameManager.gd + CompetitorManager.gd
+  Responsibility: annual scoring, competitor AI, win/lose
+  Inputs: month 12 signal, donor count, revenue, reputation
+  Outputs: evaluation_ready signal, game_over signal
+
+SAVE SYSTEM
+  Owner: SaveSystem.gd
+  Responsibility: serialize/deserialize all game state to JSON
+  Inputs: save_game() call
+  Outputs: user://pocketoffice_save.json
+
+---
+
+## Balancing Philosophy
+Early game (Year 1-2):
+  - Cash is tight but not punishing
+  - 2-3 employees is enough to survive
+  - First donor should be reachable within Month 4
+  - Teach systems one at a time through natural play
+
+Mid game (Year 2-4):
+  - Player expands team to 5-8 employees
+  - Facility combos start mattering
+  - Competitor gap becomes visible and motivating
+  - OT decisions become meaningful tradeoffs
+
+Late game (Year 4-5):
+  - Resource optimization is the main challenge
+  - All 5 donors should be pursued
+  - Burnout risk is real if player is careless
+  - Final evaluation should feel earned not random
+
+Number scaling rules:
+  - Salaries scale faster than project rewards (creates pressure)
+  - Reputation grows slowly but unlocks exponentially more content
+  - CP costs should always feel affordable with 2-3 weeks of play
+  - Never let the player feel stuck for more than one month
+
+---
+
+## Player Goal Structure
+SHORT-TERM goals (within one session, minutes):
+  - Accept a project
+  - Assign an employee
+  - Buy an item from the shop
+  - Build a facility
+  - Handle a random event
+
+MID-TERM goals (across sessions, days):
+  - Win a specific donor
+  - Get an employee to level 5
+  - Unlock a facility combo
+  - Survive a month without going negative cash
+
+LONG-TERM goals (campaign, weeks):
+  - Finish Year 5 ranked #1
+  - Unlock Derek Anan Boonphun
+  - Win all 5 donors in a single campaign
+  - Achieve S grade on Annual Evaluation
+
+Every UI screen should make at least one goal visible at all times.
+
+---
+
+## Randomness Rules
+Random events must follow these rules:
+  - Never make the player lose more than 10% of cash from one event
+  - Always give at least 2 choices so player has agency
+  - Good outcomes and bad outcomes should be roughly balanced
+  - Event text must feel relatable to real office life
+  - Never fire the same event twice in a row
+  - Events should occasionally reference the player's current state
+    (e.g. reference a specific employee name or current project)
+
+---
+
+## Debug and Development Tools
+These tools should be accessible via a hidden debug menu in-game:
+  - Time speed: x1, x2, x5, x10 tick speed
+  - Add cash: inject $10,000 instantly
+  - Add CP: inject 100 CP instantly
+  - Force event: trigger a specific event by name
+  - Skip month: advance clock by 1 full month instantly
+  - Skip year: advance to next Annual Evaluation instantly
+  - Unlock all facilities: bypass cash requirements
+  - Set reputation: set to any value for testing donor requirements
+  - Force burnout: trigger burnout on selected employee
+  - Reset tutorial: clear pocketoffice_prefs.json flag
+
+Implementation: A hidden DebugMenu scene activated by a key combo
+(e.g. Ctrl+Shift+D) that only works in DEBUG builds.
+
+---
+
+## Content Expansion Strategy
+The architecture must support adding new content without code changes:
+
+New employees:
+  - Add entry to EmployeeManager hero_roster array
+  - No new code required
+
+New facilities:
+  - Add entry to FacilityManager _FACILITY_DATA dictionary
+  - Combo system reads from data, no code changes
+
+New random events:
+  - Add entry to EventManager _EVENTS array
+  - Event system picks randomly from the array
+
+New projects:
+  - Add entry to ProjectManager _TEMPLATES array
+  - Project pool pulls from templates automatically
+
+New donors:
+  - Add entry to DonorManager _DONOR_LIST array
+  - Research screen reads from the list automatically
+
+Rule: If adding new content requires editing GDScript logic,
+the architecture needs to be refactored first.
+
+---
+
+## Design Pitfalls to Avoid
+FEATURE BLOAT
+  Warning: Adding systems before the core loop is fun.
+  Rule: Every feature must make the core loop more fun or it waits.
+
+PREMATURE POLISH
+  Warning: Spending time on art/sound before gameplay is solid.
+  Rule: Placeholder art until Milestone 4 is complete.
+
+CONTENT BEFORE SYSTEMS
+  Warning: Adding 50 events before the event system is stable.
+  Rule: 3 events that work perfectly beats 30 events that feel wrong.
+
+UNCLEAR FEEDBACK
+  Warning: Player does not know why something happened.
+  Rule: Every game action must produce visible feedback within 1 second.
+
+TUTORIAL OVERLOAD
+  Warning: Explaining everything at once before player can play.
+  Rule: Tutorial teaches by doing, not by reading walls of text.
+
+UNFAIR DIFFICULTY
+  Warning: Player loses due to bad luck, not bad decisions.
+  Rule: Random events adjust to game state; never fire at worst moment.
+
+SAVE CORRUPTION
+  Warning: One bad save ruins hours of progress.
+  Rule: SaveSystem validates data on load and falls back to new_game().
