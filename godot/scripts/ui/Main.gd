@@ -34,6 +34,16 @@ func _ready() -> void:
 	if em != null:
 		em.event_fired.connect(_on_event_fired)
 	_maybe_show_tutorial()
+	_load_debug_menu()
+
+func _load_debug_menu() -> void:
+	if not OS.is_debug_build():
+		return
+	var debug_scene: PackedScene = load("res://scenes/DebugMenu.tscn")
+	if debug_scene == null:
+		return
+	var debug_menu: Node = debug_scene.instantiate()
+	add_child(debug_menu)
 
 func _on_shop_requested() -> void:
 	get_tree().change_scene_to_file("res://scenes/ShopScreen.tscn")
