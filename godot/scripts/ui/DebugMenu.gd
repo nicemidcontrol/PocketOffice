@@ -51,7 +51,7 @@ func _input(event: InputEvent) -> void:
 func _on_cash_btn_pressed() -> void:
 	if _gm == null:
 		return
-	_gm.economy.add_cash(10000)
+	_gm.economy.add_revenue(10000, "Debug injection")
 	_show_feedback("+$10,000 injected")
 
 func _on_cp_btn_pressed() -> void:
