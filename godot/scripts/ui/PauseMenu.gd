@@ -121,6 +121,10 @@ func _on_lists_pressed() -> void:
 func _on_system_pressed() -> void:
 	_toggle_sub(_system_sub)
 
+func _on_score_pressed() -> void:
+	_close()
+	score_requested.emit()
+
 func _on_menu_save_pressed() -> void:
 	if _gm != null:
 		_gm.save_game()

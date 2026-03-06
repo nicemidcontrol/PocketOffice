@@ -15,12 +15,14 @@ enum CompanyTier { STARTUP, SME, ENTERPRISE, GLOBAL_CORP }
 # ─────────────────────────────────────────
 #  SIGNALS  (replaces C# static events)
 # ─────────────────────────────────────────
-signal day_passed(day: int)
+signal tick_passed(tick: int)
 signal month_passed(month: int)
 signal year_passed(year: int)
 signal tier_upgraded(new_tier: CompanyTier)
 signal game_message(message: String)
 signal corp_points_changed(new_value: int)
+signal evaluation_ready(year: int, results: Array)
+signal game_over(final_rank: int)
 
 # ─────────────────────────────────────────
 #  SUB-MANAGERS  (child nodes)
@@ -40,17 +42,21 @@ var company_data := {
 	"tier":                  CompanyTier.STARTUP,
 	"current_year":          2024,
 	"current_month":         1,
-	"current_day":           1,
+	"current_tick":          0,
 	"unlocked_departments":  ["General"],
 }
 
 # ─────────────────────────────────────────
 #  TIME
 # ─────────────────────────────────────────
-@export var day_duration_seconds: float = 10.0
-var _day_timer: float = 0.0
+@export var tick_duration_seconds: float = 10.0
+var _tick_timer: float = 0.0
 var is_paused: bool  = false
 var corp_points: int = 0
+
+var game_year:               int   = 1
+var last_evaluation_year:    int   = 0
+var last_evaluation_results: Array = []
 
 # ─────────────────────────────────────────
 #  LIFECYCLE
@@ -68,10 +74,10 @@ func _ready() -> void:
 func _process(delta: float) -> void:
 	if is_paused:
 		return
-	_day_timer += delta
-	if _day_timer >= day_duration_seconds:
-		_day_timer = 0.0
-		_advance_day()
+	_tick_timer += delta
+	if _tick_timer >= tick_duration_seconds:
+		_tick_timer = 0.0
+		_advance_tick()
 
 # ─────────────────────────────────────────
 #  SUB-MANAGER SETUP
@@ -101,7 +107,7 @@ func new_game(company_name: String) -> void:
 		"tier":                 CompanyTier.STARTUP,
 		"current_year":         2024,
 		"current_month":        1,
-		"current_day":          1,
+		"current_tick":         0,
 		"unlocked_departments": ["General"],
 	}
 	economy.initialize(10000)
@@ -114,16 +120,15 @@ func new_game(company_name: String) -> void:
 # ─────────────────────────────────────────
 #  TIME PROGRESSION
 # ─────────────────────────────────────────
-func _advance_day() -> void:
-	company_data["current_day"] += 1
-	day_passed.emit(company_data["current_day"])
+func _advance_tick() -> void:
+	company_data["current_tick"] += 1
+	tick_passed.emit(company_data["current_tick"])
 
 	employees.tick_motivation()
-	projects.tick_projects(self)
 	events.try_trigger_random_event()
 
-	if company_data["current_day"] > 30:
-		company_data["current_day"] = 1
+	if company_data["current_tick"] > 8:
+		company_data["current_tick"] = 0
 		_advance_month()
 
 func _advance_month() -> void:
@@ -183,6 +188,57 @@ func _calculate_annual_score() -> int:
 	var employee_score := minf(employees.average_motivation() / 100.0 * 30.0, 30.0)
 	return roundi(rep_score + finance_score + employee_score)
 
+func _build_evaluation_results() -> Array:
+	var dm: Node = get_node_or_null("/root/DonorManager")
+	var cm: Node = get_node_or_null("/root/CompetitorManager")
+
+	var won_count: int    = 0
+	if dm != null:
+		won_count = dm.won_donors.size()
+	var reputation: int   = int(company_data.get("reputation", 0))
+	var total_earned: int = economy.total_earned
+
+	var p_donors_score:  float = clampf(float(won_count) / 5.0 * 100.0, 0.0, 100.0)
+	var p_revenue_score: float = clampf(float(total_earned) / 500000.0 * 100.0, 0.0, 100.0)
+	var p_rep_score:     float = clampf(float(reputation) / 200.0 * 100.0, 0.0, 100.0)
+	var p_total:         float = (p_donors_score + p_revenue_score + p_rep_score) / 3.0
+
+	var results: Array = []
+	results.append({
+		"name":          str(company_data.get("company_name", "Your Company")),
+		"is_player":     true,
+		"donors_score":  p_donors_score,
+		"revenue_score": p_revenue_score,
+		"rep_score":     p_rep_score,
+		"total":         p_total,
+	})
+
+	if cm != null:
+		for comp in cm.competitors:
+			var c_donors:  float = float(comp["donors"])
+			var c_revenue: float = float(comp["revenue"])
+			var c_rep:     float = float(comp["reputation"])
+			var c_donors_score:  float = clampf(floorf(c_donors) / 5.0 * 100.0, 0.0, 100.0)
+			var c_revenue_score: float = clampf(c_revenue / 500000.0 * 100.0, 0.0, 100.0)
+			var c_rep_score:     float = clampf(c_rep / 200.0 * 100.0, 0.0, 100.0)
+			var c_total:         float = (c_donors_score + c_revenue_score + c_rep_score) / 3.0
+			results.append({
+				"name":          str(comp["name"]),
+				"is_player":     false,
+				"donors_score":  c_donors_score,
+				"revenue_score": c_revenue_score,
+				"rep_score":     c_rep_score,
+				"total":         c_total,
+			})
+
+	results.sort_custom(func(a: Dictionary, b: Dictionary) -> bool:
+		return float(a["total"]) > float(b["total"])
+	)
+	for i in range(results.size()):
+		results[i]["rank"] = i + 1
+
+	return results
+
 # ─────────────────────────────────────────
 #  GAME CONTROLS
 # ─────────────────────────────────────────
@@ -194,7 +250,7 @@ func toggle_pause() -> void:
 	is_paused = !is_paused
 
 func set_speed(multiplier: float) -> void:
-	day_duration_seconds = 10.0 / clampf(multiplier, 0.5, 4.0)
+	tick_duration_seconds = 10.0 / clampf(multiplier, 0.5, 4.0)
 
 func get_current_date_string() -> String:
 	return "Month %d, Year %d" % [company_data["current_month"], company_data["current_year"]]
@@ -273,3 +329,18 @@ func _on_clock_month_changed(_month: int, _year: int) -> void:
 		if hq_funding > 0:
 			economy.add_revenue(hq_funding, "Annual HQ Funding")
 			broadcast("Annual HQ funding received: $%d!" % hq_funding)
+
+		var results: Array = _build_evaluation_results()
+		last_evaluation_results = results
+		last_evaluation_year    = game_year
+		evaluation_ready.emit(game_year, results)
+
+		var player_rank: int = 1
+		for entry in results:
+			if bool(entry.get("is_player", false)):
+				player_rank = int(entry.get("rank", 1))
+				break
+		if game_year >= 5:
+			game_over.emit(player_rank)
+
+		game_year += 1

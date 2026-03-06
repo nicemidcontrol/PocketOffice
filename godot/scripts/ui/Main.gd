@@ -26,6 +26,7 @@ func _ready() -> void:
 		_cp_value.text = str(gm.corp_points)
 		gm.employees.hero_unlocked.connect(_on_hero_unlocked)
 		gm.employees.employee_burnout.connect(_on_employee_burnout)
+		gm.evaluation_ready.connect(_on_evaluation_ready)
 	var dm: Node = get_node_or_null("/root/DonorManager")
 	if dm != null:
 		dm.donor_won.connect(_on_donor_won)
@@ -64,6 +65,12 @@ func _on_build_requested() -> void:
 
 func _on_research_requested() -> void:
 	get_tree().change_scene_to_file("res://scenes/ResearchScreen.tscn")
+
+func _on_evaluation_ready(_year: int, _results: Array) -> void:
+	get_tree().change_scene_to_file("res://scenes/EvaluationScreen.tscn")
+
+func _on_score_requested() -> void:
+	get_tree().change_scene_to_file("res://scenes/EvaluationScreen.tscn")
 
 func _on_project_completed(proj: Dictionary) -> void:
 	var proj_name: String = proj.get("name", "Project")

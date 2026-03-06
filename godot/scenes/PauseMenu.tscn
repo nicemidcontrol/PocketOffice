@@ -395,5 +395,5 @@ theme_override_font_sizes/font_size = 16
 [connection signal="pressed" from="Root/ButtonsContainer/SystemSub/SystemSubVBox/SaveMenuBtn" to="." method="_on_menu_save_pressed"]
 [connection signal="pressed" from="Root/ButtonsContainer/SystemSub/SystemSubVBox/SettingsBtn" to="." method="_on_coming_soon"]
 [connection signal="pressed" from="Root/ButtonsContainer/SystemSub/SystemSubVBox/IndexBtn" to="." method="_on_coming_soon"]
-[connection signal="pressed" from="Root/ButtonsContainer/SystemSub/SystemSubVBox/ScoreBtn" to="." method="_on_coming_soon"]
+[connection signal="pressed" from="Root/ButtonsContainer/SystemSub/SystemSubVBox/ScoreBtn" to="." method="_on_score_pressed"]
 [connection signal="pressed" from="Root/ButtonsContainer/SystemSub/SystemSubVBox/QuitBtn" to="." method="_on_quit_pressed"]
