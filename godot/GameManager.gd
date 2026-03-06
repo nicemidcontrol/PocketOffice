@@ -291,11 +291,18 @@ func save_game() -> void:
 	SaveSystem.save(data)
 
 func load_game() -> void:
-	var data := SaveSystem.load_save()
+	var data: Dictionary = SaveSystem.load_save()
 	if data.is_empty():
 		return
 
 	company_data = data.get("company_data", company_data)
+	# Backfill keys missing from old saves so direct access never crashes
+	if not company_data.has("current_tick"):
+		company_data["current_tick"] = 0
+	if not company_data.has("current_month"):
+		company_data["current_month"] = 1
+	if not company_data.has("current_year"):
+		company_data["current_year"] = 2024
 	economy.from_save_dict(data.get("economy", {}))
 	employees.load_employees(data.get("employees", []))
 	projects.load_projects(data.get("active_projects", []))
