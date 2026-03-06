@@ -203,6 +203,12 @@ func get_all_employees() -> Array[Employee]:
 func get_hired_employees() -> Array[Employee]:
 	return _all_employees.filter(func(e): return e.is_hired)
 
+func get_employee_by_id(emp_id: String) -> Employee:
+	for emp in _all_employees:
+		if emp.id == emp_id:
+			return emp
+	return null
+
 # ─────────────────────────────────────────
 #  HERO SYSTEM
 # ─────────────────────────────────────────

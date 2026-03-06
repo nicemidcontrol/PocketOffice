@@ -108,10 +108,10 @@ func _make_active_card(proj: Dictionary) -> Control:
 	margin.add_child(vbox)
 	card.add_child(margin)
 
-	var role: int = proj["required_role"]
+	var role: int = proj.get("required_role", 0)
 
 	var name_lbl: Label = Label.new()
-	name_lbl.text = proj["name"]
+	name_lbl.text = proj.get("name", "Project")
 	name_lbl.add_theme_color_override("font_color", Color(0.92, 0.92, 0.95))
 	name_lbl.add_theme_font_size_override("font_size", 14)
 	vbox.add_child(name_lbl)
@@ -122,20 +122,21 @@ func _make_active_card(proj: Dictionary) -> Control:
 	role_lbl.add_theme_font_size_override("font_size", 10)
 	vbox.add_child(role_lbl)
 
+	var progress: float = proj.get("progress", 0.0)
 	var pbar: ProgressBar = ProgressBar.new()
 	pbar.min_value = 0.0
 	pbar.max_value = 1.0
-	pbar.value = proj["progress"]
+	pbar.value = progress
 	pbar.custom_minimum_size = Vector2(0, 14)
 	vbox.add_child(pbar)
 
 	var pct_lbl: Label = Label.new()
-	pct_lbl.text = "%d%% complete" % int(proj["progress"] * 100.0)
+	pct_lbl.text = "%d%% complete" % int(progress * 100.0)
 	pct_lbl.add_theme_color_override("font_color", Color(0.5, 0.51, 0.62))
 	pct_lbl.add_theme_font_size_override("font_size", 10)
 	vbox.add_child(pct_lbl)
 
-	var ids: Array = proj["assigned_employee_ids"]
+	var ids: Array = proj.get("assigned_employee_ids", [])
 	if ids.is_empty():
 		var no_emp: Label = Label.new()
 		no_emp.text = "No employees assigned"
@@ -196,7 +197,7 @@ func _make_active_card(proj: Dictionary) -> Control:
 	assign_btn.add_theme_stylebox_override("normal",  _btn_style(Color(0.08, 0.22, 0.36), Color(0.18, 0.42, 0.78, 0.7)))
 	assign_btn.add_theme_stylebox_override("hover",   _btn_style(Color(0.10, 0.28, 0.44), Color(0.18, 0.42, 0.78, 0.7)))
 	assign_btn.add_theme_stylebox_override("pressed", _btn_style(Color(0.06, 0.16, 0.28), Color(0.18, 0.42, 0.78, 0.7)))
-	var pid: int = proj["id"]
+	var pid: int = proj.get("id", -1)
 	assign_btn.pressed.connect(func() -> void: _open_assign_popup(pid))
 	vbox.add_child(assign_btn)
 
@@ -215,22 +216,22 @@ func _make_avail_card(proj: Dictionary) -> Control:
 	margin.add_child(vbox)
 	card.add_child(margin)
 
-	var role: int = proj["required_role"]
+	var role: int = proj.get("required_role", 0)
 
 	var name_lbl: Label = Label.new()
-	name_lbl.text = proj["name"]
+	name_lbl.text = proj.get("name", "Project")
 	name_lbl.add_theme_color_override("font_color", Color(0.92, 0.92, 0.95))
 	name_lbl.add_theme_font_size_override("font_size", 14)
 	vbox.add_child(name_lbl)
 
 	var info_lbl: Label = Label.new()
-	info_lbl.text = "%s  |  %d ticks" % [_role_name(role), proj["duration_ticks"]]
+	info_lbl.text = "%s  |  %d ticks" % [_role_name(role), proj.get("duration_ticks", proj.get("duration_days", 0))]
 	info_lbl.add_theme_color_override("font_color", _role_color(role))
 	info_lbl.add_theme_font_size_override("font_size", 10)
 	vbox.add_child(info_lbl)
 
 	var reward_lbl: Label = Label.new()
-	reward_lbl.text = "$%s  +%d CP" % [_fmt(proj["reward_cash"]), proj["reward_corp_points"]]
+	reward_lbl.text = "$%s  +%d CP" % [_fmt(proj.get("reward_cash", 0)), proj.get("reward_corp_points", 0)]
 	reward_lbl.add_theme_color_override("font_color", Color(1.0, 0.82, 0.1))
 	reward_lbl.add_theme_font_size_override("font_size", 12)
 	vbox.add_child(reward_lbl)
@@ -241,7 +242,7 @@ func _make_avail_card(proj: Dictionary) -> Control:
 	accept_btn.add_theme_stylebox_override("normal",  _btn_style(Color(0.08, 0.36, 0.17), Color(0.22, 0.9, 0.42, 0.7)))
 	accept_btn.add_theme_stylebox_override("hover",   _btn_style(Color(0.10, 0.44, 0.20), Color(0.22, 0.9, 0.42, 0.7)))
 	accept_btn.add_theme_stylebox_override("pressed", _btn_style(Color(0.06, 0.28, 0.13), Color(0.22, 0.9, 0.42, 0.7)))
-	var pid: int = proj["id"]
+	var pid: int = proj.get("id", -1)
 	accept_btn.pressed.connect(func() -> void: _on_accept_pressed(pid))
 	vbox.add_child(accept_btn)
 
@@ -256,8 +257,8 @@ func _on_accept_pressed(pid: int) -> void:
 func _open_assign_popup(project_id: int) -> void:
 	_selected_pid = project_id
 	for proj in _gm.projects.get_active_projects():
-		if proj["id"] == project_id:
-			_popup_title.text = "Assign to: " + proj["name"]
+		if proj.get("id", -1) == project_id:
+			_popup_title.text = "Assign to: " + proj.get("name", "Project")
 			break
 	for child in _popup_list.get_children():
 		child.queue_free()
