@@ -1,0 +1,299 @@
+[gd_scene load_steps=8 format=3 uid="uid://btrainscreen01"]
+
+[ext_resource type="Script" path="res://scripts/ui/TrainingScreen.gd" id="1_tsscript"]
+
+[sub_resource type="StyleBoxFlat" id="SBFlat_header"]
+bg_color = Color(0.047, 0.047, 0.11, 0.97)
+border_width_bottom = 2
+border_color = Color(0.18, 0.42, 0.78, 1)
+
+[sub_resource type="StyleBoxFlat" id="SBFlat_tab"]
+bg_color = Color(0.055, 0.055, 0.13, 0.95)
+border_width_bottom = 2
+border_color = Color(0.18, 0.18, 0.28, 0.6)
+
+[sub_resource type="StyleBoxFlat" id="SBFlat_slot"]
+bg_color = Color(0.047, 0.047, 0.11, 0.92)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(0.18, 0.42, 0.78, 1)
+corner_radius_top_left = 8
+corner_radius_top_right = 8
+corner_radius_bottom_right = 8
+corner_radius_bottom_left = 8
+
+[sub_resource type="StyleBoxFlat" id="SBFlat_result"]
+bg_color = Color(0.047, 0.047, 0.11, 0.97)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(0.18, 0.42, 0.78, 1)
+corner_radius_top_left = 8
+corner_radius_top_right = 8
+corner_radius_bottom_right = 8
+corner_radius_bottom_left = 8
+
+[sub_resource type="StyleBoxFlat" id="SBFlat_run"]
+bg_color = Color(0.055, 0.18, 0.055, 0.95)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(0.18, 0.78, 0.18, 1)
+corner_radius_top_left = 8
+corner_radius_top_right = 8
+corner_radius_bottom_right = 8
+corner_radius_bottom_left = 8
+
+[sub_resource type="StyleBoxFlat" id="SBFlat_bg_dark"]
+bg_color = Color(0.0, 0.0, 0.0, 0.6)
+
+[node name="TrainingScreen" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_tsscript")
+
+[node name="Background" type="ColorRect" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0.047, 0.047, 0.11, 1)
+
+[node name="TopBar" type="Panel" parent="."]
+layout_mode = 1
+anchors_preset = 10
+anchor_right = 1.0
+offset_bottom = 60.0
+grow_horizontal = 2
+theme_override_styles/panel = SubResource("SBFlat_header")
+
+[node name="BackBtn" type="Button" parent="TopBar"]
+layout_mode = 1
+anchor_top = 0.0
+anchor_bottom = 1.0
+offset_right = 90.0
+grow_vertical = 2
+theme_override_colors/font_color = Color(0.5, 0.7, 1, 1)
+theme_override_font_sizes/font_size = 12
+text = "< BACK"
+
+[node name="TitleLabel" type="Label" parent="TopBar"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_colors/font_color = Color(0.92, 0.92, 0.95, 1)
+theme_override_font_sizes/font_size = 15
+text = "TRAINING"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="CpLabel" type="Label" parent="TopBar"]
+layout_mode = 1
+anchor_left = 1.0
+anchor_right = 1.0
+anchor_top = 0.0
+anchor_bottom = 1.0
+offset_left = -100.0
+grow_horizontal = 0
+grow_vertical = 2
+theme_override_colors/font_color = Color(1, 0.82, 0.1, 1)
+theme_override_font_sizes/font_size = 13
+text = "[CP] 0"
+horizontal_alignment = 2
+vertical_alignment = 1
+
+[node name="TabBar" type="HBoxContainer" parent="."]
+layout_mode = 1
+anchor_right = 1.0
+offset_top = 60.0
+offset_bottom = 104.0
+grow_horizontal = 2
+theme_override_constants/separation = 0
+
+[node name="TrainTab" type="Button" parent="TabBar"]
+layout_mode = 2
+size_flags_horizontal = 3
+custom_minimum_size = Vector2(0, 44)
+text = "TRAIN"
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_font_sizes/font_size = 13
+theme_override_styles/normal = SubResource("SBFlat_tab")
+theme_override_styles/hover = SubResource("SBFlat_tab")
+theme_override_styles/pressed = SubResource("SBFlat_tab")
+
+[node name="ComboTab" type="Button" parent="TabBar"]
+layout_mode = 2
+size_flags_horizontal = 3
+custom_minimum_size = Vector2(0, 44)
+text = "COMBOS"
+theme_override_colors/font_color = Color(0.48, 0.48, 0.58, 1)
+theme_override_font_sizes/font_size = 13
+theme_override_styles/normal = SubResource("SBFlat_tab")
+theme_override_styles/hover = SubResource("SBFlat_tab")
+theme_override_styles/pressed = SubResource("SBFlat_tab")
+
+[node name="SlotArea" type="Panel" parent="."]
+layout_mode = 1
+anchor_right = 1.0
+offset_top = 108.0
+offset_bottom = 220.0
+grow_horizontal = 2
+theme_override_styles/panel = SubResource("SBFlat_slot")
+
+[node name="SlotHBox" type="HBoxContainer" parent="SlotArea"]
+layout_mode = 1
+anchor_right = 1.0
+anchor_top = 0.0
+anchor_bottom = 0.0
+offset_left = 8.0
+offset_right = -8.0
+offset_top = 8.0
+offset_bottom = 64.0
+grow_horizontal = 2
+theme_override_constants/separation = 6
+
+[node name="ComboHintLabel" type="Label" parent="SlotArea"]
+layout_mode = 1
+anchor_left = 0.0
+anchor_right = 1.0
+anchor_top = 0.0
+anchor_bottom = 0.0
+offset_top = 68.0
+offset_bottom = 86.0
+grow_horizontal = 2
+theme_override_colors/font_color = Color(1, 0.82, 0.1, 1)
+theme_override_font_sizes/font_size = 11
+text = ""
+horizontal_alignment = 1
+
+[node name="CostLabel" type="Label" parent="SlotArea"]
+layout_mode = 1
+anchor_left = 0.0
+anchor_right = 1.0
+anchor_top = 0.0
+anchor_bottom = 0.0
+offset_top = 88.0
+offset_bottom = 108.0
+grow_horizontal = 2
+theme_override_colors/font_color = Color(0.72, 0.72, 0.78, 1)
+theme_override_font_sizes/font_size = 11
+text = "Cost: 0 CP"
+horizontal_alignment = 1
+
+[node name="TrainScroll" type="ScrollContainer" parent="."]
+layout_mode = 1
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 8.0
+offset_top = 224.0
+offset_right = -8.0
+offset_bottom = -60.0
+grow_horizontal = 2
+grow_vertical = 2
+horizontal_scroll_mode = 0
+
+[node name="TrainList" type="VBoxContainer" parent="TrainScroll"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/separation = 8
+
+[node name="ComboScroll" type="ScrollContainer" parent="."]
+layout_mode = 1
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 8.0
+offset_top = 224.0
+offset_right = -8.0
+offset_bottom = -60.0
+grow_horizontal = 2
+grow_vertical = 2
+horizontal_scroll_mode = 0
+visible = false
+
+[node name="ComboList" type="VBoxContainer" parent="ComboScroll"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/separation = 8
+
+[node name="RunBtn" type="Button" parent="."]
+layout_mode = 1
+anchor_left = 0.0
+anchor_right = 1.0
+anchor_top = 1.0
+anchor_bottom = 1.0
+offset_left = 12.0
+offset_right = -12.0
+offset_top = -56.0
+offset_bottom = -8.0
+grow_horizontal = 2
+grow_vertical = 0
+theme_override_colors/font_color = Color(0.22, 0.9, 0.42, 1)
+theme_override_font_sizes/font_size = 14
+theme_override_styles/normal = SubResource("SBFlat_run")
+theme_override_styles/hover = SubResource("SBFlat_run")
+theme_override_styles/pressed = SubResource("SBFlat_run")
+text = "START TRAINING"
+disabled = true
+
+[node name="ResultPanel" type="Panel" parent="."]
+layout_mode = 1
+anchors_preset = -1
+anchor_left = 0.05
+anchor_right = 0.95
+anchor_top = 0.15
+anchor_bottom = 0.85
+grow_horizontal = 2
+grow_vertical = 2
+visible = false
+theme_override_styles/panel = SubResource("SBFlat_result")
+
+[node name="Margin" type="MarginContainer" parent="ResultPanel"]
+layout_mode = 1
+anchor_right = 1.0
+anchor_bottom = 1.0
+anchor_top = 0.0
+offset_bottom = -48.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/margin_left = 16
+theme_override_constants/margin_top = 12
+theme_override_constants/margin_right = 16
+theme_override_constants/margin_bottom = 12
+
+[node name="ResultLabel" type="Label" parent="ResultPanel/Margin"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+theme_override_colors/font_color = Color(0.92, 0.92, 0.95, 1)
+theme_override_font_sizes/font_size = 12
+text = ""
+autowrap_mode = 3
+
+[node name="CloseBtn" type="Button" parent="ResultPanel"]
+layout_mode = 1
+anchor_left = 0.0
+anchor_right = 1.0
+anchor_top = 1.0
+anchor_bottom = 1.0
+offset_left = 12.0
+offset_right = -12.0
+offset_top = -44.0
+offset_bottom = -8.0
+grow_horizontal = 2
+grow_vertical = 0
+theme_override_colors/font_color = Color(0.72, 0.72, 0.78, 1)
+theme_override_font_sizes/font_size = 13
+text = "CLOSE"
