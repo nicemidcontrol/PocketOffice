@@ -1,4 +1,4 @@
-[gd_scene load_steps=11 format=3 uid="uid://oa2c387kjige"]
+[gd_scene load_steps=14 format=3 uid="uid://oa2c387kjige"]
 
 [ext_resource type="Script" uid="uid://4kd85xnol5ow" path="res://scripts/ui/Main.gd" id="1_mainscript"]
 [ext_resource type="PackedScene" uid="uid://c7hud4a0x844" path="res://scenes/HUD.tscn" id="2_hudscene"]
@@ -24,6 +24,32 @@ bg_color = Color(0.1, 0.1, 0.2, 0.9)
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_fever_fill"]
 bg_color = Color(0.22, 0.9, 0.42, 1.0)
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_fever_panel"]
+bg_color = Color(0.047, 0.047, 0.11, 0.92)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(0.18, 0.42, 0.78, 1.0)
+corner_radius_top_left = 8
+corner_radius_top_right = 8
+corner_radius_bottom_right = 8
+corner_radius_bottom_left = 8
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_fever_bar_bg"]
+bg_color = Color(0.0, 0.0, 0.0, 0.0)
+corner_radius_top_left = 8
+corner_radius_top_right = 8
+corner_radius_bottom_right = 8
+corner_radius_bottom_left = 8
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_fever_bar_fill"]
+bg_color = Color(0.22, 0.9, 0.42, 1.0)
+corner_radius_top_left = 6
+corner_radius_top_right = 6
+corner_radius_bottom_right = 6
+corner_radius_bottom_left = 6
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_notif"]
 bg_color = Color(0.047, 0.047, 0.11, 0.97)
@@ -153,38 +179,42 @@ one_shot = true
 [node name="FeverLayer" type="CanvasLayer" parent="."]
 layer = 4
 
-[node name="FeverBar" type="ProgressBar" parent="FeverLayer"]
-anchors_preset = 12
+[node name="FeverPanel" type="Panel" parent="FeverLayer"]
 anchor_left = 0.0
 anchor_right = 1.0
 anchor_top = 1.0
 anchor_bottom = 1.0
-offset_top = -64.0
+offset_left = 12.0
+offset_right = -12.0
+offset_top = -72.0
 offset_bottom = -56.0
 grow_horizontal = 2
 grow_vertical = 0
+theme_override_styles/panel = SubResource("StyleBoxFlat_fever_panel")
+
+[node name="FeverBar" type="ProgressBar" parent="FeverLayer/FeverPanel"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
 min_value = 0.0
 max_value = 100.0
 value = 50.0
 show_percentage = false
-theme_override_styles/background = SubResource("StyleBoxFlat_fever_bg")
-theme_override_styles/fill = SubResource("StyleBoxFlat_fever_fill")
+theme_override_styles/background = SubResource("StyleBoxFlat_fever_bar_bg")
+theme_override_styles/fill = SubResource("StyleBoxFlat_fever_bar_fill")
 
-[node name="FeverLabel" type="Label" parent="FeverLayer"]
-visible = true
-anchors_preset = 12
-anchor_left = 0.0
+[node name="FeverLabel" type="Label" parent="FeverLayer/FeverPanel"]
+layout_mode = 1
+anchors_preset = 15
 anchor_right = 1.0
-anchor_top = 1.0
 anchor_bottom = 1.0
-offset_left = 0.0
-offset_right = 0.0
-offset_top = -64.0
-offset_bottom = -56.0
 grow_horizontal = 2
-grow_vertical = 0
-text = "!! FEVER MODE !!"
+grow_vertical = 2
+text = "MOT 50%"
 horizontal_alignment = 1
 vertical_alignment = 1
-theme_override_colors/font_color = Color(0.0, 0.0, 0.0, 0.8)
-theme_override_font_sizes/font_size = 9
+theme_override_colors/font_color = Color(0.85, 0.85, 0.85, 1.0)
+theme_override_font_sizes/font_size = 10
