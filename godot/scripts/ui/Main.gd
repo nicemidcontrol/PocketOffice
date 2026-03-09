@@ -1,12 +1,16 @@
 extends Control
 
-@onready var _bottom_bar:   Node  = $BottomBar
-@onready var _pause_menu:   Node  = $PauseMenu
-@onready var _cp_value:     Label = $CpIndicator/CpPanel/HBox/CpValue
-@onready var _notif_panel:  Panel = $NotifLayer/NotifPanel
-@onready var _notif_label:  Label = $NotifLayer/NotifPanel/Margin/VBox/NotifLabel
-@onready var _notif_timer:  Timer = $NotifLayer/NotifPanel/NotifTimer
-@onready var _event_popup:  Node  = $EventPopup
+@onready var _bottom_bar:   Node         = $BottomBar
+@onready var _pause_menu:   Node         = $PauseMenu
+@onready var _cp_value:     Label        = $CpIndicator/CpPanel/HBox/CpValue
+@onready var _notif_panel:  Panel        = $NotifLayer/NotifPanel
+@onready var _notif_label:  Label        = $NotifLayer/NotifPanel/Margin/VBox/NotifLabel
+@onready var _notif_timer:  Timer        = $NotifLayer/NotifPanel/NotifTimer
+@onready var _event_popup:  Node         = $EventPopup
+@onready var _fever_bar:    ProgressBar  = $FeverLayer/FeverBar
+@onready var _fever_label:  Label        = $FeverLayer/FeverLabel
+
+var _is_active: bool = true
 
 func _ready() -> void:
 	_bottom_bar.menu_requested.connect(_on_menu_requested)
@@ -27,6 +31,9 @@ func _ready() -> void:
 		gm.employees.hero_unlocked.connect(_on_hero_unlocked)
 		gm.employees.employee_burnout.connect(_on_employee_burnout)
 		gm.evaluation_ready.connect(_on_evaluation_ready)
+		gm.fever_mode_started.connect(_on_fever_started)
+		gm.fever_mode_ended.connect(_on_fever_ended)
+		gm.tick_passed.connect(_on_mot_tick)
 	var dm: Node = get_node_or_null("/root/DonorManager")
 	if dm != null:
 		dm.donor_won.connect(_on_donor_won)
@@ -35,6 +42,7 @@ func _ready() -> void:
 		em.event_fired.connect(_on_event_fired)
 	_maybe_show_tutorial()
 	_load_debug_menu()
+	_is_active = true
 
 func _load_debug_menu() -> void:
 	if not OS.is_debug_build():
@@ -45,7 +53,14 @@ func _load_debug_menu() -> void:
 	var debug_menu: Node = debug_scene.instantiate()
 	add_child(debug_menu)
 
+func _on_scene_about_to_change() -> void:
+	_is_active = false
+
+func _on_returned_to_main() -> void:
+	_is_active = true
+
 func _on_shop_requested() -> void:
+	_is_active = false
 	get_tree().change_scene_to_file("res://scenes/ShopScreen.tscn")
 
 func _maybe_show_tutorial() -> void:
@@ -62,31 +77,41 @@ func _on_menu_requested() -> void:
 	_pause_menu.open()
 
 func _on_hire_requested() -> void:
+	_is_active = false
 	get_tree().change_scene_to_file("res://scenes/HireScreen.tscn")
 
 func _on_project_board_requested() -> void:
+	_is_active = false
 	get_tree().change_scene_to_file("res://scenes/ProjectBoard.tscn")
 
 func _on_employee_list_requested() -> void:
+	_is_active = false
 	get_tree().change_scene_to_file("res://scenes/EmployeeListScreen.tscn")
 
 func _on_build_requested() -> void:
+	_is_active = false
 	get_tree().change_scene_to_file("res://scenes/BuildScreen.tscn")
 
 func _on_research_requested() -> void:
+	_is_active = false
 	get_tree().change_scene_to_file("res://scenes/ResearchScreen.tscn")
 
 func _on_evaluation_ready(_year: int, _results: Array) -> void:
+	_is_active = false
 	get_tree().change_scene_to_file("res://scenes/EvaluationScreen.tscn")
 
 func _on_score_requested() -> void:
+	_is_active = false
 	get_tree().change_scene_to_file("res://scenes/EvaluationScreen.tscn")
 
 func _on_project_completed(proj: Dictionary) -> void:
+	if not _is_active:
+		return
 	var proj_name: String = proj.get("name", "Project")
 	var cash: int = proj.get("reward_cash", 0)
 	var cp: int   = proj.get("reward_corp_points", 0)
 	_notif_label.text = "%s Complete!\n+$%d  +%d CP" % [proj_name, cash, cp]
+	get_tree().paused = true
 	_notif_panel.visible = true
 	_notif_timer.start()
 
@@ -94,8 +119,11 @@ func _on_notif_timer_timeout() -> void:
 	_notif_panel.visible = false
 	_notif_label.remove_theme_color_override("font_color")
 	_notif_panel.remove_theme_stylebox_override("panel")
+	get_tree().paused = false
 
 func _on_employee_burnout(emp_name: String) -> void:
+	if not _is_active:
+		return
 	_notif_label.text = emp_name + " is burned out!\nRemove OT immediately."
 	var red_style: StyleBoxFlat = StyleBoxFlat.new()
 	red_style.bg_color = Color(0.15, 0.04, 0.04, 0.97)
@@ -110,18 +138,26 @@ func _on_employee_burnout(emp_name: String) -> void:
 	red_style.corner_radius_bottom_left  = 8
 	_notif_panel.add_theme_stylebox_override("panel", red_style)
 	_notif_label.add_theme_color_override("font_color", Color(1.0, 0.35, 0.35, 1.0))
+	get_tree().paused = true
 	_notif_panel.visible = true
 	_notif_timer.start()
 
 func _on_hero_unlocked(_hero_name: String) -> void:
+	if not _is_active:
+		return
 	_notif_label.text = "A legendary employee is now available!\nCheck HR > Recruit."
+	get_tree().paused = true
 	_notif_panel.visible = true
 	_notif_timer.start()
 
 func _on_event_fired(event: Dictionary) -> void:
+	if not _is_active:
+		return
 	_event_popup.show_event(event)
 
 func _on_donor_won(donor_name: String, monthly: int) -> void:
+	if not _is_active:
+		return
 	var green_style: StyleBoxFlat = StyleBoxFlat.new()
 	green_style.bg_color = Color(0.05, 0.14, 0.07, 0.97)
 	green_style.border_width_left   = 2
@@ -136,8 +172,42 @@ func _on_donor_won(donor_name: String, monthly: int) -> void:
 	_notif_panel.add_theme_stylebox_override("panel", green_style)
 	_notif_label.add_theme_color_override("font_color", Color(0.3, 1.0, 0.4, 1.0))
 	_notif_label.text = "%s secured!\n+$%d/mo funding" % [donor_name, monthly]
+	get_tree().paused = true
 	_notif_panel.visible = true
 	_notif_timer.start()
 
 func _on_cp_changed(new_val: int) -> void:
 	_cp_value.text = str(new_val)
+
+func _on_mot_tick(_tick: int) -> void:
+	if not _is_active:
+		return
+	var gm: Node = get_node_or_null("/root/GameManager")
+	if gm == null:
+		return
+	var avg: float = gm.employees.average_motivation()
+	_fever_bar.value = avg
+	var fill_style: StyleBoxFlat = StyleBoxFlat.new()
+	fill_style.corner_radius_top_left     = 0
+	fill_style.corner_radius_top_right    = 0
+	fill_style.corner_radius_bottom_right = 0
+	fill_style.corner_radius_bottom_left  = 0
+	if avg >= 100.0:
+		fill_style.bg_color = Color(1.0, 0.82, 0.1, 1.0)
+	elif avg >= 70.0:
+		fill_style.bg_color = Color(0.9, 0.6, 0.1, 1.0)
+	else:
+		fill_style.bg_color = Color(0.22, 0.9, 0.42, 1.0)
+	_fever_bar.add_theme_stylebox_override("fill", fill_style)
+
+func _on_fever_started() -> void:
+	if not _is_active:
+		return
+	_fever_label.visible = true
+	var fill_style: StyleBoxFlat = StyleBoxFlat.new()
+	fill_style.bg_color = Color(1.0, 0.82, 0.1, 1.0)
+	_fever_bar.add_theme_stylebox_override("fill", fill_style)
+
+func _on_fever_ended() -> void:
+	_fever_label.visible = false
+	_fever_bar.value = 50.0

@@ -17,6 +17,7 @@ var _current_event: Dictionary = {}
 # ------------------------------------------
 func _ready() -> void:
 	visible = false
+	process_mode = Node.PROCESS_MODE_ALWAYS
 
 # ------------------------------------------
 #  PUBLIC API
@@ -27,6 +28,7 @@ func show_event(event: Dictionary) -> void:
 	_desc_label.text = event.get("description", "")
 	_build_choices(event.get("choices", []))
 	visible = true
+	get_tree().paused = true
 
 # ------------------------------------------
 #  CHOICE BUILDING
@@ -109,6 +111,7 @@ func _on_choice_selected(choice_idx: int) -> void:
 
 func _hide_popup() -> void:
 	visible = false
+	get_tree().paused = false
 	_current_event = {}
 	for child in _choices_vbox.get_children():
 		child.queue_free()

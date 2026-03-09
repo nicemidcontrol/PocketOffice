@@ -23,6 +23,8 @@ signal game_message(message: String)
 signal corp_points_changed(new_value: int)
 signal evaluation_ready(year: int, results: Array)
 signal game_over(final_rank: int)
+signal fever_mode_started
+signal fever_mode_ended
 
 # ─────────────────────────────────────────
 #  SUB-MANAGERS  (child nodes)
@@ -58,6 +60,11 @@ var game_year:               int   = 1
 var last_evaluation_year:    int   = 0
 var last_evaluation_results: Array = []
 
+var is_fever_mode: bool        = false
+var _fever_timer: float        = 0.0
+var _fever_duration: float     = 60.0
+var _fever_cooldown_month: int = -1
+
 # ─────────────────────────────────────────
 #  LIFECYCLE
 # ─────────────────────────────────────────
@@ -78,6 +85,10 @@ func _process(delta: float) -> void:
 	if _tick_timer >= tick_duration_seconds:
 		_tick_timer = 0.0
 		_advance_tick()
+	if is_fever_mode:
+		_fever_timer -= delta
+		if _fever_timer <= 0.0:
+			_end_fever_mode()
 
 # ─────────────────────────────────────────
 #  SUB-MANAGER SETUP
@@ -130,6 +141,7 @@ func _advance_tick() -> void:
 	if company_data["current_tick"] > 8:
 		company_data["current_tick"] = 0
 		_advance_month()
+	_check_fever_trigger()
 
 func _advance_month() -> void:
 	company_data["current_month"] += 1
@@ -240,6 +252,35 @@ func _build_evaluation_results() -> Array:
 	return results
 
 # ─────────────────────────────────────────
+#  FEVER MODE
+# ─────────────────────────────────────────
+func _check_fever_trigger() -> void:
+	if is_fever_mode:
+		return
+	var current_month: int = company_data.get("current_month", 1)
+	if current_month == _fever_cooldown_month:
+		return
+	var avg_mot: float = employees.average_motivation()
+	if avg_mot >= 100.0:
+		_start_fever_mode()
+
+func _start_fever_mode() -> void:
+	is_fever_mode = true
+	_fever_timer = _fever_duration
+	var current_month: int = company_data.get("current_month", 1)
+	_fever_cooldown_month = current_month
+	fever_mode_started.emit()
+	broadcast("FEVER MODE! All stats doubled for 60 seconds!")
+
+func _end_fever_mode() -> void:
+	is_fever_mode = false
+	_fever_timer = 0.0
+	for emp in employees.get_hired_employees():
+		emp.motivation = 50
+	fever_mode_ended.emit()
+	broadcast("Fever Mode ended. Time to recharge.")
+
+# ─────────────────────────────────────────
 #  GAME CONTROLS
 # ─────────────────────────────────────────
 func add_corp_points(amount: int) -> void:
@@ -282,11 +323,13 @@ func _on_employee_burnout(emp_name: String) -> void:
 # ─────────────────────────────────────────
 func save_game() -> void:
 	var data := {
-		"company_data":   company_data,
-		"employees":      employees.to_save_array(),
-		"economy":        economy.to_save_dict(),
-		"active_projects":projects.to_save_array(),
-		"office":         office.to_save_dict(),
+		"company_data":        company_data,
+		"employees":           employees.to_save_array(),
+		"economy":             economy.to_save_dict(),
+		"active_projects":     projects.to_save_array(),
+		"office":              office.to_save_dict(),
+		"is_fever_mode":       is_fever_mode,
+		"fever_cooldown_month": _fever_cooldown_month,
 	}
 	SaveSystem.save(data)
 
@@ -308,6 +351,8 @@ func load_game() -> void:
 	projects.load_projects(data.get("active_projects", []))
 	office.from_save_dict(data.get("office", {}))
 	events.initialize()
+	is_fever_mode         = data.get("is_fever_mode", false)
+	_fever_cooldown_month = data.get("fever_cooldown_month", -1)
 	broadcast("Game loaded! Welcome back to %s." % company_data["company_name"])
 
 # ─────────────────────────────────────────

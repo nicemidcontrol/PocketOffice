@@ -97,3 +97,4 @@ func _on_time_updated(hour: int, minute: int) -> void:
 		clock_label.add_theme_color_override("font_color", Color(0.22, 0.9, 0.42))
 	else:
 		clock_label.add_theme_color_override("font_color", Color(0.5, 0.51, 0.62))
+
