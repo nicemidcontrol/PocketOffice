@@ -7,6 +7,7 @@ signal build_requested
 signal research_requested
 signal shop_requested
 signal training_requested
+signal score_requested
 
 # ─────────────────────────────────────────
 #  NODE REFS
