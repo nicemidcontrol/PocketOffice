@@ -107,11 +107,12 @@ func _on_work_day_started() -> void:
 		return
 	var to_complete: Array = []
 	for proj in _active:
-		var base: float      = 1.0 / float(proj.get("duration_ticks", 1))
-		var role_mult: float = 1.5 if _has_role_match(proj, gm) else 1.0
-		var ot_mult: float   = _get_ot_multiplier(proj, gm)
-		var daily: float     = base * role_mult * ot_mult
-		proj["progress"] = minf(1.0, proj.get("progress", 0.0) + daily)
+		var base: float        = 1.0 / float(proj.get("duration_ticks", 1))
+		var role_mult: float   = 1.5 if _has_role_match(proj, gm) else 1.0
+		var ot_mult: float     = _get_ot_multiplier(proj, gm)
+		var daily: float       = base * role_mult * ot_mult
+		var fever_mult: float  = 2.0 if gm.is_fever_mode else 1.0
+		proj["progress"] = minf(1.0, proj.get("progress", 0.0) + daily * fever_mult)
 		if proj["progress"] >= 1.0:
 			to_complete.append(proj.get("id", -1))
 	var any_completed: bool = not to_complete.is_empty()

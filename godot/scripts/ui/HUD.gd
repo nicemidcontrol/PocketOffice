@@ -3,13 +3,15 @@ extends CanvasLayer
 # ─────────────────────────────────────────
 #  NODE REFS
 # ─────────────────────────────────────────
-@onready var cash_label:    Label = $TopBar/Margin/HBox/CashSection/CashLabel
-@onready var rep_label:     Label = $TopBar/Margin/HBox/RepSection/RepLabel
-@onready var date_label:    Label = $TopBar/Margin/HBox/DateSection/DateLabel
-@onready var clock_label:   Label = $TopBar/Margin/HBox/ClockSection/ClockLabel
-@onready var message_panel: Panel = $MessagePanel
-@onready var message_label: Label = $MessagePanel/Margin/MessageLabel
-@onready var message_timer: Timer = $MessageTimer
+@onready var cash_label:    Label       = $TopBar/Margin/HBox/CashSection/CashLabel
+@onready var rep_label:     Label       = $TopBar/Margin/HBox/RepSection/RepLabel
+@onready var date_label:    Label       = $TopBar/Margin/HBox/DateSection/DateLabel
+@onready var clock_label:   Label       = $TopBar/Margin/HBox/ClockSection/ClockLabel
+@onready var message_panel: Panel       = $MessagePanel
+@onready var message_label: Label       = $MessagePanel/Margin/MessageLabel
+@onready var message_timer: Timer       = $MessageTimer
+@onready var _mot_bar:      ProgressBar = $MotivationBar
+@onready var _fever_label:  Label       = $FeverLabel
 
 # ─────────────────────────────────────────
 #  STATE
@@ -34,6 +36,9 @@ func _ready() -> void:
 	_gm.game_message.connect(_on_game_message)
 	_gm.economy.cash_changed.connect(_on_cash_changed)
 	_gm.month_passed.connect(_on_month_passed)
+	_gm.fever_mode_started.connect(_on_fever_started)
+	_gm.fever_mode_ended.connect(_on_fever_ended)
+	_gm.tick_passed.connect(_on_tick_passed)
 
 	_cm = get_node_or_null("/root/ClockManager")
 	if _cm != null:
@@ -97,3 +102,31 @@ func _on_time_updated(hour: int, minute: int) -> void:
 		clock_label.add_theme_color_override("font_color", Color(0.22, 0.9, 0.42))
 	else:
 		clock_label.add_theme_color_override("font_color", Color(0.5, 0.51, 0.62))
+
+func _on_tick_passed(_tick: int) -> void:
+	if _gm == null:
+		return
+	var avg: float = _gm.employees.average_motivation()
+	_mot_bar.value = avg
+	if avg >= 100.0:
+		_mot_bar.add_theme_stylebox_override("fill", _bar_style(Color(1.0, 0.82, 0.1)))
+	else:
+		_mot_bar.remove_theme_stylebox_override("fill")
+
+func _on_fever_started() -> void:
+	_fever_label.visible = true
+	_fever_label.text = "FEVER!"
+	_mot_bar.add_theme_stylebox_override("fill", _bar_style(Color(1.0, 0.82, 0.1)))
+
+func _on_fever_ended() -> void:
+	_fever_label.visible = false
+	_mot_bar.remove_theme_stylebox_override("fill")
+
+func _bar_style(col: Color) -> StyleBoxFlat:
+	var s: StyleBoxFlat = StyleBoxFlat.new()
+	s.bg_color = col
+	s.corner_radius_top_left     = 3
+	s.corner_radius_top_right    = 3
+	s.corner_radius_bottom_right = 3
+	s.corner_radius_bottom_left  = 3
+	return s
