@@ -20,6 +20,7 @@ func _ready() -> void:
 	_pause_menu.build_requested.connect(_on_build_requested)
 	_pause_menu.research_requested.connect(_on_research_requested)
 	_pause_menu.shop_requested.connect(_on_shop_requested)
+	_pause_menu.training_requested.connect(_on_training_requested)
 	_notif_timer.timeout.connect(_on_notif_timer_timeout)
 
 	await get_tree().process_frame
@@ -62,6 +63,14 @@ func _on_returned_to_main() -> void:
 func _on_shop_requested() -> void:
 	_is_active = false
 	get_tree().change_scene_to_file("res://scenes/ShopScreen.tscn")
+
+func _on_training_requested() -> void:
+	_is_active = false
+	var screen: Node = load("res://scenes/TrainingScreen.tscn").instantiate()
+	add_child(screen)
+	screen.training_done.connect(func() -> void:
+		_is_active = true
+	)
 
 func _maybe_show_tutorial() -> void:
 	var tut_script: GDScript = load("res://scripts/ui/TutorialOverlay.gd")

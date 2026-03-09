@@ -6,6 +6,7 @@ signal employee_list_requested
 signal build_requested
 signal research_requested
 signal shop_requested
+signal training_requested
 
 # ─────────────────────────────────────────
 #  NODE REFS
@@ -100,6 +101,10 @@ func _on_items_pressed() -> void:
 func _on_employee_list_pressed() -> void:
 	_close()
 	employee_list_requested.emit()
+
+func _on_training_btn_pressed() -> void:
+	_close()
+	training_requested.emit()
 
 func _on_coming_soon() -> void:
 	_show_toast("Coming Soon")
