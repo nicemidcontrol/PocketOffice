@@ -115,7 +115,7 @@ func _make_training_card(t: Dictionary) -> PanelContainer:
 	card.add_theme_stylebox_override("panel", card_style)
 
 	var vbox: VBoxContainer = VBoxContainer.new()
-	vbox.theme_override_constants = {"separation": 4}
+	vbox.add_theme_constant_override("separation", 4)
 	card.add_child(vbox)
 
 	# Name + tier row
@@ -124,7 +124,7 @@ func _make_training_card(t: Dictionary) -> PanelContainer:
 
 	var name_lbl: Label = Label.new()
 	name_lbl.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	name_lbl.theme_override_font_sizes = {"font_size": 13}
+	name_lbl.add_theme_font_size_override("font_size", 13)
 	var tier: int = t.get("tier", 1)
 	match tier:
 		1: name_lbl.add_theme_color_override("font_color", Color(0.92, 0.92, 0.95, 1))
@@ -135,14 +135,14 @@ func _make_training_card(t: Dictionary) -> PanelContainer:
 
 	var tier_lbl: Label = Label.new()
 	tier_lbl.add_theme_color_override("font_color", Color(0.5, 0.51, 0.62, 1))
-	tier_lbl.theme_override_font_sizes = {"font_size": 10}
+	tier_lbl.add_theme_font_size_override("font_size", 10)
 	tier_lbl.text = "Tier %d" % tier
 	hrow.add_child(tier_lbl)
 
 	# Cost label
 	var cost_lbl: Label = Label.new()
 	cost_lbl.add_theme_color_override("font_color", Color(1.0, 0.82, 0.1, 1))
-	cost_lbl.theme_override_font_sizes = {"font_size": 11}
+	cost_lbl.add_theme_font_size_override("font_size", 11)
 	cost_lbl.text = "%d CP/person" % t.get("cp_cost", 7)
 	vbox.add_child(cost_lbl)
 
@@ -154,7 +154,7 @@ func _make_training_card(t: Dictionary) -> PanelContainer:
 		stat_parts.append("%s+%d" % [short, stats[k]])
 	var stats_lbl: Label = Label.new()
 	stats_lbl.add_theme_color_override("font_color", Color(0.72, 0.72, 0.78, 1))
-	stats_lbl.theme_override_font_sizes = {"font_size": 11}
+	stats_lbl.add_theme_font_size_override("font_size", 11)
 	stats_lbl.text = "  ".join(stat_parts)
 	vbox.add_child(stats_lbl)
 
@@ -162,14 +162,14 @@ func _make_training_card(t: Dictionary) -> PanelContainer:
 	if t.get("double_stat", "") == "role_primary":
 		var bonus_lbl: Label = Label.new()
 		bonus_lbl.add_theme_color_override("font_color", Color(0.2, 0.85, 0.94, 1))
-		bonus_lbl.theme_override_font_sizes = {"font_size": 10}
+		bonus_lbl.add_theme_font_size_override("font_size", 10)
 		bonus_lbl.text = "* Role bonus: doubles primary stat"
 		vbox.add_child(bonus_lbl)
 
 	# Select button
 	var sel_btn: Button = Button.new()
 	sel_btn.text = "SELECT"
-	sel_btn.theme_override_font_sizes = {"font_size": 12}
+	sel_btn.add_theme_font_size_override("font_size", 12)
 	var training_ref: Dictionary = t
 	var card_ref: PanelContainer = card
 	sel_btn.pressed.connect(func() -> void: _on_select_training(training_ref, card_ref))
@@ -229,14 +229,14 @@ func _make_combo_card(combo: Dictionary, discovered: bool) -> PanelContainer:
 	card.add_child(vbox)
 
 	var name_lbl: Label = Label.new()
-	name_lbl.theme_override_font_sizes = {"font_size": 13}
+	name_lbl.add_theme_font_size_override("font_size", 13)
 	name_lbl.add_theme_color_override("font_color",
 		Color(0.92, 0.92, 0.95, 1) if discovered else Color(0.4, 0.4, 0.45, 1))
 	name_lbl.text = combo.get("name", "???") if discovered else "???"
 	vbox.add_child(name_lbl)
 
 	var req_lbl: Label = Label.new()
-	req_lbl.theme_override_font_sizes = {"font_size": 11}
+	req_lbl.add_theme_font_size_override("font_size", 11)
 	req_lbl.add_theme_color_override("font_color",
 		Color(0.72, 0.72, 0.78, 1) if discovered else Color(0.35, 0.35, 0.38, 1))
 	if discovered:
@@ -247,7 +247,7 @@ func _make_combo_card(combo: Dictionary, discovered: bool) -> PanelContainer:
 	vbox.add_child(req_lbl)
 
 	var bonus_lbl: Label = Label.new()
-	bonus_lbl.theme_override_font_sizes = {"font_size": 11}
+	bonus_lbl.add_theme_font_size_override("font_size", 11)
 	bonus_lbl.add_theme_color_override("font_color",
 		Color(1.0, 0.82, 0.1, 1) if discovered else Color(0.35, 0.35, 0.38, 1))
 	bonus_lbl.text = combo.get("bonus_desc", "???") if discovered else "???"
@@ -267,7 +267,7 @@ func _build_slot_area() -> void:
 		btn.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 		btn.custom_minimum_size = Vector2(0, 48)
 		btn.text = "EMPTY"
-		btn.theme_override_font_sizes = {"font_size": 11}
+		btn.add_theme_font_size_override("font_size", 11)
 		var slot_idx: int = i
 		btn.pressed.connect(func() -> void: _open_picker(slot_idx))
 		_slot_hbox.add_child(btn)
@@ -332,13 +332,13 @@ func _open_picker(slot_idx: int) -> void:
 
 	var vbox: VBoxContainer = VBoxContainer.new()
 	vbox.set_anchors_preset(Control.PRESET_FULL_RECT)
-	vbox.theme_override_constants = {"separation": 4}
+	vbox.add_theme_constant_override("separation", 4)
 	_picker_panel.add_child(vbox)
 
 	var hdr: Label = Label.new()
 	hdr.text = "  Select Employee  "
 	hdr.add_theme_color_override("font_color", Color(0.92, 0.92, 0.95, 1))
-	hdr.theme_override_font_sizes = {"font_size": 13}
+	hdr.add_theme_font_size_override("font_size", 13)
 	hdr.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	vbox.add_child(hdr)
 
@@ -363,7 +363,7 @@ func _open_picker(slot_idx: int) -> void:
 				break
 		var emp_btn: Button = Button.new()
 		emp_btn.text = "%s  %s  Sk%d" % [emp.full_name(), emp.role_name(), emp.skill]
-		emp_btn.theme_override_font_sizes = {"font_size": 11}
+		emp_btn.add_theme_font_size_override("font_size", 11)
 		emp_btn.disabled = already_in_slot
 		var emp_ref: Object = emp
 		emp_btn.pressed.connect(func() -> void: _on_emp_picked(emp_ref))
@@ -371,7 +371,7 @@ func _open_picker(slot_idx: int) -> void:
 
 	var cancel_btn: Button = Button.new()
 	cancel_btn.text = "CANCEL"
-	cancel_btn.theme_override_font_sizes = {"font_size": 12}
+	cancel_btn.add_theme_font_size_override("font_size", 12)
 	cancel_btn.pressed.connect(func() -> void:
 		_picker_panel.queue_free()
 		_picker_panel = null
