@@ -50,21 +50,22 @@ func _refresh_all() -> void:
 	_update_date()
 
 func _update_cash(amount: int) -> void:
-	cash_label.text = "$" + _format_number(amount)
+	cash_label.text = "G" + _format_number(amount)
 
 func _update_reputation() -> void:
 	rep_label.text = str(_gm.company_data.get("reputation", 0))
 
 func _update_date() -> void:
-	var month: int = _gm.company_data.get("current_month", 1)
-	var year: int  = _gm.company_data.get("current_year", 2024)
-	date_label.text = "M%d  Y%d" % [month, year]
+	var month: int    = _gm.company_data.get("current_month", 1)
+	var game_year: int = _gm.game_year
+	var week: int     = _gm.company_data.get("current_tick", 0) + 1
+	date_label.text = "W%d  M%d  Y%d" % [week, month, game_year]
 
 func _format_number(n: int) -> String:
 	if n >= 1_000_000:
-		return "%.1fM" % (n / 1_000_000.0)
+		return "%dM" % (n / 1_000_000)
 	if n >= 1_000:
-		return "%.1fK" % (n / 1_000.0)
+		return "%dK" % (n / 1_000)
 	return str(n)
 
 # ─────────────────────────────────────────
