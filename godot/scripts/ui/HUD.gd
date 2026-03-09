@@ -50,7 +50,7 @@ func _refresh_all() -> void:
 	_update_date()
 
 func _update_cash(amount: int) -> void:
-	cash_label.text = "G" + _format_number(amount)
+	cash_label.text = "$" + _format_number(amount)
 
 func _update_reputation() -> void:
 	rep_label.text = str(_gm.company_data.get("reputation", 0))
