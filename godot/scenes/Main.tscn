@@ -171,17 +171,20 @@ theme_override_styles/background = SubResource("StyleBoxFlat_fever_bg")
 theme_override_styles/fill = SubResource("StyleBoxFlat_fever_fill")
 
 [node name="FeverLabel" type="Label" parent="FeverLayer"]
-visible = false
+visible = true
 anchors_preset = 12
 anchor_left = 0.0
 anchor_right = 1.0
 anchor_top = 1.0
 anchor_bottom = 1.0
-offset_top = -80.0
-offset_bottom = -64.0
+offset_left = 0.0
+offset_right = 0.0
+offset_top = -64.0
+offset_bottom = -56.0
 grow_horizontal = 2
 grow_vertical = 0
 text = "!! FEVER MODE !!"
 horizontal_alignment = 1
-theme_override_colors/font_color = Color(1.0, 0.82, 0.1, 1.0)
-theme_override_font_sizes/font_size = 11
+vertical_alignment = 1
+theme_override_colors/font_color = Color(0.0, 0.0, 0.0, 0.8)
+theme_override_font_sizes/font_size = 9
