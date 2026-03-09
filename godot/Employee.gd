@@ -135,15 +135,15 @@ func _apply_personality_bonuses() -> void:
 func _calculate_base_salary() -> int:
 	var base: int
 	match role:
-		Role.INTERN:        base = 500
-		Role.DEVELOPER:     base = 2000
-		Role.DESIGNER:      base = 1800
-		Role.MARKETER:      base = 1700
-		Role.HR_SPECIALIST: base = 1600
-		Role.ACCOUNTANT:    base = 1900
-		Role.MANAGER:       base = 2500
-		_:                  base = 1500
-	return base + (skill * 10) + (level * 100)
+		Role.INTERN:        base = 300
+		Role.DEVELOPER:     base = 1200
+		Role.DESIGNER:      base = 1100
+		Role.MARKETER:      base = 1000
+		Role.HR_SPECIALIST: base = 950
+		Role.ACCOUNTANT:    base = 1150
+		Role.MANAGER:       base = 1500
+		_:                  base = 900
+	return base + (skill * 5) + (level * 50)
 
 static func _generate_id() -> String:
 	# Simple unique ID using time + random

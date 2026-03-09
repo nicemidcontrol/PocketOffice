@@ -110,7 +110,7 @@ func new_game(company_name: String) -> void:
 		"current_tick":         0,
 		"unlocked_departments": ["General"],
 	}
-	economy.initialize(10000)
+	economy.initialize(50000)
 	projects.initialize()
 	events.initialize()
 	office.initialize()

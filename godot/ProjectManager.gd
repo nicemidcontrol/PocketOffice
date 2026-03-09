@@ -13,16 +13,16 @@ signal projects_updated
 #   0=DEVELOPER  1=DESIGNER  2=MARKETER  3=HR_SPECIALIST
 #   4=ACCOUNTANT  5=MANAGER  6=INTERN
 const _TEMPLATES: Array = [
-	{"name": "Website Redesign",    "description": "Rebuild the company website.",     "required_role": 0, "duration_ticks": 5, "reward_cash": 3000, "reward_corp_points": 20},
-	{"name": "Marketing Campaign",  "description": "Launch a new marketing campaign.", "required_role": 2, "duration_ticks": 4, "reward_cash": 2500, "reward_corp_points": 15},
-	{"name": "Annual Report",       "description": "Prepare the annual financial report.", "required_role": 4, "duration_ticks": 6, "reward_cash": 2000, "reward_corp_points": 25},
-	{"name": "System Upgrade",      "description": "Upgrade core IT infrastructure.",  "required_role": 0, "duration_ticks": 8, "reward_cash": 5000, "reward_corp_points": 35},
-	{"name": "Client Presentation", "description": "Present quarterly results to a key client.", "required_role": 2, "duration_ticks": 3, "reward_cash": 1500, "reward_corp_points": 10},
-	{"name": "Budget Planning",     "description": "Plan the next quarter budget.",    "required_role": 4, "duration_ticks": 5, "reward_cash": 2200, "reward_corp_points": 20},
-	{"name": "UI/UX Overhaul",      "description": "Redesign the core product interface.", "required_role": 1, "duration_ticks": 7, "reward_cash": 4000, "reward_corp_points": 30},
-	{"name": "Brand Identity",      "description": "Create updated brand guidelines.", "required_role": 1, "duration_ticks": 4, "reward_cash": 2800, "reward_corp_points": 18},
-	{"name": "Operations Manual",   "description": "Write the office operations manual.", "required_role": 5, "duration_ticks": 6, "reward_cash": 3500, "reward_corp_points": 28},
-	{"name": "Intern Onboarding",   "description": "Onboard the new intern cohort.",   "required_role": 6, "duration_ticks": 2, "reward_cash": 800,  "reward_corp_points": 8},
+	{"name": "Website Redesign",    "description": "Rebuild the company website.",     "required_role": 0, "duration_ticks": 5, "reward_cash": 4500, "reward_corp_points": 30},
+	{"name": "Marketing Campaign",  "description": "Launch a new marketing campaign.", "required_role": 2, "duration_ticks": 4, "reward_cash": 3800, "reward_corp_points": 23},
+	{"name": "Annual Report",       "description": "Prepare the annual financial report.", "required_role": 4, "duration_ticks": 6, "reward_cash": 3000, "reward_corp_points": 38},
+	{"name": "System Upgrade",      "description": "Upgrade core IT infrastructure.",  "required_role": 0, "duration_ticks": 8, "reward_cash": 7500, "reward_corp_points": 53},
+	{"name": "Client Presentation", "description": "Present quarterly results to a key client.", "required_role": 2, "duration_ticks": 3, "reward_cash": 2300, "reward_corp_points": 15},
+	{"name": "Budget Planning",     "description": "Plan the next quarter budget.",    "required_role": 4, "duration_ticks": 5, "reward_cash": 3300, "reward_corp_points": 30},
+	{"name": "UI/UX Overhaul",      "description": "Redesign the core product interface.", "required_role": 1, "duration_ticks": 7, "reward_cash": 6000, "reward_corp_points": 45},
+	{"name": "Brand Identity",      "description": "Create updated brand guidelines.", "required_role": 1, "duration_ticks": 4, "reward_cash": 4200, "reward_corp_points": 27},
+	{"name": "Operations Manual",   "description": "Write the office operations manual.", "required_role": 5, "duration_ticks": 6, "reward_cash": 5300, "reward_corp_points": 42},
+	{"name": "Intern Onboarding",   "description": "Onboard the new intern cohort.",   "required_role": 6, "duration_ticks": 2, "reward_cash": 1200, "reward_corp_points": 12},
 ]
 
 # ------------------------------------------
