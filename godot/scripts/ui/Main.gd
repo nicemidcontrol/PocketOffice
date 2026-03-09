@@ -7,8 +7,8 @@ extends Control
 @onready var _notif_label:  Label        = $NotifLayer/NotifPanel/Margin/VBox/NotifLabel
 @onready var _notif_timer:  Timer        = $NotifLayer/NotifPanel/NotifTimer
 @onready var _event_popup:  Node         = $EventPopup
-@onready var _fever_bar:    ProgressBar  = $FeverLayer/FeverBar
-@onready var _fever_label:  Label        = $FeverLayer/FeverLabel
+@onready var _fever_bar:    ProgressBar  = $FeverLayer/FeverPanel/FeverBar
+@onready var _fever_label:  Label        = $FeverLayer/FeverPanel/FeverLabel
 
 var _is_active: bool = true
 
@@ -211,8 +211,35 @@ func _on_fever_started() -> void:
 	if not _is_active:
 		return
 	_fever_label.text = "!! FEVER MODE !!"
-	_fever_label.add_theme_color_override("font_color", Color(0.1, 0.05, 0.0, 1.0))
+	_fever_label.add_theme_color_override("font_color", Color(1.0, 0.82, 0.1, 1.0))
+	var panel: Panel = $FeverLayer/FeverPanel
+	var s: StyleBoxFlat = StyleBoxFlat.new()
+	s.bg_color = Color(0.047, 0.047, 0.11, 0.92)
+	s.border_width_left   = 2
+	s.border_width_top    = 2
+	s.border_width_right  = 2
+	s.border_width_bottom = 2
+	s.border_color = Color(1.0, 0.82, 0.1, 1.0)
+	s.corner_radius_top_left     = 8
+	s.corner_radius_top_right    = 8
+	s.corner_radius_bottom_right = 8
+	s.corner_radius_bottom_left  = 8
+	panel.add_theme_stylebox_override("panel", s)
 
 func _on_fever_ended() -> void:
 	_fever_bar.value = 50.0
 	_fever_label.text = "MOT 50%"
+	_fever_label.add_theme_color_override("font_color", Color(0.85, 0.85, 0.85, 1.0))
+	var panel: Panel = $FeverLayer/FeverPanel
+	var s: StyleBoxFlat = StyleBoxFlat.new()
+	s.bg_color = Color(0.047, 0.047, 0.11, 0.92)
+	s.border_width_left   = 2
+	s.border_width_top    = 2
+	s.border_width_right  = 2
+	s.border_width_bottom = 2
+	s.border_color = Color(0.18, 0.42, 0.78, 1.0)
+	s.corner_radius_top_left     = 8
+	s.corner_radius_top_right    = 8
+	s.corner_radius_bottom_right = 8
+	s.corner_radius_bottom_left  = 8
+	panel.add_theme_stylebox_override("panel", s)
