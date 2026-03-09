@@ -279,15 +279,19 @@ func _refresh_slots() -> void:
 		var btn: Button = _slot_btns[i]
 		if i < _selected_employees.size():
 			var emp: Object = _selected_employees[i]
-			btn.text = "%s\n%s" % [emp.first_name, emp.role_name()]
+			if emp == null or not emp.has_method("role_name"):
+				btn.text = "EMPTY"
+			else:
+				btn.text = "%s\n%s" % [emp.first_name, emp.role_name()]
 		else:
 			btn.text = "EMPTY"
 	_refresh_combo_hint()
 	_refresh_run_btn()
 
 func _refresh_combo_hint() -> void:
-	if _selected_employees.size() == 3:
-		var combo: Dictionary = _tm.check_combo(_selected_employees)
+	var valid_emps: Array = _valid_employees()
+	if valid_emps.size() == 3:
+		var combo: Dictionary = _tm.check_combo(valid_emps)
 		if not combo.is_empty():
 			_combo_hint.text = "COMBO: %s" % combo.get("name", "")
 			return
@@ -295,16 +299,24 @@ func _refresh_combo_hint() -> void:
 	_refresh_cost()
 
 func _refresh_cost() -> void:
-	if _selected_training.is_empty() or _selected_employees.is_empty():
+	var valid_emps: Array = _valid_employees()
+	if _selected_training.is_empty() or valid_emps.is_empty():
 		_cost_label.text = "Cost: 0 CP"
 		return
 	var cost: int = _tm.get_total_cp_cost(
-		_selected_training, _selected_employees.size(),
-		_selected_employees, _discovered_combos)
+		_selected_training, valid_emps.size(),
+		valid_emps, _discovered_combos)
 	_cost_label.text = "Cost: %d CP" % cost
 
 func _refresh_run_btn() -> void:
-	_run_btn.disabled = _selected_training.is_empty() or _selected_employees.is_empty()
+	_run_btn.disabled = _selected_training.is_empty() or _valid_employees().is_empty()
+
+func _valid_employees() -> Array:
+	var out: Array = []
+	for e in _selected_employees:
+		if e != null and e.has_method("role_name"):
+			out.append(e)
+	return out
 
 # ─────────────────────────────────────────
 #  EMPLOYEE PICKER
@@ -379,11 +391,6 @@ func _open_picker(slot_idx: int) -> void:
 	vbox.add_child(cancel_btn)
 
 func _on_emp_picked(emp: Object) -> void:
-	if _active_slot >= _selected_employees.size():
-		_selected_employees.resize(_active_slot + 1)
-		for i in range(_selected_employees.size()):
-			if _selected_employees[i] == null:
-				pass
 	while _selected_employees.size() <= _active_slot:
 		_selected_employees.append(null)
 	_selected_employees[_active_slot] = emp
@@ -438,10 +445,7 @@ func _on_run_training() -> void:
 		return
 	if _gm == null:
 		return
-	var valid_emps: Array = []
-	for e in _selected_employees:
-		if e != null:
-			valid_emps.append(e)
+	var valid_emps: Array = _valid_employees()
 	if valid_emps.is_empty():
 		return
 	var total_cost: int = _tm.get_total_cp_cost(
