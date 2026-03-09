@@ -39,13 +39,15 @@ var office:    Node
 #  COMPANY STATE
 # ─────────────────────────────────────────
 var company_data := {
-	"company_name":          "My Startup Inc.",
-	"reputation":            10,
-	"tier":                  CompanyTier.STARTUP,
-	"current_year":          2024,
-	"current_month":         1,
-	"current_tick":          0,
-	"unlocked_departments":  ["General"],
+	"company_name":                "My Startup Inc.",
+	"reputation":                  10,
+	"tier":                        CompanyTier.STARTUP,
+	"current_year":                2024,
+	"current_month":               1,
+	"current_tick":                0,
+	"unlocked_departments":        ["General"],
+	"discovered_training_combos":  [],
+	"discovered_facility_combos":  [],
 }
 
 # ─────────────────────────────────────────
@@ -113,13 +115,15 @@ func _init_sub_managers() -> void:
 # ─────────────────────────────────────────
 func new_game(company_name: String) -> void:
 	company_data = {
-		"company_name":         company_name,
-		"reputation":           10,
-		"tier":                 CompanyTier.STARTUP,
-		"current_year":         2024,
-		"current_month":        1,
-		"current_tick":         0,
-		"unlocked_departments": ["General"],
+		"company_name":                company_name,
+		"reputation":                  10,
+		"tier":                        CompanyTier.STARTUP,
+		"current_year":                2024,
+		"current_month":               1,
+		"current_tick":                0,
+		"unlocked_departments":        ["General"],
+		"discovered_training_combos":  [],
+		"discovered_facility_combos":  [],
 	}
 	economy.initialize(50000)
 	projects.initialize()

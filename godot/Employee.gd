@@ -21,7 +21,11 @@ enum Role {
 	HR_SPECIALIST,
 	ACCOUNTANT,
 	MANAGER,
-	INTERN
+	INTERN,
+	ANALYST,
+	LEGAL,
+	IT_SUPPORT,
+	PR
 }
 
 # ─────────────────────────────────────────
@@ -142,6 +146,10 @@ func _calculate_base_salary() -> int:
 		Role.HR_SPECIALIST: base = 950
 		Role.ACCOUNTANT:    base = 1150
 		Role.MANAGER:       base = 1500
+		Role.ANALYST:       base = 1050
+		Role.LEGAL:         base = 1200
+		Role.IT_SUPPORT:    base = 900
+		Role.PR:            base = 980
 		_:                  base = 900
 	return base + (skill * 5) + (level * 50)
 
@@ -170,6 +178,9 @@ func _level_up() -> void:
 func adjust_motivation(delta: int) -> void:
 	motivation  = clampi(motivation + delta, 0, 100)
 	is_burned_out = motivation <= 10
+
+func role_name() -> String:
+	return Role.keys()[role]
 
 func get_display_string() -> String:
 	return "%s | %s | Lv.%d | Skill:%d Motivation:%d | $%d/mo" % [
