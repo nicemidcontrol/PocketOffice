@@ -187,27 +187,32 @@ func _on_mot_tick(_tick: int) -> void:
 		return
 	var avg: float = gm.employees.average_motivation()
 	_fever_bar.value = avg
+	_fever_label.visible = true
 	var fill_style: StyleBoxFlat = StyleBoxFlat.new()
 	fill_style.corner_radius_top_left     = 0
 	fill_style.corner_radius_top_right    = 0
 	fill_style.corner_radius_bottom_right = 0
 	fill_style.corner_radius_bottom_left  = 0
-	if avg >= 100.0:
+	if gm.is_fever_mode:
 		fill_style.bg_color = Color(1.0, 0.82, 0.1, 1.0)
+		_fever_label.text = "!! FEVER MODE !!"
+		_fever_label.add_theme_color_override("font_color", Color(0.1, 0.05, 0.0, 1.0))
 	elif avg >= 70.0:
 		fill_style.bg_color = Color(0.9, 0.6, 0.1, 1.0)
+		_fever_label.text = "MOT %.0f%%" % avg
+		_fever_label.add_theme_color_override("font_color", Color(0.0, 0.0, 0.0, 0.8))
 	else:
 		fill_style.bg_color = Color(0.22, 0.9, 0.42, 1.0)
+		_fever_label.text = "MOT %.0f%%" % avg
+		_fever_label.add_theme_color_override("font_color", Color(0.0, 0.0, 0.0, 0.8))
 	_fever_bar.add_theme_stylebox_override("fill", fill_style)
 
 func _on_fever_started() -> void:
 	if not _is_active:
 		return
-	_fever_label.visible = true
-	var fill_style: StyleBoxFlat = StyleBoxFlat.new()
-	fill_style.bg_color = Color(1.0, 0.82, 0.1, 1.0)
-	_fever_bar.add_theme_stylebox_override("fill", fill_style)
+	_fever_label.text = "!! FEVER MODE !!"
+	_fever_label.add_theme_color_override("font_color", Color(0.1, 0.05, 0.0, 1.0))
 
 func _on_fever_ended() -> void:
-	_fever_label.visible = false
 	_fever_bar.value = 50.0
+	_fever_label.text = "MOT 50%"
