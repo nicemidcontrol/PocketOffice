@@ -45,7 +45,7 @@ layout_mode = 2
 
 [node name="CashSection" type="VBoxContainer" parent="TopBar/Margin/HBox"]
 layout_mode = 2
-size_flags_horizontal = 3
+size_flags_horizontal = 8
 size_flags_vertical = 4
 alignment = 1
 
@@ -64,12 +64,14 @@ theme_override_colors/font_color = Color(0.22, 0.9, 0.42, 1.0)
 theme_override_font_sizes/font_size = 17
 
 [node name="VSep1" type="VSeparator" parent="TopBar/Margin/HBox"]
+visible = false
 layout_mode = 2
 custom_minimum_size = Vector2(10, 0)
 size_flags_vertical = 3
 theme_override_styles/separator = SubResource("StyleBoxLine_sep")
 
 [node name="RepSection" type="VBoxContainer" parent="TopBar/Margin/HBox"]
+visible = false
 layout_mode = 2
 size_flags_horizontal = 3
 size_flags_vertical = 4
@@ -90,6 +92,7 @@ theme_override_colors/font_color = Color(1.0, 0.82, 0.1, 1.0)
 theme_override_font_sizes/font_size = 17
 
 [node name="VSep2" type="VSeparator" parent="TopBar/Margin/HBox"]
+visible = false
 layout_mode = 2
 custom_minimum_size = Vector2(10, 0)
 size_flags_vertical = 3
@@ -116,12 +119,14 @@ theme_override_colors/font_color = Color(0.2, 0.85, 0.94, 1.0)
 theme_override_font_sizes/font_size = 14
 
 [node name="VSep3" type="VSeparator" parent="TopBar/Margin/HBox"]
+visible = false
 layout_mode = 2
 custom_minimum_size = Vector2(10, 0)
 size_flags_vertical = 3
 theme_override_styles/separator = SubResource("StyleBoxLine_sep")
 
 [node name="ClockSection" type="VBoxContainer" parent="TopBar/Margin/HBox"]
+visible = false
 layout_mode = 2
 size_flags_horizontal = 3
 size_flags_vertical = 4
