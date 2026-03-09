@@ -1,12 +1,14 @@
 extends Control
 
-@onready var _bottom_bar:   Node  = $BottomBar
-@onready var _pause_menu:   Node  = $PauseMenu
-@onready var _cp_value:     Label = $CpIndicator/CpPanel/HBox/CpValue
-@onready var _notif_panel:  Panel = $NotifLayer/NotifPanel
-@onready var _notif_label:  Label = $NotifLayer/NotifPanel/Margin/VBox/NotifLabel
-@onready var _notif_timer:  Timer = $NotifLayer/NotifPanel/NotifTimer
-@onready var _event_popup:  Node  = $EventPopup
+@onready var _bottom_bar:   Node         = $BottomBar
+@onready var _pause_menu:   Node         = $PauseMenu
+@onready var _cp_value:     Label        = $CpIndicator/CpPanel/HBox/CpValue
+@onready var _notif_panel:  Panel        = $NotifLayer/NotifPanel
+@onready var _notif_label:  Label        = $NotifLayer/NotifPanel/Margin/VBox/NotifLabel
+@onready var _notif_timer:  Timer        = $NotifLayer/NotifPanel/NotifTimer
+@onready var _event_popup:  Node         = $EventPopup
+@onready var _fever_bar:    ProgressBar  = $FeverLayer/FeverBar
+@onready var _fever_label:  Label        = $FeverLayer/FeverLabel
 
 var _is_active: bool = true
 
@@ -29,6 +31,9 @@ func _ready() -> void:
 		gm.employees.hero_unlocked.connect(_on_hero_unlocked)
 		gm.employees.employee_burnout.connect(_on_employee_burnout)
 		gm.evaluation_ready.connect(_on_evaluation_ready)
+		gm.fever_mode_started.connect(_on_fever_started)
+		gm.fever_mode_ended.connect(_on_fever_ended)
+		gm.tick_passed.connect(_on_mot_tick)
 	var dm: Node = get_node_or_null("/root/DonorManager")
 	if dm != null:
 		dm.donor_won.connect(_on_donor_won)
@@ -173,3 +178,36 @@ func _on_donor_won(donor_name: String, monthly: int) -> void:
 
 func _on_cp_changed(new_val: int) -> void:
 	_cp_value.text = str(new_val)
+
+func _on_mot_tick(_tick: int) -> void:
+	if not _is_active:
+		return
+	var gm: Node = get_node_or_null("/root/GameManager")
+	if gm == null:
+		return
+	var avg: float = gm.employees.average_motivation()
+	_fever_bar.value = avg
+	var fill_style: StyleBoxFlat = StyleBoxFlat.new()
+	fill_style.corner_radius_top_left     = 0
+	fill_style.corner_radius_top_right    = 0
+	fill_style.corner_radius_bottom_right = 0
+	fill_style.corner_radius_bottom_left  = 0
+	if avg >= 100.0:
+		fill_style.bg_color = Color(1.0, 0.82, 0.1, 1.0)
+	elif avg >= 70.0:
+		fill_style.bg_color = Color(0.9, 0.6, 0.1, 1.0)
+	else:
+		fill_style.bg_color = Color(0.22, 0.9, 0.42, 1.0)
+	_fever_bar.add_theme_stylebox_override("fill", fill_style)
+
+func _on_fever_started() -> void:
+	if not _is_active:
+		return
+	_fever_label.visible = true
+	var fill_style: StyleBoxFlat = StyleBoxFlat.new()
+	fill_style.bg_color = Color(1.0, 0.82, 0.1, 1.0)
+	_fever_bar.add_theme_stylebox_override("fill", fill_style)
+
+func _on_fever_ended() -> void:
+	_fever_label.visible = false
+	_fever_bar.value = 50.0
