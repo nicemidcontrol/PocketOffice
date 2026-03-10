@@ -6,6 +6,7 @@ extends CanvasLayer
 @onready var _title_label:   Label         = $Panel/Margin/VBox/TitleLabel
 @onready var _desc_label:    Label         = $Panel/Margin/VBox/DescLabel
 @onready var _choices_vbox:  VBoxContainer = $Panel/Margin/VBox/ChoicesVBox
+@onready var _close_btn:     Button        = $Panel/CloseBtn
 
 # ------------------------------------------
 #  STATE
@@ -18,6 +19,7 @@ var _current_event: Dictionary = {}
 func _ready() -> void:
 	visible = false
 	process_mode = Node.PROCESS_MODE_ALWAYS
+	_close_btn.pressed.connect(_on_close_pressed)
 
 # ------------------------------------------
 #  PUBLIC API
@@ -108,6 +110,10 @@ func _on_choice_selected(choice_idx: int) -> void:
 	if em != null:
 		em.resolve(choices[choice_idx])
 	_hide_popup()
+
+func _on_close_pressed() -> void:
+	visible = false
+	get_tree().paused = false
 
 func _hide_popup() -> void:
 	visible = false
