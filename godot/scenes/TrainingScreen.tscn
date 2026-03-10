@@ -1,4 +1,4 @@
-[gd_scene load_steps=8 format=3 uid="uid://btrainscreen01"]
+[gd_scene load_steps=7 format=3 uid="uid://btrainscreen01"]
 
 [ext_resource type="Script" path="res://scripts/ui/TrainingScreen.gd" id="1_tsscript"]
 
@@ -12,20 +12,8 @@ bg_color = Color(0.055, 0.055, 0.13, 0.95)
 border_width_bottom = 2
 border_color = Color(0.18, 0.18, 0.28, 0.6)
 
-[sub_resource type="StyleBoxFlat" id="SBFlat_slot"]
+[sub_resource type="StyleBoxFlat" id="SBFlat_dark"]
 bg_color = Color(0.047, 0.047, 0.11, 0.92)
-border_width_left = 2
-border_width_top = 2
-border_width_right = 2
-border_width_bottom = 2
-border_color = Color(0.18, 0.42, 0.78, 1)
-corner_radius_top_left = 8
-corner_radius_top_right = 8
-corner_radius_bottom_right = 8
-corner_radius_bottom_left = 8
-
-[sub_resource type="StyleBoxFlat" id="SBFlat_result"]
-bg_color = Color(0.047, 0.047, 0.11, 0.97)
 border_width_left = 2
 border_width_top = 2
 border_width_right = 2
@@ -48,8 +36,29 @@ corner_radius_top_right = 8
 corner_radius_bottom_right = 8
 corner_radius_bottom_left = 8
 
-[sub_resource type="StyleBoxFlat" id="SBFlat_bg_dark"]
-bg_color = Color(0.0, 0.0, 0.0, 0.6)
+[sub_resource type="StyleBoxFlat" id="SBFlat_result"]
+bg_color = Color(0.047, 0.047, 0.11, 0.97)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(0.18, 0.42, 0.78, 1)
+corner_radius_top_left = 8
+corner_radius_top_right = 8
+corner_radius_bottom_right = 8
+corner_radius_bottom_left = 8
+
+[sub_resource type="StyleBoxFlat" id="SBFlat_btm_btn"]
+bg_color = Color(0.04, 0.06, 0.12, 0.97)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(0.18, 0.42, 0.78, 1)
+corner_radius_top_left = 6
+corner_radius_top_right = 6
+corner_radius_bottom_right = 6
+corner_radius_bottom_left = 6
 
 [node name="TrainingScreen" type="Control"]
 layout_mode = 3
@@ -76,16 +85,6 @@ anchor_right = 1.0
 offset_bottom = 60.0
 grow_horizontal = 2
 theme_override_styles/panel = SubResource("SBFlat_header")
-
-[node name="BackBtn" type="Button" parent="TopBar"]
-layout_mode = 1
-anchor_top = 0.0
-anchor_bottom = 1.0
-offset_right = 90.0
-grow_vertical = 2
-theme_override_colors/font_color = Color(0.5, 0.7, 1, 1)
-theme_override_font_sizes/font_size = 12
-text = "< BACK"
 
 [node name="TitleLabel" type="Label" parent="TopBar"]
 layout_mode = 1
@@ -145,79 +144,151 @@ theme_override_styles/normal = SubResource("SBFlat_tab")
 theme_override_styles/hover = SubResource("SBFlat_tab")
 theme_override_styles/pressed = SubResource("SBFlat_tab")
 
-[node name="SlotArea" type="Panel" parent="."]
+[node name="TrainScroll" type="ScrollContainer" parent="."]
 layout_mode = 1
 anchor_right = 1.0
-offset_top = 108.0
-offset_bottom = 220.0
+anchor_bottom = 1.0
+offset_top = 104.0
+offset_bottom = -56.0
 grow_horizontal = 2
-theme_override_styles/panel = SubResource("SBFlat_slot")
+grow_vertical = 2
+horizontal_scroll_mode = 0
 
-[node name="SlotHBox" type="HBoxContainer" parent="SlotArea"]
-layout_mode = 1
-anchor_right = 1.0
-anchor_top = 0.0
-anchor_bottom = 0.0
-offset_left = 8.0
-offset_right = -8.0
-offset_top = 8.0
-offset_bottom = 64.0
-grow_horizontal = 2
+[node name="TrainVBox" type="VBoxContainer" parent="TrainScroll"]
+layout_mode = 2
+size_flags_horizontal = 3
 theme_override_constants/separation = 6
 
-[node name="ComboHintLabel" type="Label" parent="SlotArea"]
+[node name="AnimArea" type="Panel" parent="TrainScroll/TrainVBox"]
+layout_mode = 2
+size_flags_horizontal = 3
+custom_minimum_size = Vector2(0, 96)
+theme_override_styles/panel = SubResource("SBFlat_dark")
+
+[node name="SlotCenter" type="CenterContainer" parent="TrainScroll/TrainVBox/AnimArea"]
 layout_mode = 1
-anchor_left = 0.0
+anchors_preset = 15
 anchor_right = 1.0
-anchor_top = 0.0
-anchor_bottom = 0.0
-offset_top = 68.0
-offset_bottom = 86.0
+anchor_bottom = 1.0
 grow_horizontal = 2
+grow_vertical = 2
+
+[node name="SlotHBox" type="HBoxContainer" parent="TrainScroll/TrainVBox/AnimArea/SlotCenter"]
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="NavRow" type="HBoxContainer" parent="TrainScroll/TrainVBox"]
+layout_mode = 2
+size_flags_horizontal = 3
+custom_minimum_size = Vector2(0, 40)
+theme_override_constants/separation = 4
+
+[node name="PrevBtn" type="Button" parent="TrainScroll/TrainVBox/NavRow"]
+layout_mode = 2
+custom_minimum_size = Vector2(48, 0)
+theme_override_font_sizes/font_size = 18
+text = "<"
+
+[node name="NavLabel" type="Label" parent="TrainScroll/TrainVBox/NavRow"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_colors/font_color = Color(0.72, 0.72, 0.82, 1)
+theme_override_font_sizes/font_size = 13
+text = "Trainings"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="NextBtn" type="Button" parent="TrainScroll/TrainVBox/NavRow"]
+layout_mode = 2
+custom_minimum_size = Vector2(48, 0)
+theme_override_font_sizes/font_size = 18
+text = ">"
+
+[node name="CardPanel" type="Panel" parent="TrainScroll/TrainVBox"]
+layout_mode = 2
+size_flags_horizontal = 3
+custom_minimum_size = Vector2(0, 100)
+theme_override_styles/panel = SubResource("SBFlat_dark")
+
+[node name="CardMargin" type="MarginContainer" parent="TrainScroll/TrainVBox/CardPanel"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/margin_left = 12
+theme_override_constants/margin_top = 10
+theme_override_constants/margin_right = 12
+theme_override_constants/margin_bottom = 10
+
+[node name="CardVBox" type="VBoxContainer" parent="TrainScroll/TrainVBox/CardPanel/CardMargin"]
+layout_mode = 2
+theme_override_constants/separation = 4
+
+[node name="CardNameLabel" type="Label" parent="TrainScroll/TrainVBox/CardPanel/CardMargin/CardVBox"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.92, 0.92, 0.95, 1)
+theme_override_font_sizes/font_size = 14
+text = "---"
+horizontal_alignment = 1
+
+[node name="CardTierCostLabel" type="Label" parent="TrainScroll/TrainVBox/CardPanel/CardMargin/CardVBox"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.5, 0.51, 0.62, 1)
+theme_override_font_sizes/font_size = 11
+text = ""
+horizontal_alignment = 1
+
+[node name="CardStatsLabel" type="Label" parent="TrainScroll/TrainVBox/CardPanel/CardMargin/CardVBox"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.72, 0.72, 0.78, 1)
+theme_override_font_sizes/font_size = 11
+text = ""
+horizontal_alignment = 1
+
+[node name="CardBonusLabel" type="Label" parent="TrainScroll/TrainVBox/CardPanel/CardMargin/CardVBox"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.2, 0.85, 0.94, 1)
+theme_override_font_sizes/font_size = 10
+text = ""
+horizontal_alignment = 1
+visible = false
+
+[node name="ComboHintLabel" type="Label" parent="TrainScroll/TrainVBox"]
+layout_mode = 2
+size_flags_horizontal = 3
 theme_override_colors/font_color = Color(1, 0.82, 0.1, 1)
 theme_override_font_sizes/font_size = 11
 text = ""
 horizontal_alignment = 1
 
-[node name="CostLabel" type="Label" parent="SlotArea"]
-layout_mode = 1
-anchor_left = 0.0
-anchor_right = 1.0
-anchor_top = 0.0
-anchor_bottom = 0.0
-offset_top = 88.0
-offset_bottom = 108.0
-grow_horizontal = 2
+[node name="CostLabel" type="Label" parent="TrainScroll/TrainVBox"]
+layout_mode = 2
+size_flags_horizontal = 3
 theme_override_colors/font_color = Color(0.72, 0.72, 0.78, 1)
 theme_override_font_sizes/font_size = 11
 text = "Cost: 0 CP"
 horizontal_alignment = 1
 
-[node name="TrainScroll" type="ScrollContainer" parent="."]
-layout_mode = 1
-anchor_right = 1.0
-anchor_bottom = 1.0
-offset_left = 8.0
-offset_top = 224.0
-offset_right = -8.0
-offset_bottom = -60.0
-grow_horizontal = 2
-grow_vertical = 2
-horizontal_scroll_mode = 0
-
-[node name="TrainList" type="VBoxContainer" parent="TrainScroll"]
+[node name="RunBtn" type="Button" parent="TrainScroll/TrainVBox"]
 layout_mode = 2
 size_flags_horizontal = 3
-theme_override_constants/separation = 8
+custom_minimum_size = Vector2(0, 48)
+theme_override_colors/font_color = Color(0.22, 0.9, 0.42, 1)
+theme_override_font_sizes/font_size = 14
+theme_override_styles/normal = SubResource("SBFlat_run")
+theme_override_styles/hover = SubResource("SBFlat_run")
+theme_override_styles/pressed = SubResource("SBFlat_run")
+text = "START TRAINING"
+disabled = true
 
 [node name="ComboScroll" type="ScrollContainer" parent="."]
 layout_mode = 1
 anchor_right = 1.0
 anchor_bottom = 1.0
-offset_left = 8.0
-offset_top = 224.0
-offset_right = -8.0
-offset_bottom = -60.0
+offset_top = 104.0
+offset_bottom = -56.0
 grow_horizontal = 2
 grow_vertical = 2
 horizontal_scroll_mode = 0
@@ -228,25 +299,43 @@ layout_mode = 2
 size_flags_horizontal = 3
 theme_override_constants/separation = 8
 
-[node name="RunBtn" type="Button" parent="."]
+[node name="BottomBtns" type="HBoxContainer" parent="."]
 layout_mode = 1
 anchor_left = 0.0
 anchor_right = 1.0
 anchor_top = 1.0
 anchor_bottom = 1.0
-offset_left = 12.0
-offset_right = -12.0
-offset_top = -56.0
-offset_bottom = -8.0
+offset_left = 8.0
+offset_right = -8.0
+offset_top = -52.0
+offset_bottom = -4.0
 grow_horizontal = 2
 grow_vertical = 0
-theme_override_colors/font_color = Color(0.22, 0.9, 0.42, 1)
-theme_override_font_sizes/font_size = 14
-theme_override_styles/normal = SubResource("SBFlat_run")
-theme_override_styles/hover = SubResource("SBFlat_run")
-theme_override_styles/pressed = SubResource("SBFlat_run")
-text = "START TRAINING"
-disabled = true
+theme_override_constants/separation = 8
+
+[node name="BackBtn" type="Button" parent="BottomBtns"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_colors/font_color = Color(0.92, 0.92, 0.95, 1)
+theme_override_font_sizes/font_size = 13
+theme_override_styles/normal = SubResource("SBFlat_btm_btn")
+theme_override_styles/hover = SubResource("SBFlat_btm_btn")
+theme_override_styles/pressed = SubResource("SBFlat_btm_btn")
+text = "BACK"
+
+[node name="BtnSpacer" type="Control" parent="BottomBtns"]
+layout_mode = 2
+custom_minimum_size = Vector2(16, 0)
+
+[node name="CancelBtn" type="Button" parent="BottomBtns"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_colors/font_color = Color(0.92, 0.92, 0.95, 1)
+theme_override_font_sizes/font_size = 13
+theme_override_styles/normal = SubResource("SBFlat_btm_btn")
+theme_override_styles/hover = SubResource("SBFlat_btm_btn")
+theme_override_styles/pressed = SubResource("SBFlat_btm_btn")
+text = "CANCEL"
 
 [node name="ResultPanel" type="Panel" parent="."]
 layout_mode = 1

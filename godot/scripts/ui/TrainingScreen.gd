@@ -2,28 +2,34 @@ extends Control
 
 signal training_done
 
-# ─────────────────────────────────────────
+# -----------------------------------------
 #  NODE REFS
-# ─────────────────────────────────────────
-@onready var _back_btn:      Button          = $TopBar/BackBtn
+# -----------------------------------------
 @onready var _tab_train:     Button          = $TabBar/TrainTab
 @onready var _tab_combo:     Button          = $TabBar/ComboTab
 @onready var _train_scroll:  ScrollContainer = $TrainScroll
-@onready var _train_list:    VBoxContainer   = $TrainScroll/TrainList
+@onready var _slot_hbox:     HBoxContainer   = $TrainScroll/TrainVBox/AnimArea/SlotCenter/SlotHBox
+@onready var _prev_btn:      Button          = $TrainScroll/TrainVBox/NavRow/PrevBtn
+@onready var _next_btn:      Button          = $TrainScroll/TrainVBox/NavRow/NextBtn
+@onready var _card_name:     Label           = $TrainScroll/TrainVBox/CardPanel/CardMargin/CardVBox/CardNameLabel
+@onready var _card_tiercost: Label           = $TrainScroll/TrainVBox/CardPanel/CardMargin/CardVBox/CardTierCostLabel
+@onready var _card_stats:    Label           = $TrainScroll/TrainVBox/CardPanel/CardMargin/CardVBox/CardStatsLabel
+@onready var _card_bonus:    Label           = $TrainScroll/TrainVBox/CardPanel/CardMargin/CardVBox/CardBonusLabel
 @onready var _combo_scroll:  ScrollContainer = $ComboScroll
 @onready var _combo_list:    VBoxContainer   = $ComboScroll/ComboList
-@onready var _slot_hbox:     HBoxContainer   = $SlotArea/SlotHBox
-@onready var _run_btn:       Button          = $RunBtn
+@onready var _run_btn:       Button          = $TrainScroll/TrainVBox/RunBtn
 @onready var _result_panel:  Panel           = $ResultPanel
 @onready var _result_label:  Label           = $ResultPanel/Margin/ResultLabel
 @onready var _result_close:  Button          = $ResultPanel/CloseBtn
 @onready var _cp_label:      Label           = $TopBar/CpLabel
-@onready var _combo_hint:    Label           = $SlotArea/ComboHintLabel
-@onready var _cost_label:    Label           = $SlotArea/CostLabel
+@onready var _combo_hint:    Label           = $TrainScroll/TrainVBox/ComboHintLabel
+@onready var _cost_label:    Label           = $TrainScroll/TrainVBox/CostLabel
+@onready var _back_btn:      Button          = $BottomBtns/BackBtn
+@onready var _cancel_btn:    Button          = $BottomBtns/CancelBtn
 
-# ─────────────────────────────────────────
+# -----------------------------------------
 #  STATE
-# ─────────────────────────────────────────
+# -----------------------------------------
 var _gm: Node = null
 var _em: Node = null
 var _tm: Node = null
@@ -39,13 +45,13 @@ var _slot_btns: Array = []
 var _picker_panel: Panel = null
 var _active_slot: int = -1
 
-# Card selection tracking
-var _training_cards: Array = []
-var _selected_card: PanelContainer = null
+# Arrow navigation
+var _training_index: int = 0
+var _available_trainings: Array = []
 
-# ─────────────────────────────────────────
+# -----------------------------------------
 #  LIFECYCLE
-# ─────────────────────────────────────────
+# -----------------------------------------
 func _ready() -> void:
 	await get_tree().process_frame
 	_gm = get_node_or_null("/root/GameManager")
@@ -57,24 +63,28 @@ func _ready() -> void:
 		_discovered_combos = _gm.company_data.get("discovered_training_combos", [])
 		_discovered_facility_combos = _gm.company_data.get("discovered_facility_combos", [])
 	_back_btn.pressed.connect(_on_back)
+	_cancel_btn.pressed.connect(_on_cancel)
 	_tab_train.pressed.connect(_show_train_tab)
 	_tab_combo.pressed.connect(_show_combo_tab)
 	_run_btn.pressed.connect(_on_run_training)
+	_prev_btn.pressed.connect(_on_prev_training)
+	_next_btn.pressed.connect(_on_next_training)
 	_result_close.pressed.connect(func() -> void: _result_panel.visible = false)
 	_result_panel.visible = false
 	_build_slot_area()
 	_show_train_tab()
 	_refresh_cp()
 
-# ─────────────────────────────────────────
+# -----------------------------------------
 #  TAB SWITCHING
-# ─────────────────────────────────────────
+# -----------------------------------------
 func _show_train_tab() -> void:
 	_train_scroll.visible = true
 	_combo_scroll.visible = false
 	_tab_train.add_theme_color_override("font_color", Color(1, 1, 1, 1))
 	_tab_combo.add_theme_color_override("font_color", Color(0.48, 0.48, 0.58, 1))
-	_build_training_list()
+	_load_available_trainings()
+	_refresh_training_card()
 
 func _show_combo_tab() -> void:
 	_train_scroll.visible = false
@@ -83,111 +93,73 @@ func _show_combo_tab() -> void:
 	_tab_combo.add_theme_color_override("font_color", Color(1, 1, 1, 1))
 	_build_combo_list()
 
-# ─────────────────────────────────────────
-#  TRAINING LIST
-# ─────────────────────────────────────────
-func _build_training_list() -> void:
-	for child in _train_list.get_children():
-		child.queue_free()
-	_training_cards.clear()
-	_selected_card = null
+# -----------------------------------------
+#  ARROW NAVIGATION
+# -----------------------------------------
+func _load_available_trainings() -> void:
 	if _gm == null:
+		_available_trainings = []
+		_selected_training = {}
 		return
-	var available: Array = _tm.get_available_trainings(_gm)
-	for t in available:
-		var card: PanelContainer = _make_training_card(t)
-		_train_list.add_child(card)
-		_training_cards.append(card)
+	_available_trainings = _tm.get_available_trainings(_gm)
+	if _available_trainings.is_empty():
+		_selected_training = {}
+		return
+	if _training_index >= _available_trainings.size():
+		_training_index = 0
+	_selected_training = _available_trainings[_training_index]
 
-func _make_training_card(t: Dictionary) -> PanelContainer:
-	var card: PanelContainer = PanelContainer.new()
-	var card_style: StyleBoxFlat = StyleBoxFlat.new()
-	card_style.bg_color = Color(0.047, 0.047, 0.11, 0.92)
-	card_style.border_width_left   = 2
-	card_style.border_width_top    = 2
-	card_style.border_width_right  = 2
-	card_style.border_width_bottom = 2
-	card_style.border_color = Color(0.18, 0.42, 0.78, 1)
-	card_style.corner_radius_top_left     = 8
-	card_style.corner_radius_top_right    = 8
-	card_style.corner_radius_bottom_right = 8
-	card_style.corner_radius_bottom_left  = 8
-	card.add_theme_stylebox_override("panel", card_style)
+func _on_prev_training() -> void:
+	if _available_trainings.is_empty():
+		return
+	_training_index -= 1
+	if _training_index < 0:
+		_training_index = _available_trainings.size() - 1
+	_selected_training = _available_trainings[_training_index]
+	_refresh_training_card()
+	_refresh_run_btn()
+	_refresh_cost()
 
-	var vbox: VBoxContainer = VBoxContainer.new()
-	vbox.add_theme_constant_override("separation", 4)
-	card.add_child(vbox)
+func _on_next_training() -> void:
+	if _available_trainings.is_empty():
+		return
+	_training_index += 1
+	if _training_index >= _available_trainings.size():
+		_training_index = 0
+	_selected_training = _available_trainings[_training_index]
+	_refresh_training_card()
+	_refresh_run_btn()
+	_refresh_cost()
 
-	# Name + tier row
-	var hrow: HBoxContainer = HBoxContainer.new()
-	vbox.add_child(hrow)
-
-	var name_lbl: Label = Label.new()
-	name_lbl.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	name_lbl.add_theme_font_size_override("font_size", 13)
+func _refresh_training_card() -> void:
+	if _available_trainings.is_empty():
+		_card_name.text = "No trainings available"
+		_card_tiercost.text = ""
+		_card_stats.text = ""
+		_card_bonus.visible = false
+		return
+	var t: Dictionary = _available_trainings[_training_index]
 	var tier: int = t.get("tier", 1)
 	match tier:
-		1: name_lbl.add_theme_color_override("font_color", Color(0.92, 0.92, 0.95, 1))
-		2: name_lbl.add_theme_color_override("font_color", Color(0.2, 0.85, 0.94, 1))
-		_: name_lbl.add_theme_color_override("font_color", Color(1.0, 0.82, 0.1, 1))
-	name_lbl.text = t.get("name", "")
-	hrow.add_child(name_lbl)
-
-	var tier_lbl: Label = Label.new()
-	tier_lbl.add_theme_color_override("font_color", Color(0.5, 0.51, 0.62, 1))
-	tier_lbl.add_theme_font_size_override("font_size", 10)
-	tier_lbl.text = "Tier %d" % tier
-	hrow.add_child(tier_lbl)
-
-	# Cost label
-	var cost_lbl: Label = Label.new()
-	cost_lbl.add_theme_color_override("font_color", Color(1.0, 0.82, 0.1, 1))
-	cost_lbl.add_theme_font_size_override("font_size", 11)
-	cost_lbl.text = "%d CP/person" % t.get("cp_cost", 7)
-	vbox.add_child(cost_lbl)
-
-	# Stats line
+		1: _card_name.add_theme_color_override("font_color", Color(0.92, 0.92, 0.95, 1))
+		2: _card_name.add_theme_color_override("font_color", Color(0.2, 0.85, 0.94, 1))
+		_: _card_name.add_theme_color_override("font_color", Color(1.0, 0.82, 0.1, 1))
+	_card_name.text = t.get("name", "")
+	_card_tiercost.text = "Tier %d  |  %d CP/person" % [tier, t.get("cp_cost", 7)]
 	var stats: Dictionary = t.get("stats", {})
 	var stat_parts: Array = []
 	for k in stats:
-		var short: String = _stat_short(k)
-		stat_parts.append("%s+%d" % [short, stats[k]])
-	var stats_lbl: Label = Label.new()
-	stats_lbl.add_theme_color_override("font_color", Color(0.72, 0.72, 0.78, 1))
-	stats_lbl.add_theme_font_size_override("font_size", 11)
-	stats_lbl.text = "  ".join(stat_parts)
-	vbox.add_child(stats_lbl)
-
-	# Double stat note
+		stat_parts.append("%s+%d" % [_stat_short(k), stats[k]])
+	_card_stats.text = "  ".join(stat_parts)
 	if t.get("double_stat", "") == "role_primary":
-		var bonus_lbl: Label = Label.new()
-		bonus_lbl.add_theme_color_override("font_color", Color(0.2, 0.85, 0.94, 1))
-		bonus_lbl.add_theme_font_size_override("font_size", 10)
-		bonus_lbl.text = "* Role bonus: doubles primary stat"
-		vbox.add_child(bonus_lbl)
+		_card_bonus.text = "* Role bonus: doubles primary stat"
+		_card_bonus.visible = true
+	else:
+		_card_bonus.visible = false
 
-	# Select button
-	var sel_btn: Button = Button.new()
-	sel_btn.text = "SELECT"
-	sel_btn.add_theme_font_size_override("font_size", 12)
-	var training_ref: Dictionary = t
-	var card_ref: PanelContainer = card
-	sel_btn.pressed.connect(func() -> void: _on_select_training(training_ref, card_ref))
-	vbox.add_child(sel_btn)
-
-	return card
-
-func _stat_short(key: String) -> String:
-	match key:
-		"skill":      return "SKL"
-		"motivation": return "MOT"
-		"teamwork":   return "TWK"
-		"creativity": return "CRE"
-	return key.to_upper().left(3)
-
-# ─────────────────────────────────────────
+# -----------------------------------------
 #  COMBO LIST
-# ─────────────────────────────────────────
+# -----------------------------------------
 func _build_combo_list() -> void:
 	for child in _combo_list.get_children():
 		child.queue_free()
@@ -255,18 +227,17 @@ func _make_combo_card(combo: Dictionary, discovered: bool) -> PanelContainer:
 
 	return card
 
-# ─────────────────────────────────────────
+# -----------------------------------------
 #  SLOT AREA
-# ─────────────────────────────────────────
+# -----------------------------------------
 func _build_slot_area() -> void:
 	for child in _slot_hbox.get_children():
 		child.queue_free()
 	_slot_btns.clear()
 	for i in range(3):
 		var btn: Button = Button.new()
-		btn.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-		btn.custom_minimum_size = Vector2(0, 48)
-		btn.text = "EMPTY"
+		btn.custom_minimum_size = Vector2(80, 80)
+		btn.text = "+\nEMPTY"
 		btn.add_theme_font_size_override("font_size", 11)
 		var slot_idx: int = i
 		btn.pressed.connect(func() -> void: _open_picker(slot_idx))
@@ -277,16 +248,48 @@ func _build_slot_area() -> void:
 func _refresh_slots() -> void:
 	for i in range(3):
 		var btn: Button = _slot_btns[i]
+		var emp: Object = null
 		if i < _selected_employees.size():
-			var emp: Object = _selected_employees[i]
-			if emp == null or not emp.has_method("role_name"):
-				btn.text = "EMPTY"
-			else:
-				btn.text = "%s\n%s" % [emp.first_name, emp.role_name()]
+			emp = _selected_employees[i]
+		var slot_style: StyleBoxFlat = StyleBoxFlat.new()
+		slot_style.corner_radius_top_left     = 6
+		slot_style.corner_radius_top_right    = 6
+		slot_style.corner_radius_bottom_right = 6
+		slot_style.corner_radius_bottom_left  = 6
+		slot_style.border_width_left   = 2
+		slot_style.border_width_top    = 2
+		slot_style.border_width_right  = 2
+		slot_style.border_width_bottom = 2
+		if emp == null or not emp.has_method("role_name"):
+			btn.text = "+\nEMPTY"
+			slot_style.bg_color = Color(0.047, 0.047, 0.11, 0.92)
+			slot_style.border_color = Color(0.18, 0.42, 0.78, 1)
 		else:
-			btn.text = "EMPTY"
+			var rc: Color = _role_color(emp)
+			btn.text = "%s\n%s" % [emp.first_name, emp.role_name().left(3)]
+			slot_style.bg_color = Color(rc.r * 0.3, rc.g * 0.3, rc.b * 0.3, 0.95)
+			slot_style.border_color = rc
+		btn.add_theme_stylebox_override("normal", slot_style)
+		btn.add_theme_stylebox_override("hover", slot_style)
+		btn.add_theme_stylebox_override("pressed", slot_style)
 	_refresh_combo_hint()
 	_refresh_run_btn()
+
+func _role_color(emp: Object) -> Color:
+	var rn: String = emp.role_name()
+	match rn:
+		"DEVELOPER":     return Color(0.2, 0.6, 1.0)
+		"DESIGNER":      return Color(0.4, 0.9, 0.6)
+		"MANAGER":       return Color(0.9, 0.5, 0.8)
+		"INTERN":        return Color(0.9, 0.4, 0.4)
+		"MARKETER":      return Color(1.0, 0.7, 0.3)
+		"HR_SPECIALIST": return Color(0.5, 0.8, 0.9)
+		"ACCOUNTANT":    return Color(0.7, 0.7, 0.3)
+		"ANALYST":       return Color(0.5, 0.7, 0.9)
+		"LEGAL":         return Color(0.8, 0.6, 0.4)
+		"IT_SUPPORT":    return Color(0.4, 0.8, 0.5)
+		"PR":            return Color(0.9, 0.6, 0.7)
+	return Color(0.5, 0.5, 0.5)
 
 func _refresh_combo_hint() -> void:
 	var valid_emps: Array = _valid_employees()
@@ -318,9 +321,9 @@ func _valid_employees() -> Array:
 			result.append(e)
 	return result
 
-# ─────────────────────────────────────────
+# -----------------------------------------
 #  EMPLOYEE PICKER
-# ─────────────────────────────────────────
+# -----------------------------------------
 func _open_picker(slot_idx: int) -> void:
 	_active_slot = slot_idx
 	if _picker_panel != null:
@@ -403,43 +406,9 @@ func _on_emp_picked(emp: Object) -> void:
 	_refresh_slots()
 	_refresh_cost()
 
-# ─────────────────────────────────────────
-#  TRAINING SELECTION
-# ─────────────────────────────────────────
-func _on_select_training(t: Dictionary, card: PanelContainer) -> void:
-	_selected_training = t
-	if _selected_card != null and is_instance_valid(_selected_card):
-		var old_style: StyleBoxFlat = StyleBoxFlat.new()
-		old_style.bg_color = Color(0.047, 0.047, 0.11, 0.92)
-		old_style.border_width_left   = 2
-		old_style.border_width_top    = 2
-		old_style.border_width_right  = 2
-		old_style.border_width_bottom = 2
-		old_style.border_color = Color(0.18, 0.42, 0.78, 1)
-		old_style.corner_radius_top_left     = 8
-		old_style.corner_radius_top_right    = 8
-		old_style.corner_radius_bottom_right = 8
-		old_style.corner_radius_bottom_left  = 8
-		_selected_card.add_theme_stylebox_override("panel", old_style)
-	_selected_card = card
-	var sel_style: StyleBoxFlat = StyleBoxFlat.new()
-	sel_style.bg_color = Color(0.047, 0.047, 0.11, 0.92)
-	sel_style.border_width_left   = 2
-	sel_style.border_width_top    = 2
-	sel_style.border_width_right  = 2
-	sel_style.border_width_bottom = 2
-	sel_style.border_color = Color(1.0, 0.82, 0.1, 1)
-	sel_style.corner_radius_top_left     = 8
-	sel_style.corner_radius_top_right    = 8
-	sel_style.corner_radius_bottom_right = 8
-	sel_style.corner_radius_bottom_left  = 8
-	card.add_theme_stylebox_override("panel", sel_style)
-	_refresh_run_btn()
-	_refresh_cost()
-
-# ─────────────────────────────────────────
+# -----------------------------------------
 #  RUN TRAINING
-# ─────────────────────────────────────────
+# -----------------------------------------
 func _on_run_training() -> void:
 	if _selected_training.is_empty() or _valid_employees().is_empty():
 		return
@@ -497,17 +466,30 @@ func _on_run_training() -> void:
 	_refresh_cp()
 	_selected_employees.clear()
 	_selected_training = {}
-	_selected_card = null
+	_training_index = 0
+	_load_available_trainings()
+	_refresh_training_card()
 	_refresh_slots()
 	_refresh_run_btn()
 
-# ─────────────────────────────────────────
+# -----------------------------------------
 #  HELPERS
-# ─────────────────────────────────────────
+# -----------------------------------------
+func _stat_short(key: String) -> String:
+	match key:
+		"skill":      return "SKL"
+		"motivation": return "MOT"
+		"teamwork":   return "TWK"
+		"creativity": return "CRE"
+	return key.to_upper().left(3)
+
 func _refresh_cp() -> void:
 	if _gm != null:
 		_cp_label.text = "[CP] %d" % _gm.corp_points
 
 func _on_back() -> void:
 	training_done.emit()
+	queue_free()
+
+func _on_cancel() -> void:
 	queue_free()
