@@ -6,6 +6,7 @@ extends Control
 @onready var _notif_panel:  Panel        = $NotifLayer/NotifPanel
 @onready var _notif_label:  Label        = $NotifLayer/NotifPanel/Margin/VBox/NotifLabel
 @onready var _notif_timer:  Timer        = $NotifLayer/NotifPanel/NotifTimer
+@onready var _notif_close:  Button       = $NotifLayer/NotifPanel/Margin/VBox/NotifCloseBtn
 @onready var _event_popup:  Node         = $EventPopup
 @onready var _fever_bar:    ProgressBar  = $FeverLayer/FeverPanel/FeverBar
 @onready var _fever_label:  Label        = $FeverLayer/FeverPanel/FeverLabel
@@ -22,6 +23,7 @@ func _ready() -> void:
 	_pause_menu.shop_requested.connect(_on_shop_requested)
 	_pause_menu.training_requested.connect(_on_training_requested)
 	_notif_timer.timeout.connect(_on_notif_timer_timeout)
+	_notif_close.pressed.connect(_on_notif_close_pressed)
 
 	await get_tree().process_frame
 	var gm: Node = get_node_or_null("/root/GameManager")
@@ -56,9 +58,11 @@ func _load_debug_menu() -> void:
 
 func _on_scene_about_to_change() -> void:
 	_is_active = false
+	$CpIndicator.visible = false
 
 func _on_returned_to_main() -> void:
 	_is_active = true
+	$CpIndicator.visible = true
 
 func _on_shop_requested() -> void:
 	_is_active = false
@@ -66,10 +70,12 @@ func _on_shop_requested() -> void:
 
 func _on_training_requested() -> void:
 	_is_active = false
+	$CpIndicator.visible = false
 	var screen: Node = load("res://scenes/TrainingScreen.tscn").instantiate()
 	add_child(screen)
 	screen.training_done.connect(func() -> void:
 		_is_active = true
+		$CpIndicator.visible = true
 	)
 
 func _maybe_show_tutorial() -> void:
@@ -128,6 +134,11 @@ func _on_notif_timer_timeout() -> void:
 	_notif_panel.visible = false
 	_notif_label.remove_theme_color_override("font_color")
 	_notif_panel.remove_theme_stylebox_override("panel")
+	get_tree().paused = false
+
+func _on_notif_close_pressed() -> void:
+	_notif_panel.visible = false
+	_notif_timer.stop()
 	get_tree().paused = false
 
 func _on_employee_burnout(emp_name: String) -> void:

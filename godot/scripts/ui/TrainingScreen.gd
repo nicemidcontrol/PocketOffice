@@ -312,11 +312,11 @@ func _refresh_run_btn() -> void:
 	_run_btn.disabled = _selected_training.is_empty() or _valid_employees().is_empty()
 
 func _valid_employees() -> Array:
-	var out: Array = []
+	var result: Array = []
 	for e in _selected_employees:
 		if e != null and e.has_method("role_name"):
-			out.append(e)
-	return out
+			result.append(e)
+	return result
 
 # ─────────────────────────────────────────
 #  EMPLOYEE PICKER
@@ -441,7 +441,7 @@ func _on_select_training(t: Dictionary, card: PanelContainer) -> void:
 #  RUN TRAINING
 # ─────────────────────────────────────────
 func _on_run_training() -> void:
-	if _selected_training.is_empty() or _selected_employees.is_empty():
+	if _selected_training.is_empty() or _valid_employees().is_empty():
 		return
 	if _gm == null:
 		return
@@ -455,8 +455,10 @@ func _on_run_training() -> void:
 			total_cost, _gm.corp_points]
 		_result_panel.visible = true
 		return
+	print("[Training] cost=%d cp=%d" % [total_cost, _gm.corp_points])
 	_gm.corp_points -= total_cost
 	_gm.corp_points_changed.emit(_gm.corp_points)
+	_cp_label.text = "[CP] %d" % _gm.corp_points
 	var results: Array = _tm.apply_training(
 		_selected_training, valid_emps, _gm, _discovered_combos)
 

@@ -42,6 +42,16 @@ grow_horizontal = 2
 grow_vertical = 2
 theme_override_styles/panel = SubResource("StyleBoxFlat_panel")
 
+[node name="CloseBtn" type="Button" parent="Panel"]
+anchors_preset = 1
+anchor_left = 1.0
+anchor_right = 1.0
+offset_left = -36.0
+offset_top = 4.0
+offset_right = -4.0
+offset_bottom = 32.0
+text = "X"
+
 [node name="Margin" type="MarginContainer" parent="Panel"]
 layout_mode = 1
 anchors_preset = 15
