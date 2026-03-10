@@ -43,23 +43,43 @@ theme_override_constants/margin_bottom = 6
 [node name="HBox" type="HBoxContainer" parent="TopBar/Margin"]
 layout_mode = 2
 
-[node name="CashSection" type="VBoxContainer" parent="TopBar/Margin/HBox"]
+[node name="DateSection" type="VBoxContainer" parent="TopBar/Margin/HBox"]
 layout_mode = 2
-size_flags_horizontal = 8
+size_flags_horizontal = 3
 size_flags_vertical = 4
 alignment = 1
 
-[node name="CashHeader" type="Label" parent="TopBar/Margin/HBox/CashSection"]
+[node name="DateLabel" type="Label" parent="TopBar/Margin/HBox/DateSection"]
 layout_mode = 2
-text = "CASH"
+text = "W1  M1  Y1"
+horizontal_alignment = 0
+theme_override_colors/font_color = Color(0.2, 0.85, 0.94, 1.0)
+theme_override_font_sizes/font_size = 14
+
+[node name="SeasonSection" type="VBoxContainer" parent="TopBar/Margin/HBox"]
+layout_mode = 2
+size_flags_horizontal = 0
+size_flags_vertical = 4
+custom_minimum_size = Vector2(100, 0)
+alignment = 1
+
+[node name="SeasonLabel" type="Label" parent="TopBar/Margin/HBox/SeasonSection"]
+layout_mode = 2
+text = "SPRING"
 horizontal_alignment = 1
-theme_override_colors/font_color = Color(0.5, 0.51, 0.62, 1.0)
-theme_override_font_sizes/font_size = 9
+theme_override_colors/font_color = Color(0.9, 0.9, 0.9, 1.0)
+theme_override_font_sizes/font_size = 13
+
+[node name="CashSection" type="VBoxContainer" parent="TopBar/Margin/HBox"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 4
+alignment = 1
 
 [node name="CashLabel" type="Label" parent="TopBar/Margin/HBox/CashSection"]
 layout_mode = 2
 text = "$0"
-horizontal_alignment = 1
+horizontal_alignment = 2
 theme_override_colors/font_color = Color(0.22, 0.9, 0.42, 1.0)
 theme_override_font_sizes/font_size = 17
 
@@ -97,26 +117,6 @@ layout_mode = 2
 custom_minimum_size = Vector2(10, 0)
 size_flags_vertical = 3
 theme_override_styles/separator = SubResource("StyleBoxLine_sep")
-
-[node name="DateSection" type="VBoxContainer" parent="TopBar/Margin/HBox"]
-layout_mode = 2
-size_flags_horizontal = 3
-size_flags_vertical = 4
-alignment = 1
-
-[node name="DateHeader" type="Label" parent="TopBar/Margin/HBox/DateSection"]
-layout_mode = 2
-text = "DATE"
-horizontal_alignment = 1
-theme_override_colors/font_color = Color(0.5, 0.51, 0.62, 1.0)
-theme_override_font_sizes/font_size = 9
-
-[node name="DateLabel" type="Label" parent="TopBar/Margin/HBox/DateSection"]
-layout_mode = 2
-text = "M1  Y2024"
-horizontal_alignment = 1
-theme_override_colors/font_color = Color(0.2, 0.85, 0.94, 1.0)
-theme_override_font_sizes/font_size = 14
 
 [node name="VSep3" type="VSeparator" parent="TopBar/Margin/HBox"]
 visible = false

@@ -4,9 +4,8 @@ extends CanvasLayer
 #  NODE REFS
 # ─────────────────────────────────────────
 @onready var cash_label:    Label = $TopBar/Margin/HBox/CashSection/CashLabel
-@onready var rep_label:     Label = $TopBar/Margin/HBox/RepSection/RepLabel
 @onready var date_label:    Label = $TopBar/Margin/HBox/DateSection/DateLabel
-@onready var clock_label:   Label = $TopBar/Margin/HBox/ClockSection/ClockLabel
+@onready var season_label:  Label = $TopBar/Margin/HBox/SeasonSection/SeasonLabel
 @onready var message_panel: Panel = $MessagePanel
 @onready var message_label: Label = $MessagePanel/Margin/MessageLabel
 @onready var message_timer: Timer = $MessageTimer
@@ -46,20 +45,31 @@ func _ready() -> void:
 # ─────────────────────────────────────────
 func _refresh_all() -> void:
 	_update_cash(_gm.economy.current_cash)
-	_update_reputation()
 	_update_date()
 
 func _update_cash(amount: int) -> void:
 	cash_label.text = "$" + _format_number(amount)
 
 func _update_reputation() -> void:
-	rep_label.text = str(_gm.company_data.get("reputation", 0))
+	pass
 
 func _update_date() -> void:
-	var month: int    = _gm.company_data.get("current_month", 1)
+	var month: int     = _gm.company_data.get("current_month", 1)
 	var game_year: int = _gm.game_year
-	var week: int     = _gm.company_data.get("current_tick", 0) + 1
+	var tick: int      = _gm.company_data.get("current_tick", 0)
+	var week: int      = clampi((tick / 2) + 1, 1, 4)
 	date_label.text = "W%d  M%d  Y%d" % [week, month, game_year]
+	_update_season(month)
+
+func _update_season(month: int) -> void:
+	var season: String = "WINTER"
+	if month >= 3 and month <= 5:
+		season = "SPRING"
+	elif month >= 6 and month <= 8:
+		season = "SUMMER"
+	elif month >= 9 and month <= 11:
+		season = "AUTUMN"
+	season_label.text = season
 
 func _format_number(n: int) -> String:
 	if n >= 1_000_000:
@@ -75,7 +85,6 @@ func _on_cash_changed(new_cash: int) -> void:
 	_update_cash(new_cash)
 
 func _on_month_passed(_month: int) -> void:
-	_update_reputation()
 	_update_date()
 
 func _on_game_message(message: String) -> void:
@@ -92,10 +101,5 @@ func _on_message_timer_timeout() -> void:
 	_tween = create_tween()
 	_tween.tween_property(message_panel, "modulate:a", 0.0, 0.4)
 
-func _on_time_updated(hour: int, minute: int) -> void:
-	clock_label.text = "%02d:%02d" % [hour, minute]
-	if hour < 16:
-		clock_label.add_theme_color_override("font_color", Color(0.22, 0.9, 0.42))
-	else:
-		clock_label.add_theme_color_override("font_color", Color(0.5, 0.51, 0.62))
-
+func _on_time_updated(_hour: int, _minute: int) -> void:
+	pass
