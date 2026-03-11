@@ -1,19 +1,21 @@
-extends Control
+extends CanvasLayer
+
+signal screen_closed
 
 # ─────────────────────────────────────────
 #  NODES
 # ─────────────────────────────────────────
-@onready var _cash_label:     Label         = $Header/HBox/CashLabel
-@onready var _title_label:    Label         = $Header/HBox/TitleLabel
-@onready var _ad_layer:       Control       = $AdSelectLayer
-@onready var _ad_vbox:        VBoxContainer = $AdSelectLayer/Scroll/VBox
-@onready var _champ_layer:    Control       = $ChampDialogLayer
-@onready var _champ_dialogue: Label         = $ChampDialogLayer/ChampPanel/Margin/VBox/ChampDialogue
-@onready var _champ_dots:     Label         = $ChampDialogLayer/ChampPanel/Margin/VBox/ChampDots
-@onready var _champ_continue: Button        = $ChampDialogLayer/ChampPanel/Margin/VBox/ContinueBtn
-@onready var _champ_timer:    Timer         = $ChampDialogLayer/ChampTimer
-@onready var _cand_layer:     Control       = $CandidateLayer
-@onready var _cand_vbox:      VBoxContainer = $CandidateLayer/Scroll/VBox
+@onready var _cash_label:     Label         = $Dimmer/Card/Header/HBox/CashLabel
+@onready var _title_label:    Label         = $Dimmer/Card/Header/HBox/TitleLabel
+@onready var _ad_layer:       Control       = $Dimmer/Card/AdSelectLayer
+@onready var _ad_vbox:        VBoxContainer = $Dimmer/Card/AdSelectLayer/Scroll/VBox
+@onready var _champ_layer:    Control       = $Dimmer/Card/ChampDialogLayer
+@onready var _champ_dialogue: Label         = $Dimmer/Card/ChampDialogLayer/ChampPanel/Margin/VBox/ChampDialogue
+@onready var _champ_dots:     Label         = $Dimmer/Card/ChampDialogLayer/ChampPanel/Margin/VBox/ChampDots
+@onready var _champ_continue: Button        = $Dimmer/Card/ChampDialogLayer/ChampPanel/Margin/VBox/ContinueBtn
+@onready var _champ_timer:    Timer         = $Dimmer/Card/ChampDialogLayer/ChampTimer
+@onready var _cand_layer:     Control       = $Dimmer/Card/CandidateLayer
+@onready var _cand_vbox:      VBoxContainer = $Dimmer/Card/CandidateLayer/Scroll/VBox
 
 # ─────────────────────────────────────────
 #  AD CONFIG
@@ -57,6 +59,7 @@ var _hero_templates: Array    = []
 #  LIFECYCLE
 # ─────────────────────────────────────────
 func _ready() -> void:
+	process_mode = Node.PROCESS_MODE_ALWAYS
 	_em = load("res://EmployeeManager.gd") as GDScript
 
 	await get_tree().process_frame
@@ -160,7 +163,6 @@ func _make_ad_card(ad: Dictionary, can_afford: bool, is_champ: bool) -> PanelCon
 	vbox.add_theme_constant_override("separation", 4)
 	margin.add_child(vbox)
 
-	# Top row: ad name + tier badge (+ S-tier guarantee badge)
 	var top_row: HBoxContainer = HBoxContainer.new()
 	top_row.add_theme_constant_override("separation", 8)
 	vbox.add_child(top_row)
@@ -188,7 +190,6 @@ func _make_ad_card(ad: Dictionary, can_afford: bool, is_champ: bool) -> PanelCon
 		guar_lbl.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
 		top_row.add_child(guar_lbl)
 
-	# Mid row: cost + candidate count
 	var mid_row: HBoxContainer = HBoxContainer.new()
 	mid_row.add_theme_constant_override("separation", 8)
 	vbox.add_child(mid_row)
@@ -207,14 +208,12 @@ func _make_ad_card(ad: Dictionary, can_afford: bool, is_champ: bool) -> PanelCon
 	count_lbl.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
 	mid_row.add_child(count_lbl)
 
-	# Description
 	var desc_lbl: Label = Label.new()
 	desc_lbl.text = ad["desc"]
 	desc_lbl.add_theme_color_override("font_color", Color(0.50, 0.52, 0.62, 1.0))
 	desc_lbl.add_theme_font_size_override("font_size", 11)
 	vbox.add_child(desc_lbl)
 
-	# SELECT / TOO POOR button
 	var select_btn: Button = Button.new()
 	var btn_style: StyleBoxFlat = StyleBoxFlat.new()
 	btn_style.corner_radius_top_left     = 4
@@ -309,7 +308,6 @@ func _make_candidate_card(emp: Object, is_hero: bool) -> PanelContainer:
 	vbox.add_theme_constant_override("separation", 8)
 	margin.add_child(vbox)
 
-	# Top row: name + HERO tag (if hero) + role tag
 	var top_row: HBoxContainer = HBoxContainer.new()
 	top_row.add_theme_constant_override("separation", 6)
 	vbox.add_child(top_row)
@@ -336,14 +334,12 @@ func _make_candidate_card(emp: Object, is_hero: bool) -> PanelContainer:
 	role_lbl.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
 	top_row.add_child(role_lbl)
 
-	# Personality
 	var pers_lbl: Label = Label.new()
 	pers_lbl.text = _pers_str(emp.personality)
 	pers_lbl.add_theme_color_override("font_color", Color(0.60, 0.62, 0.72, 1.0))
 	pers_lbl.add_theme_font_size_override("font_size", 12)
 	vbox.add_child(pers_lbl)
 
-	# SKL bar
 	var skl_row: HBoxContainer = HBoxContainer.new()
 	skl_row.add_theme_constant_override("separation", 8)
 	vbox.add_child(skl_row)
@@ -378,7 +374,6 @@ func _make_candidate_card(emp: Object, is_hero: bool) -> PanelContainer:
 	skl_bar.add_theme_stylebox_override("fill", skl_fill)
 	skl_row.add_child(skl_bar)
 
-	# MOT bar
 	var mot_row: HBoxContainer = HBoxContainer.new()
 	mot_row.add_theme_constant_override("separation", 8)
 	vbox.add_child(mot_row)
@@ -413,7 +408,6 @@ func _make_candidate_card(emp: Object, is_hero: bool) -> PanelContainer:
 	mot_bar.add_theme_stylebox_override("fill", mot_fill)
 	mot_row.add_child(mot_bar)
 
-	# Bottom row: salary + HIRE button
 	var bot_row: HBoxContainer = HBoxContainer.new()
 	bot_row.add_theme_constant_override("separation", 8)
 	vbox.add_child(bot_row)
@@ -491,7 +485,6 @@ func _on_ad_selected(tier: int, cost: int, count: int) -> void:
 	_hero_templates.clear()
 	current_candidates = _generate_candidates(tier, count)
 
-	# S-tier: also pull in any available hero employees
 	if tier == 5:
 		var heroes: Array = _gm.employees.get_available_heroes()
 		for template in heroes:
@@ -514,7 +507,8 @@ func _on_champ_continue_pressed() -> void:
 func _on_back_pressed() -> void:
 	match current_screen:
 		0:
-			get_tree().change_scene_to_file("res://scenes/Main.tscn")
+			screen_closed.emit()
+			queue_free()
 		1:
 			_show_ad_select()
 		2:
@@ -525,16 +519,14 @@ func _on_back_pressed() -> void:
 # ─────────────────────────────────────────
 func _tier_color(tier: int) -> Color:
 	match tier:
-		0: return Color(0.60, 0.60, 0.60, 1.0)  # E - grey
-		1: return Color(0.55, 0.80, 0.45, 1.0)  # D - green
-		2: return Color(0.35, 0.70, 1.00, 1.0)  # C - blue
-		3: return Color(0.70, 0.45, 1.00, 1.0)  # B - purple
-		4: return Color(1.00, 0.55, 0.20, 1.0)  # A - orange
-		5: return Color(1.00, 0.78, 0.15, 1.0)  # S - gold
+		0: return Color(0.60, 0.60, 0.60, 1.0)
+		1: return Color(0.55, 0.80, 0.45, 1.0)
+		2: return Color(0.35, 0.70, 1.00, 1.0)
+		3: return Color(0.70, 0.45, 1.00, 1.0)
+		4: return Color(1.00, 0.55, 0.20, 1.0)
+		5: return Color(1.00, 0.78, 0.15, 1.0)
 	return Color.WHITE
 
-# Employee.Role: DEVELOPER=0 DESIGNER=1 MARKETER=2 HR_SPECIALIST=3
-#               ACCOUNTANT=4 MANAGER=5 INTERN=6
 func _role_str(role: int) -> String:
 	match role:
 		0: return "DEV"
@@ -548,17 +540,15 @@ func _role_str(role: int) -> String:
 
 func _role_color(role: int) -> Color:
 	match role:
-		0: return Color(0.40, 0.80, 1.00, 1.0)  # blue   - Developer
-		1: return Color(1.00, 0.60, 0.90, 1.0)  # pink   - Designer
-		2: return Color(1.00, 0.85, 0.30, 1.0)  # gold   - Marketer
-		3: return Color(0.50, 1.00, 0.60, 1.0)  # green  - HR
-		4: return Color(0.80, 0.70, 1.00, 1.0)  # purple - Accountant
-		5: return Color(1.00, 0.50, 0.30, 1.0)  # orange - Manager
-		6: return Color(0.65, 0.65, 0.65, 1.0)  # gray   - Intern
+		0: return Color(0.40, 0.80, 1.00, 1.0)
+		1: return Color(1.00, 0.60, 0.90, 1.0)
+		2: return Color(1.00, 0.85, 0.30, 1.0)
+		3: return Color(0.50, 1.00, 0.60, 1.0)
+		4: return Color(0.80, 0.70, 1.00, 1.0)
+		5: return Color(1.00, 0.50, 0.30, 1.0)
+		6: return Color(0.65, 0.65, 0.65, 1.0)
 	return Color.WHITE
 
-# Employee.Personality: NORMAL=0 WORKAHOLIC=1 LAZY=2 GOSSIP=3
-#                       PERFECTIONIST=4 TEAM_PLAYER=5 LONE_STAR=6
 func _pers_str(p: int) -> String:
 	match p:
 		0: return "Normal"

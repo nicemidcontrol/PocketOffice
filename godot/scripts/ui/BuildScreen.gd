@@ -1,17 +1,20 @@
-extends Control
+extends CanvasLayer
 
-@onready var _cash_label:        Label           = $Header/HBox/CashLabel
-@onready var _tab_facilities:    Button          = $TabBar/FacilitiesTab
-@onready var _tab_combos:        Button          = $TabBar/CombosTab
-@onready var _facilities_scroll: ScrollContainer = $FacilitiesScroll
-@onready var _combos_scroll:     ScrollContainer = $CombosScroll
-@onready var _facilities_list:   VBoxContainer   = $FacilitiesScroll/FacilitiesList
-@onready var _combos_list:       VBoxContainer   = $CombosScroll/CombosList
+signal screen_closed
+
+@onready var _cash_label:        Label           = $Dimmer/Card/Header/HBox/CashLabel
+@onready var _tab_facilities:    Button          = $Dimmer/Card/TabBar/FacilitiesTab
+@onready var _tab_combos:        Button          = $Dimmer/Card/TabBar/CombosTab
+@onready var _facilities_scroll: ScrollContainer = $Dimmer/Card/FacilitiesScroll
+@onready var _combos_scroll:     ScrollContainer = $Dimmer/Card/CombosScroll
+@onready var _facilities_list:   VBoxContainer   = $Dimmer/Card/FacilitiesScroll/FacilitiesList
+@onready var _combos_list:       VBoxContainer   = $Dimmer/Card/CombosScroll/CombosList
 
 var _gm: Node = null
 var _fm: Node = null
 
 func _ready() -> void:
+	process_mode = Node.PROCESS_MODE_ALWAYS
 	_gm = get_node_or_null("/root/GameManager")
 	_fm = get_node_or_null("/root/FacilityManager")
 	if _fm != null:
@@ -294,7 +297,8 @@ func _get_facility_name(id: String) -> String:
 #  INPUT HANDLERS
 # ─────────────────────────────────────────
 func _on_back_pressed() -> void:
-	get_tree().change_scene_to_file("res://scenes/Main.tscn")
+	screen_closed.emit()
+	queue_free()
 
 func _on_facilities_tab_pressed() -> void:
 	_show_facilities_tab()

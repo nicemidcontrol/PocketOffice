@@ -2,6 +2,18 @@
 
 [ext_resource type="Script" uid="uid://depbuildscr01" path="res://scripts/ui/BuildScreen.gd" id="1_bsscript"]
 
+[sub_resource type="StyleBoxFlat" id="SBFlat_card"]
+bg_color = Color(0.047, 0.047, 0.11, 0.97)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(0.18, 0.42, 0.78, 1.0)
+corner_radius_top_left = 10
+corner_radius_top_right = 10
+corner_radius_bottom_right = 10
+corner_radius_bottom_left = 10
+
 [sub_resource type="StyleBoxFlat" id="SBFlat_header"]
 bg_color = Color(0.047, 0.047, 0.11, 0.97)
 border_width_bottom = 2
@@ -12,25 +24,35 @@ bg_color = Color(0.055, 0.055, 0.13, 0.95)
 border_width_bottom = 2
 border_color = Color(0.18, 0.18, 0.28, 0.6)
 
-[node name="BuildScreen" type="Control"]
-layout_mode = 2
-anchors_preset = 15
-anchor_right = 1.0
-anchor_bottom = 1.0
-grow_horizontal = 2
-grow_vertical = 2
+[node name="BuildScreen" type="CanvasLayer"]
+layer = 8
 script = ExtResource("1_bsscript")
 
-[node name="Background" type="ColorRect" parent="."]
-layout_mode = 1
+[node name="Dimmer" type="ColorRect" parent="."]
+layout_mode = 3
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
-color = Color(0.047, 0.047, 0.11, 1)
+color = Color(0.0, 0.0, 0.0, 0.55)
 
-[node name="Header" type="Panel" parent="."]
+[node name="Card" type="Panel" parent="."]
+layout_mode = 3
+anchors_preset = 8
+anchor_left = 0.5
+anchor_right = 0.5
+anchor_top = 0.5
+anchor_bottom = 0.5
+offset_left = -175.0
+offset_right = 175.0
+offset_top = -310.0
+offset_bottom = 310.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_styles/panel = SubResource("SBFlat_card")
+
+[node name="Header" type="Panel" parent="Card"]
 layout_mode = 1
 anchors_preset = 10
 anchor_right = 1.0
@@ -38,7 +60,7 @@ grow_horizontal = 2
 offset_bottom = 60.0
 theme_override_styles/panel = SubResource("SBFlat_header")
 
-[node name="HBox" type="HBoxContainer" parent="Header"]
+[node name="HBox" type="HBoxContainer" parent="Card/Header"]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
@@ -47,14 +69,14 @@ grow_horizontal = 2
 grow_vertical = 2
 theme_override_constants/separation = 8
 
-[node name="BackBtn" type="Button" parent="Header/HBox"]
+[node name="BackBtn" type="Button" parent="Card/Header/HBox"]
 custom_minimum_size = Vector2(80, 0)
 layout_mode = 2
 theme_override_colors/font_color = Color(0.5, 0.7, 1, 1)
 theme_override_font_sizes/font_size = 12
 text = "< BACK"
 
-[node name="TitleLabel" type="Label" parent="Header/HBox"]
+[node name="TitleLabel" type="Label" parent="Card/Header/HBox"]
 layout_mode = 2
 size_flags_horizontal = 3
 theme_override_colors/font_color = Color(0.92, 0.92, 0.95, 1)
@@ -63,7 +85,7 @@ text = "BUILD"
 horizontal_alignment = 1
 vertical_alignment = 1
 
-[node name="CashLabel" type="Label" parent="Header/HBox"]
+[node name="CashLabel" type="Label" parent="Card/Header/HBox"]
 custom_minimum_size = Vector2(72, 0)
 layout_mode = 2
 theme_override_colors/font_color = Color(0.22, 0.9, 0.42, 1)
@@ -72,7 +94,7 @@ text = "$0"
 horizontal_alignment = 2
 vertical_alignment = 1
 
-[node name="TabBar" type="HBoxContainer" parent="."]
+[node name="TabBar" type="HBoxContainer" parent="Card"]
 layout_mode = 1
 anchor_right = 1.0
 offset_top = 60.0
@@ -80,7 +102,7 @@ offset_bottom = 104.0
 grow_horizontal = 2
 theme_override_constants/separation = 0
 
-[node name="FacilitiesTab" type="Button" parent="TabBar"]
+[node name="FacilitiesTab" type="Button" parent="Card/TabBar"]
 layout_mode = 2
 size_flags_horizontal = 3
 custom_minimum_size = Vector2(0, 44)
@@ -91,7 +113,7 @@ theme_override_styles/normal = SubResource("SBFlat_tab")
 theme_override_styles/hover = SubResource("SBFlat_tab")
 theme_override_styles/pressed = SubResource("SBFlat_tab")
 
-[node name="CombosTab" type="Button" parent="TabBar"]
+[node name="CombosTab" type="Button" parent="Card/TabBar"]
 layout_mode = 2
 size_flags_horizontal = 3
 custom_minimum_size = Vector2(0, 44)
@@ -102,7 +124,7 @@ theme_override_styles/normal = SubResource("SBFlat_tab")
 theme_override_styles/hover = SubResource("SBFlat_tab")
 theme_override_styles/pressed = SubResource("SBFlat_tab")
 
-[node name="FacilitiesScroll" type="ScrollContainer" parent="."]
+[node name="FacilitiesScroll" type="ScrollContainer" parent="Card"]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
@@ -115,12 +137,12 @@ offset_right = -8.0
 offset_bottom = -8.0
 horizontal_scroll_mode = 0
 
-[node name="FacilitiesList" type="VBoxContainer" parent="FacilitiesScroll"]
+[node name="FacilitiesList" type="VBoxContainer" parent="Card/FacilitiesScroll"]
 layout_mode = 2
 size_flags_horizontal = 3
 theme_override_constants/separation = 8
 
-[node name="CombosScroll" type="ScrollContainer" parent="."]
+[node name="CombosScroll" type="ScrollContainer" parent="Card"]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
@@ -134,11 +156,11 @@ offset_bottom = -8.0
 horizontal_scroll_mode = 0
 visible = false
 
-[node name="CombosList" type="VBoxContainer" parent="CombosScroll"]
+[node name="CombosList" type="VBoxContainer" parent="Card/CombosScroll"]
 layout_mode = 2
 size_flags_horizontal = 3
 theme_override_constants/separation = 8
 
-[connection signal="pressed" from="Header/HBox/BackBtn" to="." method="_on_back_pressed"]
-[connection signal="pressed" from="TabBar/FacilitiesTab" to="." method="_on_facilities_tab_pressed"]
-[connection signal="pressed" from="TabBar/CombosTab" to="." method="_on_combos_tab_pressed"]
+[connection signal="pressed" from="Card/Header/HBox/BackBtn" to="." method="_on_back_pressed"]
+[connection signal="pressed" from="Card/TabBar/FacilitiesTab" to="." method="_on_facilities_tab_pressed"]
+[connection signal="pressed" from="Card/TabBar/CombosTab" to="." method="_on_combos_tab_pressed"]
