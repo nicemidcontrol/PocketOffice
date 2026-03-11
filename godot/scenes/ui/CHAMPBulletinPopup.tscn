@@ -1,0 +1,114 @@
+[gd_scene load_steps=3 format=3 uid="uid://champbulletinpopup01"]
+
+[ext_resource type="Script" path="res://scripts/ui/CHAMPBulletinPopup.gd" id="1_cbpscript"]
+
+[sub_resource type="StyleBoxFlat" id="SBFlat_panel"]
+bg_color = Color(0.047, 0.047, 0.11, 0.97)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(0.18, 0.42, 0.78, 1)
+corner_radius_top_left = 10
+corner_radius_top_right = 10
+corner_radius_bottom_right = 10
+corner_radius_bottom_left = 10
+
+[sub_resource type="StyleBoxFlat" id="SBFlat_btn"]
+bg_color = Color(0.055, 0.13, 0.055, 0.95)
+border_width_left = 1
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 1
+border_color = Color(0.18, 0.78, 0.18, 1)
+corner_radius_top_left = 5
+corner_radius_top_right = 5
+corner_radius_bottom_right = 5
+corner_radius_bottom_left = 5
+
+[node name="CHAMPBulletinPopup" type="CanvasLayer"]
+layer = 30
+script = ExtResource("1_cbpscript")
+
+[node name="Overlay" type="ColorRect" parent="."]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0, 0, 0, 0.6)
+
+[node name="Panel" type="Panel" parent="."]
+layout_mode = 3
+anchors_preset = -1
+anchor_left = 0.05
+anchor_right = 0.95
+anchor_top = 0.1
+anchor_bottom = 0.9
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_styles/panel = SubResource("SBFlat_panel")
+
+[node name="Margin" type="MarginContainer" parent="Panel"]
+layout_mode = 1
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/margin_left = 16
+theme_override_constants/margin_top = 14
+theme_override_constants/margin_right = 16
+theme_override_constants/margin_bottom = 14
+
+[node name="VBox" type="VBoxContainer" parent="Panel/Margin"]
+layout_mode = 2
+theme_override_constants/separation = 10
+
+[node name="BrandLabel" type="Label" parent="Panel/Margin/VBox"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.18, 0.42, 0.78, 1)
+theme_override_font_sizes/font_size = 11
+text = "CHAMP BULLETIN"
+horizontal_alignment = 1
+
+[node name="HeadlineLabel" type="Label" parent="Panel/Margin/VBox"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.95, 0.92, 0.2, 1)
+theme_override_font_sizes/font_size = 13
+text = ""
+horizontal_alignment = 1
+autowrap_mode = 3
+
+[node name="EffectLabel" type="Label" parent="Panel/Margin/VBox"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.92, 0.5, 0.2, 1)
+theme_override_font_sizes/font_size = 11
+text = ""
+horizontal_alignment = 1
+autowrap_mode = 3
+
+[node name="DurationLabel" type="Label" parent="Panel/Margin/VBox"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.62, 0.62, 0.72, 1)
+theme_override_font_sizes/font_size = 10
+text = ""
+horizontal_alignment = 1
+
+[node name="Spacer" type="Control" parent="Panel/Margin/VBox"]
+layout_mode = 2
+custom_minimum_size = Vector2(0, 8)
+
+[node name="MitigationVBox" type="VBoxContainer" parent="Panel/Margin/VBox"]
+layout_mode = 2
+theme_override_constants/separation = 6
+
+[node name="AcknowledgeBtn" type="Button" parent="Panel/Margin/VBox"]
+layout_mode = 2
+custom_minimum_size = Vector2(0, 40)
+theme_override_colors/font_color = Color(0.72, 0.72, 0.78, 1)
+theme_override_font_sizes/font_size = 13
+theme_override_styles/normal = SubResource("SBFlat_btn")
+theme_override_styles/hover = SubResource("SBFlat_btn")
+theme_override_styles/pressed = SubResource("SBFlat_btn")
+text = "ACKNOWLEDGE"
