@@ -2,17 +2,24 @@
 
 [ext_resource type="Script" path="res://scripts/ui/TrainingScreen.gd" id="1_tsscript"]
 
-[sub_resource type="StyleBoxFlat" id="SBFlat_header"]
+[sub_resource type="StyleBoxFlat" id="SBFlat_card"]
 bg_color = Color(0.047, 0.047, 0.11, 0.97)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
 border_width_bottom = 2
-border_color = Color(0.18, 0.42, 0.78, 1)
+border_color = Color(0.18, 0.42, 0.78, 1.0)
+corner_radius_top_left = 10
+corner_radius_top_right = 10
+corner_radius_bottom_right = 10
+corner_radius_bottom_left = 10
 
 [sub_resource type="StyleBoxFlat" id="SBFlat_tab"]
 bg_color = Color(0.055, 0.055, 0.13, 0.95)
 border_width_bottom = 2
 border_color = Color(0.18, 0.18, 0.28, 0.6)
 
-[sub_resource type="StyleBoxFlat" id="SBFlat_dark"]
+[sub_resource type="StyleBoxFlat" id="SBFlat_inner"]
 bg_color = Color(0.047, 0.047, 0.11, 0.92)
 border_width_left = 2
 border_width_top = 2
@@ -36,18 +43,6 @@ corner_radius_top_right = 8
 corner_radius_bottom_right = 8
 corner_radius_bottom_left = 8
 
-[sub_resource type="StyleBoxFlat" id="SBFlat_result"]
-bg_color = Color(0.047, 0.047, 0.11, 0.97)
-border_width_left = 2
-border_width_top = 2
-border_width_right = 2
-border_width_bottom = 2
-border_color = Color(0.18, 0.42, 0.78, 1)
-corner_radius_top_left = 8
-corner_radius_top_right = 8
-corner_radius_bottom_right = 8
-corner_radius_bottom_left = 8
-
 [sub_resource type="StyleBoxFlat" id="SBFlat_btm_btn"]
 bg_color = Color(0.04, 0.06, 0.12, 0.97)
 border_width_left = 2
@@ -60,136 +55,104 @@ corner_radius_top_right = 6
 corner_radius_bottom_right = 6
 corner_radius_bottom_left = 6
 
-[node name="TrainingScreen" type="Control"]
+[sub_resource type="StyleBoxFlat" id="SBFlat_result"]
+bg_color = Color(0.047, 0.047, 0.11, 0.97)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(0.18, 0.42, 0.78, 1)
+corner_radius_top_left = 8
+corner_radius_top_right = 8
+corner_radius_bottom_right = 8
+corner_radius_bottom_left = 8
+
+[node name="TrainingScreen" type="CanvasLayer"]
+layer = 8
+script = ExtResource("1_tsscript")
+
+[node name="Dimmer" type="ColorRect" parent="."]
 layout_mode = 3
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
-script = ExtResource("1_tsscript")
+color = Color(0.0, 0.0, 0.0, 0.55)
 
-[node name="Background" type="ColorRect" parent="."]
-layout_mode = 1
-anchors_preset = 15
-anchor_right = 1.0
-anchor_bottom = 1.0
+[node name="Card" type="Panel" parent="."]
+layout_mode = 3
+anchors_preset = 8
+anchor_left = 0.5
+anchor_right = 0.5
+anchor_top = 0.5
+anchor_bottom = 0.5
+offset_left = -175.0
+offset_right = 175.0
+offset_top = -310.0
+offset_bottom = 310.0
 grow_horizontal = 2
 grow_vertical = 2
-color = Color(0.047, 0.047, 0.11, 1)
+theme_override_styles/panel = SubResource("SBFlat_card")
 
-[node name="TopBar" type="Panel" parent="."]
+[node name="VBox" type="VBoxContainer" parent="Card"]
 layout_mode = 1
-anchors_preset = 10
-anchor_right = 1.0
-offset_bottom = 60.0
-grow_horizontal = 2
-theme_override_styles/panel = SubResource("SBFlat_header")
-
-[node name="TitleLabel" type="Label" parent="TopBar"]
-layout_mode = 1
-anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
+offset_left = 8.0
+offset_top = 8.0
+offset_right = -8.0
+offset_bottom = -8.0
 grow_horizontal = 2
 grow_vertical = 2
-theme_override_colors/font_color = Color(0.92, 0.92, 0.95, 1)
-theme_override_font_sizes/font_size = 15
-text = "TRAINING"
-horizontal_alignment = 1
-vertical_alignment = 1
+theme_override_constants/separation = 6
 
-[node name="CpLabel" type="Label" parent="TopBar"]
-layout_mode = 1
-anchor_left = 1.0
-anchor_right = 1.0
-anchor_top = 0.0
-anchor_bottom = 1.0
-offset_left = -100.0
-grow_horizontal = 0
-grow_vertical = 2
-theme_override_colors/font_color = Color(1, 0.82, 0.1, 1)
-theme_override_font_sizes/font_size = 13
-text = "[CP] 0"
-horizontal_alignment = 2
-vertical_alignment = 1
-
-[node name="TabBar" type="HBoxContainer" parent="."]
-layout_mode = 1
-anchor_right = 1.0
-offset_top = 60.0
-offset_bottom = 104.0
-grow_horizontal = 2
-theme_override_constants/separation = 0
-
-[node name="TrainTab" type="Button" parent="TabBar"]
+[node name="TabBar" type="HBoxContainer" parent="Card/VBox"]
 layout_mode = 2
 size_flags_horizontal = 3
-custom_minimum_size = Vector2(0, 44)
-text = "TRAIN"
+theme_override_constants/separation = 0
+
+[node name="TrainTab" type="Button" parent="Card/VBox/TabBar"]
+layout_mode = 2
+size_flags_horizontal = 3
+custom_minimum_size = Vector2(0, 36)
 theme_override_colors/font_color = Color(1, 1, 1, 1)
 theme_override_font_sizes/font_size = 13
 theme_override_styles/normal = SubResource("SBFlat_tab")
 theme_override_styles/hover = SubResource("SBFlat_tab")
 theme_override_styles/pressed = SubResource("SBFlat_tab")
+text = "TRAIN"
 
-[node name="ComboTab" type="Button" parent="TabBar"]
+[node name="ComboTab" type="Button" parent="Card/VBox/TabBar"]
 layout_mode = 2
 size_flags_horizontal = 3
-custom_minimum_size = Vector2(0, 44)
-text = "COMBOS"
+custom_minimum_size = Vector2(0, 36)
 theme_override_colors/font_color = Color(0.48, 0.48, 0.58, 1)
 theme_override_font_sizes/font_size = 13
 theme_override_styles/normal = SubResource("SBFlat_tab")
 theme_override_styles/hover = SubResource("SBFlat_tab")
 theme_override_styles/pressed = SubResource("SBFlat_tab")
+text = "COMBOS"
 
-[node name="TrainScroll" type="ScrollContainer" parent="."]
-layout_mode = 1
-anchor_right = 1.0
-anchor_bottom = 1.0
-offset_top = 104.0
-offset_bottom = -56.0
-grow_horizontal = 2
-grow_vertical = 2
-horizontal_scroll_mode = 0
-
-[node name="TrainVBox" type="VBoxContainer" parent="TrainScroll"]
+[node name="SlotArea" type="HBoxContainer" parent="Card/VBox"]
 layout_mode = 2
 size_flags_horizontal = 3
-theme_override_constants/separation = 6
-
-[node name="AnimArea" type="Panel" parent="TrainScroll/TrainVBox"]
-layout_mode = 2
-size_flags_horizontal = 3
-custom_minimum_size = Vector2(0, 96)
-theme_override_styles/panel = SubResource("SBFlat_dark")
-
-[node name="SlotCenter" type="CenterContainer" parent="TrainScroll/TrainVBox/AnimArea"]
-layout_mode = 1
-anchors_preset = 15
-anchor_right = 1.0
-anchor_bottom = 1.0
-grow_horizontal = 2
-grow_vertical = 2
-
-[node name="SlotHBox" type="HBoxContainer" parent="TrainScroll/TrainVBox/AnimArea/SlotCenter"]
-layout_mode = 2
+alignment = 1
 theme_override_constants/separation = 8
 
-[node name="NavRow" type="HBoxContainer" parent="TrainScroll/TrainVBox"]
+[node name="ArrowRow" type="HBoxContainer" parent="Card/VBox"]
 layout_mode = 2
 size_flags_horizontal = 3
-custom_minimum_size = Vector2(0, 40)
+custom_minimum_size = Vector2(0, 36)
 theme_override_constants/separation = 4
 
-[node name="PrevBtn" type="Button" parent="TrainScroll/TrainVBox/NavRow"]
+[node name="PrevBtn" type="Button" parent="Card/VBox/ArrowRow"]
 layout_mode = 2
-custom_minimum_size = Vector2(48, 0)
+custom_minimum_size = Vector2(40, 0)
 theme_override_font_sizes/font_size = 18
 text = "<"
 
-[node name="NavLabel" type="Label" parent="TrainScroll/TrainVBox/NavRow"]
+[node name="TrainingLabel" type="Label" parent="Card/VBox/ArrowRow"]
 layout_mode = 2
 size_flags_horizontal = 3
 theme_override_colors/font_color = Color(0.72, 0.72, 0.82, 1)
@@ -198,56 +161,52 @@ text = "Trainings"
 horizontal_alignment = 1
 vertical_alignment = 1
 
-[node name="NextBtn" type="Button" parent="TrainScroll/TrainVBox/NavRow"]
+[node name="NextBtn" type="Button" parent="Card/VBox/ArrowRow"]
 layout_mode = 2
-custom_minimum_size = Vector2(48, 0)
+custom_minimum_size = Vector2(40, 0)
 theme_override_font_sizes/font_size = 18
 text = ">"
 
-[node name="CardPanel" type="Panel" parent="TrainScroll/TrainVBox"]
+[node name="TrainingCard" type="Panel" parent="Card/VBox"]
 layout_mode = 2
 size_flags_horizontal = 3
-custom_minimum_size = Vector2(0, 100)
-theme_override_styles/panel = SubResource("SBFlat_dark")
+custom_minimum_size = Vector2(0, 90)
+theme_override_styles/panel = SubResource("SBFlat_inner")
 
-[node name="CardMargin" type="MarginContainer" parent="TrainScroll/TrainVBox/CardPanel"]
+[node name="VBox" type="VBoxContainer" parent="Card/VBox/TrainingCard"]
 layout_mode = 1
-anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
+offset_left = 10.0
+offset_top = 8.0
+offset_right = -10.0
+offset_bottom = -8.0
 grow_horizontal = 2
 grow_vertical = 2
-theme_override_constants/margin_left = 12
-theme_override_constants/margin_top = 10
-theme_override_constants/margin_right = 12
-theme_override_constants/margin_bottom = 10
+theme_override_constants/separation = 3
 
-[node name="CardVBox" type="VBoxContainer" parent="TrainScroll/TrainVBox/CardPanel/CardMargin"]
-layout_mode = 2
-theme_override_constants/separation = 4
-
-[node name="CardNameLabel" type="Label" parent="TrainScroll/TrainVBox/CardPanel/CardMargin/CardVBox"]
+[node name="TrainingNameLabel" type="Label" parent="Card/VBox/TrainingCard/VBox"]
 layout_mode = 2
 theme_override_colors/font_color = Color(0.92, 0.92, 0.95, 1)
 theme_override_font_sizes/font_size = 14
 text = "---"
 horizontal_alignment = 1
 
-[node name="CardTierCostLabel" type="Label" parent="TrainScroll/TrainVBox/CardPanel/CardMargin/CardVBox"]
+[node name="TrainingTierCpLabel" type="Label" parent="Card/VBox/TrainingCard/VBox"]
 layout_mode = 2
-theme_override_colors/font_color = Color(0.5, 0.51, 0.62, 1)
+theme_override_colors/font_color = Color(1.0, 0.82, 0.1, 1)
 theme_override_font_sizes/font_size = 11
 text = ""
 horizontal_alignment = 1
 
-[node name="CardStatsLabel" type="Label" parent="TrainScroll/TrainVBox/CardPanel/CardMargin/CardVBox"]
+[node name="TrainingStatsLabel" type="Label" parent="Card/VBox/TrainingCard/VBox"]
 layout_mode = 2
 theme_override_colors/font_color = Color(0.72, 0.72, 0.78, 1)
 theme_override_font_sizes/font_size = 11
 text = ""
 horizontal_alignment = 1
 
-[node name="CardBonusLabel" type="Label" parent="TrainScroll/TrainVBox/CardPanel/CardMargin/CardVBox"]
+[node name="TrainingBonusLabel" type="Label" parent="Card/VBox/TrainingCard/VBox"]
 layout_mode = 2
 theme_override_colors/font_color = Color(0.2, 0.85, 0.94, 1)
 theme_override_font_sizes/font_size = 10
@@ -255,7 +214,7 @@ text = ""
 horizontal_alignment = 1
 visible = false
 
-[node name="ComboHintLabel" type="Label" parent="TrainScroll/TrainVBox"]
+[node name="ComboHintLabel" type="Label" parent="Card/VBox"]
 layout_mode = 2
 size_flags_horizontal = 3
 theme_override_colors/font_color = Color(1, 0.82, 0.1, 1)
@@ -263,7 +222,7 @@ theme_override_font_sizes/font_size = 11
 text = ""
 horizontal_alignment = 1
 
-[node name="CostLabel" type="Label" parent="TrainScroll/TrainVBox"]
+[node name="CostLabel" type="Label" parent="Card/VBox"]
 layout_mode = 2
 size_flags_horizontal = 3
 theme_override_colors/font_color = Color(0.72, 0.72, 0.78, 1)
@@ -271,10 +230,10 @@ theme_override_font_sizes/font_size = 11
 text = "Cost: 0 CP"
 horizontal_alignment = 1
 
-[node name="RunBtn" type="Button" parent="TrainScroll/TrainVBox"]
+[node name="RunBtn" type="Button" parent="Card/VBox"]
 layout_mode = 2
 size_flags_horizontal = 3
-custom_minimum_size = Vector2(0, 48)
+custom_minimum_size = Vector2(0, 44)
 theme_override_colors/font_color = Color(0.22, 0.9, 0.42, 1)
 theme_override_font_sizes/font_size = 14
 theme_override_styles/normal = SubResource("SBFlat_run")
@@ -283,39 +242,15 @@ theme_override_styles/pressed = SubResource("SBFlat_run")
 text = "START TRAINING"
 disabled = true
 
-[node name="ComboScroll" type="ScrollContainer" parent="."]
-layout_mode = 1
-anchor_right = 1.0
-anchor_bottom = 1.0
-offset_top = 104.0
-offset_bottom = -56.0
-grow_horizontal = 2
-grow_vertical = 2
-horizontal_scroll_mode = 0
-visible = false
-
-[node name="ComboList" type="VBoxContainer" parent="ComboScroll"]
+[node name="BottomRow" type="HBoxContainer" parent="Card/VBox"]
 layout_mode = 2
 size_flags_horizontal = 3
 theme_override_constants/separation = 8
 
-[node name="BottomBtns" type="HBoxContainer" parent="."]
-layout_mode = 1
-anchor_left = 0.0
-anchor_right = 1.0
-anchor_top = 1.0
-anchor_bottom = 1.0
-offset_left = 8.0
-offset_right = -8.0
-offset_top = -52.0
-offset_bottom = -4.0
-grow_horizontal = 2
-grow_vertical = 0
-theme_override_constants/separation = 8
-
-[node name="BackBtn" type="Button" parent="BottomBtns"]
+[node name="BackBtn" type="Button" parent="Card/VBox/BottomRow"]
 layout_mode = 2
 size_flags_horizontal = 3
+custom_minimum_size = Vector2(0, 40)
 theme_override_colors/font_color = Color(0.92, 0.92, 0.95, 1)
 theme_override_font_sizes/font_size = 13
 theme_override_styles/normal = SubResource("SBFlat_btm_btn")
@@ -323,13 +258,14 @@ theme_override_styles/hover = SubResource("SBFlat_btm_btn")
 theme_override_styles/pressed = SubResource("SBFlat_btm_btn")
 text = "BACK"
 
-[node name="BtnSpacer" type="Control" parent="BottomBtns"]
+[node name="HSpacer" type="Control" parent="Card/VBox/BottomRow"]
 layout_mode = 2
-custom_minimum_size = Vector2(16, 0)
+custom_minimum_size = Vector2(12, 0)
 
-[node name="CancelBtn" type="Button" parent="BottomBtns"]
+[node name="CancelBtn" type="Button" parent="Card/VBox/BottomRow"]
 layout_mode = 2
 size_flags_horizontal = 3
+custom_minimum_size = Vector2(0, 40)
 theme_override_colors/font_color = Color(0.92, 0.92, 0.95, 1)
 theme_override_font_sizes/font_size = 13
 theme_override_styles/normal = SubResource("SBFlat_btm_btn")
@@ -337,8 +273,19 @@ theme_override_styles/hover = SubResource("SBFlat_btm_btn")
 theme_override_styles/pressed = SubResource("SBFlat_btm_btn")
 text = "CANCEL"
 
+[node name="ComboScroll" type="ScrollContainer" parent="Card/VBox"]
+layout_mode = 2
+size_flags_vertical = 3
+horizontal_scroll_mode = 0
+visible = false
+
+[node name="ComboList" type="VBoxContainer" parent="Card/VBox/ComboScroll"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/separation = 8
+
 [node name="ResultPanel" type="Panel" parent="."]
-layout_mode = 1
+layout_mode = 3
 anchors_preset = -1
 anchor_left = 0.05
 anchor_right = 0.95
