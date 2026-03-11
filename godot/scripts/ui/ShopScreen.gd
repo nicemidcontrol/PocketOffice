@@ -5,12 +5,12 @@ signal screen_closed
 # ------------------------------------------
 #  NODE REFS
 # ------------------------------------------
-@onready var _back_btn:      Button        = $Dimmer/Card/Header/HBox/BackBtn
-@onready var _cp_lbl:        Label         = $Dimmer/Card/Header/HBox/CpLabel
-@onready var _champ_lbl:     Label         = $Dimmer/Card/ChampPanel/ChampMargin/ChampVBox/ChampText
-@onready var _items_vbox:    VBoxContainer = $Dimmer/Card/Body/BodyMargin/BodyVBox/ItemsVBox
-@onready var _emp_vbox:      VBoxContainer = $Dimmer/Card/Body/BodyMargin/BodyVBox/EmpVBox
-@onready var _feedback_lbl:  Label         = $Dimmer/Card/FeedbackLabel
+@onready var _back_btn:      Button        = $Card/Header/HBox/BackBtn
+@onready var _cp_lbl:        Label         = $Card/Header/HBox/CpLabel
+@onready var _champ_lbl:     Label         = $Card/ChampPanel/ChampMargin/ChampVBox/ChampText
+@onready var _items_vbox:    VBoxContainer = $Card/Body/BodyMargin/BodyVBox/ItemsVBox
+@onready var _emp_vbox:      VBoxContainer = $Card/Body/BodyMargin/BodyVBox/EmpVBox
+@onready var _feedback_lbl:  Label         = $Card/FeedbackLabel
 
 # ------------------------------------------
 #  STATE

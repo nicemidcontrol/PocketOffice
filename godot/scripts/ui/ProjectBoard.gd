@@ -5,12 +5,12 @@ signal screen_closed
 # ------------------------------------------
 #  NODE REFS
 # ------------------------------------------
-@onready var _cash_label:   Label         = $Dimmer/Card/Header/HdrMargin/HdrHBox/CashLabel
-@onready var _active_list:  VBoxContainer = $Dimmer/Card/Body/BodyMargin/BodyVBox/ActiveList
-@onready var _avail_list:   VBoxContainer = $Dimmer/Card/Body/BodyMargin/BodyVBox/AvailList
-@onready var _assign_popup: Panel         = $Dimmer/Card/AssignPopup
-@onready var _popup_title:  Label         = $Dimmer/Card/AssignPopup/PopupVBox/PopupTitle
-@onready var _popup_list:   VBoxContainer = $Dimmer/Card/AssignPopup/PopupVBox/PopupScroll/PopupList
+@onready var _cash_label:   Label         = $Card/Header/HdrMargin/HdrHBox/CashLabel
+@onready var _active_list:  VBoxContainer = $Card/Body/BodyMargin/BodyVBox/ActiveList
+@onready var _avail_list:   VBoxContainer = $Card/Body/BodyMargin/BodyVBox/AvailList
+@onready var _assign_popup: Panel         = $Card/AssignPopup
+@onready var _popup_title:  Label         = $Card/AssignPopup/PopupVBox/PopupTitle
+@onready var _popup_list:   VBoxContainer = $Card/AssignPopup/PopupVBox/PopupScroll/PopupList
 
 # ------------------------------------------
 #  STATE

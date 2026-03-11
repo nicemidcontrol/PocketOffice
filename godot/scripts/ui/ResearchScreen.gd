@@ -2,8 +2,8 @@ extends CanvasLayer
 
 signal screen_closed
 
-@onready var _cp_label:    Label         = $Dimmer/Card/Header/HBox/CpLabel
-@onready var _vbox:        VBoxContainer = $Dimmer/Card/Scroll/VBox
+@onready var _cp_label:    Label         = $Card/Header/HBox/CpLabel
+@onready var _vbox:        VBoxContainer = $Card/Scroll/VBox
 @onready var _notif_panel: Panel         = $NotifLayer/NotifPanel
 @onready var _notif_label: Label         = $NotifLayer/NotifPanel/Margin/VBox/NotifLabel
 @onready var _notif_timer: Timer         = $NotifLayer/NotifPanel/NotifTimer
