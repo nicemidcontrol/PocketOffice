@@ -58,11 +58,9 @@ func _load_debug_menu() -> void:
 
 func _on_scene_about_to_change() -> void:
 	_is_active = false
-	$CpIndicator.visible = false
 
 func _on_returned_to_main() -> void:
 	_is_active = true
-	$CpIndicator.visible = true
 
 func _on_shop_requested() -> void:
 	_is_active = false
@@ -70,12 +68,10 @@ func _on_shop_requested() -> void:
 
 func _on_training_requested() -> void:
 	_is_active = false
-	$CpIndicator.visible = false
 	var screen: Node = load("res://scenes/TrainingScreen.tscn").instantiate()
 	add_child(screen)
 	screen.training_done.connect(func() -> void:
 		_is_active = true
-		$CpIndicator.visible = true
 	)
 
 func _maybe_show_tutorial() -> void:

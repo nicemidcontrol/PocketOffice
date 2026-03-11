@@ -1,31 +1,30 @@
-extends Control
+extends CanvasLayer
 
 signal training_done
 
 # -----------------------------------------
 #  NODE REFS
 # -----------------------------------------
-@onready var _tab_train:     Button          = $TabBar/TrainTab
-@onready var _tab_combo:     Button          = $TabBar/ComboTab
-@onready var _train_scroll:  ScrollContainer = $TrainScroll
-@onready var _slot_hbox:     HBoxContainer   = $TrainScroll/TrainVBox/AnimArea/SlotCenter/SlotHBox
-@onready var _prev_btn:      Button          = $TrainScroll/TrainVBox/NavRow/PrevBtn
-@onready var _next_btn:      Button          = $TrainScroll/TrainVBox/NavRow/NextBtn
-@onready var _card_name:     Label           = $TrainScroll/TrainVBox/CardPanel/CardMargin/CardVBox/CardNameLabel
-@onready var _card_tiercost: Label           = $TrainScroll/TrainVBox/CardPanel/CardMargin/CardVBox/CardTierCostLabel
-@onready var _card_stats:    Label           = $TrainScroll/TrainVBox/CardPanel/CardMargin/CardVBox/CardStatsLabel
-@onready var _card_bonus:    Label           = $TrainScroll/TrainVBox/CardPanel/CardMargin/CardVBox/CardBonusLabel
-@onready var _combo_scroll:  ScrollContainer = $ComboScroll
-@onready var _combo_list:    VBoxContainer   = $ComboScroll/ComboList
-@onready var _run_btn:       Button          = $TrainScroll/TrainVBox/RunBtn
-@onready var _result_panel:  Panel           = $ResultPanel
-@onready var _result_label:  Label           = $ResultPanel/Margin/ResultLabel
-@onready var _result_close:  Button          = $ResultPanel/CloseBtn
-@onready var _cp_label:      Label           = $TopBar/CpLabel
-@onready var _combo_hint:    Label           = $TrainScroll/TrainVBox/ComboHintLabel
-@onready var _cost_label:    Label           = $TrainScroll/TrainVBox/CostLabel
-@onready var _back_btn:      Button          = $BottomBtns/BackBtn
-@onready var _cancel_btn:    Button          = $BottomBtns/CancelBtn
+@onready var _tab_train:        Button          = $Card/VBox/TabBar/TrainTab
+@onready var _tab_combo:        Button          = $Card/VBox/TabBar/ComboTab
+@onready var _slot_hbox:        HBoxContainer   = $Card/VBox/SlotArea
+@onready var _prev_btn:         Button          = $Card/VBox/ArrowRow/PrevBtn
+@onready var _next_btn:         Button          = $Card/VBox/ArrowRow/NextBtn
+@onready var _training_label:   Label           = $Card/VBox/ArrowRow/TrainingLabel
+@onready var _training_name:    Label           = $Card/VBox/TrainingCard/VBox/TrainingNameLabel
+@onready var _training_tier_cp: Label           = $Card/VBox/TrainingCard/VBox/TrainingTierCpLabel
+@onready var _training_stats:   Label           = $Card/VBox/TrainingCard/VBox/TrainingStatsLabel
+@onready var _training_bonus:   Label           = $Card/VBox/TrainingCard/VBox/TrainingBonusLabel
+@onready var _combo_hint:       Label           = $Card/VBox/ComboHintLabel
+@onready var _cost_label:       Label           = $Card/VBox/CostLabel
+@onready var _run_btn:          Button          = $Card/VBox/RunBtn
+@onready var _back_btn:         Button          = $Card/VBox/BottomRow/BackBtn
+@onready var _cancel_btn:       Button          = $Card/VBox/BottomRow/CancelBtn
+@onready var _combo_scroll:     ScrollContainer = $Card/VBox/ComboScroll
+@onready var _combo_list:       VBoxContainer   = $Card/VBox/ComboScroll/ComboList
+@onready var _result_panel:     Panel           = $ResultPanel
+@onready var _result_label:     Label           = $ResultPanel/Margin/ResultLabel
+@onready var _result_close:     Button          = $ResultPanel/CloseBtn
 
 # -----------------------------------------
 #  STATE
@@ -53,6 +52,7 @@ var _available_trainings: Array = []
 #  LIFECYCLE
 # -----------------------------------------
 func _ready() -> void:
+	process_mode = Node.PROCESS_MODE_ALWAYS
 	await get_tree().process_frame
 	_gm = get_node_or_null("/root/GameManager")
 	_em = get_node_or_null("/root/EmployeeManager")
@@ -62,8 +62,8 @@ func _ready() -> void:
 	if _gm != null:
 		_discovered_combos = _gm.company_data.get("discovered_training_combos", [])
 		_discovered_facility_combos = _gm.company_data.get("discovered_facility_combos", [])
-	_back_btn.pressed.connect(_on_back)
-	_cancel_btn.pressed.connect(_on_cancel)
+	_back_btn.pressed.connect(_on_back_pressed)
+	_cancel_btn.pressed.connect(_on_cancel_pressed)
 	_tab_train.pressed.connect(_show_train_tab)
 	_tab_combo.pressed.connect(_show_combo_tab)
 	_run_btn.pressed.connect(_on_run_training)
@@ -73,22 +73,31 @@ func _ready() -> void:
 	_result_panel.visible = false
 	_build_slot_area()
 	_show_train_tab()
-	_refresh_cp()
 
 # -----------------------------------------
 #  TAB SWITCHING
 # -----------------------------------------
 func _show_train_tab() -> void:
-	_train_scroll.visible = true
-	_combo_scroll.visible = false
+	$Card/VBox/SlotArea.visible      = true
+	$Card/VBox/ArrowRow.visible      = true
+	$Card/VBox/TrainingCard.visible  = true
+	$Card/VBox/ComboHintLabel.visible = true
+	$Card/VBox/CostLabel.visible     = true
+	$Card/VBox/RunBtn.visible        = true
+	$Card/VBox/ComboScroll.visible   = false
 	_tab_train.add_theme_color_override("font_color", Color(1, 1, 1, 1))
 	_tab_combo.add_theme_color_override("font_color", Color(0.48, 0.48, 0.58, 1))
 	_load_available_trainings()
 	_refresh_training_card()
 
 func _show_combo_tab() -> void:
-	_train_scroll.visible = false
-	_combo_scroll.visible = true
+	$Card/VBox/SlotArea.visible      = false
+	$Card/VBox/ArrowRow.visible      = false
+	$Card/VBox/TrainingCard.visible  = false
+	$Card/VBox/ComboHintLabel.visible = false
+	$Card/VBox/CostLabel.visible     = false
+	$Card/VBox/RunBtn.visible        = false
+	$Card/VBox/ComboScroll.visible   = true
 	_tab_train.add_theme_color_override("font_color", Color(0.48, 0.48, 0.58, 1))
 	_tab_combo.add_theme_color_override("font_color", Color(1, 1, 1, 1))
 	_build_combo_list()
@@ -133,29 +142,29 @@ func _on_next_training() -> void:
 
 func _refresh_training_card() -> void:
 	if _available_trainings.is_empty():
-		_card_name.text = "No trainings available"
-		_card_tiercost.text = ""
-		_card_stats.text = ""
-		_card_bonus.visible = false
+		_training_name.text = "No trainings available"
+		_training_tier_cp.text = ""
+		_training_stats.text = ""
+		_training_bonus.visible = false
 		return
 	var t: Dictionary = _available_trainings[_training_index]
 	var tier: int = t.get("tier", 1)
 	match tier:
-		1: _card_name.add_theme_color_override("font_color", Color(0.92, 0.92, 0.95, 1))
-		2: _card_name.add_theme_color_override("font_color", Color(0.2, 0.85, 0.94, 1))
-		_: _card_name.add_theme_color_override("font_color", Color(1.0, 0.82, 0.1, 1))
-	_card_name.text = t.get("name", "")
-	_card_tiercost.text = "Tier %d  |  %d CP/person" % [tier, t.get("cp_cost", 7)]
+		1: _training_name.add_theme_color_override("font_color", Color(0.92, 0.92, 0.95, 1))
+		2: _training_name.add_theme_color_override("font_color", Color(0.2, 0.85, 0.94, 1))
+		_: _training_name.add_theme_color_override("font_color", Color(1.0, 0.82, 0.1, 1))
+	_training_name.text = t.get("name", "")
+	_training_tier_cp.text = "Tier %d  |  %d CP/person" % [tier, t.get("cp_cost", 7)]
 	var stats: Dictionary = t.get("stats", {})
 	var stat_parts: Array = []
 	for k in stats:
 		stat_parts.append("%s+%d" % [_stat_short(k), stats[k]])
-	_card_stats.text = "  ".join(stat_parts)
+	_training_stats.text = "  ".join(stat_parts)
 	if t.get("double_stat", "") == "role_primary":
-		_card_bonus.text = "* Role bonus: doubles primary stat"
-		_card_bonus.visible = true
+		_training_bonus.text = "* Role bonus: doubles primary stat"
+		_training_bonus.visible = true
 	else:
-		_card_bonus.visible = false
+		_training_bonus.visible = false
 
 # -----------------------------------------
 #  COMBO LIST
@@ -427,7 +436,6 @@ func _on_run_training() -> void:
 	print("[Training] cost=%d cp=%d" % [total_cost, _gm.corp_points])
 	_gm.corp_points -= total_cost
 	_gm.corp_points_changed.emit(_gm.corp_points)
-	_cp_label.text = "[CP] %d" % _gm.corp_points
 	var results: Array = _tm.apply_training(
 		_selected_training, valid_emps, _gm, _discovered_combos)
 
@@ -463,7 +471,6 @@ func _on_run_training() -> void:
 
 	_result_label.text = "\n\n".join(lines)
 	_result_panel.visible = true
-	_refresh_cp()
 	_selected_employees.clear()
 	_selected_training = {}
 	_training_index = 0
@@ -483,13 +490,9 @@ func _stat_short(key: String) -> String:
 		"creativity": return "CRE"
 	return key.to_upper().left(3)
 
-func _refresh_cp() -> void:
-	if _gm != null:
-		_cp_label.text = "[CP] %d" % _gm.corp_points
-
-func _on_back() -> void:
+func _on_back_pressed() -> void:
 	training_done.emit()
 	queue_free()
 
-func _on_cancel() -> void:
+func _on_cancel_pressed() -> void:
 	queue_free()
