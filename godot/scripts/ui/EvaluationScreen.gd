@@ -1,14 +1,16 @@
-extends Control
+extends CanvasLayer
 
-@onready var _back_btn:    Button        = $Header/HBox/BackBtn
-@onready var _title_lbl:   Label         = $Header/HBox/TitleLabel
-@onready var _body_vbox:   VBoxContainer = $Body/BodyMargin/BodyVBox
-@onready var _footer_btn:  Button        = $FooterBar/FooterBtn
-@onready var _win_panel:   Control       = $WinLosePanel
-@onready var _win_title:   Label         = $WinLosePanel/WinLoseMargin/WinLoseScroll/WinLoseVBox/WinLoseTitle
-@onready var _win_sub:     Label         = $WinLosePanel/WinLoseMargin/WinLoseScroll/WinLoseVBox/WinLoseSubtitle
-@onready var _final_ranks: VBoxContainer = $WinLosePanel/WinLoseMargin/WinLoseScroll/WinLoseVBox/FinalRankList
-@onready var _play_again:  Button        = $WinLosePanel/WinLoseMargin/WinLoseScroll/WinLoseVBox/PlayAgainBtn
+signal screen_closed
+
+@onready var _back_btn:    Button        = $Dimmer/Card/Header/HBox/BackBtn
+@onready var _title_lbl:   Label         = $Dimmer/Card/Header/HBox/TitleLabel
+@onready var _body_vbox:   VBoxContainer = $Dimmer/Card/Body/BodyMargin/BodyVBox
+@onready var _footer_btn:  Button        = $Dimmer/Card/FooterBar/FooterBtn
+@onready var _win_panel:   Control       = $Dimmer/Card/WinLosePanel
+@onready var _win_title:   Label         = $Dimmer/Card/WinLosePanel/WinLoseMargin/WinLoseScroll/WinLoseVBox/WinLoseTitle
+@onready var _win_sub:     Label         = $Dimmer/Card/WinLosePanel/WinLoseMargin/WinLoseScroll/WinLoseVBox/WinLoseSubtitle
+@onready var _final_ranks: VBoxContainer = $Dimmer/Card/WinLosePanel/WinLoseMargin/WinLoseScroll/WinLoseVBox/FinalRankList
+@onready var _play_again:  Button        = $Dimmer/Card/WinLosePanel/WinLoseMargin/WinLoseScroll/WinLoseVBox/PlayAgainBtn
 
 var _results:     Array = []
 var _game_year:   int   = 1
@@ -16,6 +18,7 @@ var _is_year_5:   bool  = false
 var _player_rank: int   = 1
 
 func _ready() -> void:
+	process_mode = Node.PROCESS_MODE_ALWAYS
 	var gm: Node = get_node_or_null("/root/GameManager")
 	if gm != null:
 		_results   = gm.last_evaluation_results
@@ -331,13 +334,15 @@ func _show_win_lose_screen() -> void:
 #  BUTTON HANDLERS
 # ─────────────────────────────────────────
 func _on_back_pressed() -> void:
-	get_tree().change_scene_to_file("res://scenes/Main.tscn")
+	screen_closed.emit()
+	queue_free()
 
 func _on_footer_btn_pressed() -> void:
 	if _is_year_5:
 		_show_win_lose_screen()
 	else:
-		get_tree().change_scene_to_file("res://scenes/Main.tscn")
+		screen_closed.emit()
+		queue_free()
 
 func _on_play_again_pressed() -> void:
 	get_tree().change_scene_to_file("res://scenes/Main.tscn")

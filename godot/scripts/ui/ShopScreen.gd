@@ -1,14 +1,16 @@
-extends Control
+extends CanvasLayer
+
+signal screen_closed
 
 # ------------------------------------------
 #  NODE REFS
 # ------------------------------------------
-@onready var _back_btn:      Button        = $Header/HBox/BackBtn
-@onready var _cp_lbl:        Label         = $Header/HBox/CpLabel
-@onready var _champ_lbl:     Label         = $ChampPanel/ChampMargin/ChampVBox/ChampText
-@onready var _items_vbox:    VBoxContainer = $Body/BodyMargin/BodyVBox/ItemsVBox
-@onready var _emp_vbox:      VBoxContainer = $Body/BodyMargin/BodyVBox/EmpVBox
-@onready var _feedback_lbl:  Label         = $FeedbackLabel
+@onready var _back_btn:      Button        = $Dimmer/Card/Header/HBox/BackBtn
+@onready var _cp_lbl:        Label         = $Dimmer/Card/Header/HBox/CpLabel
+@onready var _champ_lbl:     Label         = $Dimmer/Card/ChampPanel/ChampMargin/ChampVBox/ChampText
+@onready var _items_vbox:    VBoxContainer = $Dimmer/Card/Body/BodyMargin/BodyVBox/ItemsVBox
+@onready var _emp_vbox:      VBoxContainer = $Dimmer/Card/Body/BodyMargin/BodyVBox/EmpVBox
+@onready var _feedback_lbl:  Label         = $Dimmer/Card/FeedbackLabel
 
 # ------------------------------------------
 #  STATE
@@ -58,6 +60,7 @@ const _SHOP_ITEMS: Array = [
 #  LIFECYCLE
 # ------------------------------------------
 func _ready() -> void:
+	process_mode = Node.PROCESS_MODE_ALWAYS
 	await get_tree().process_frame
 	_gm = get_node_or_null("/root/GameManager")
 	var rng: RandomNumberGenerator = RandomNumberGenerator.new()
@@ -221,4 +224,5 @@ func _on_item_selected(item: Dictionary) -> void:
 	_feedback_lbl.add_theme_color_override("font_color", Color(0.22, 0.9, 0.42))
 
 func _on_back_pressed() -> void:
-	get_tree().change_scene_to_file("res://scenes/Main.tscn")
+	screen_closed.emit()
+	queue_free()

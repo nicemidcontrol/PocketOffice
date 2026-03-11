@@ -63,8 +63,11 @@ func _on_returned_to_main() -> void:
 	_is_active = true
 
 func _on_shop_requested() -> void:
-	_is_active = false
-	get_tree().change_scene_to_file("res://scenes/ShopScreen.tscn")
+	var screen: Node = load("res://scenes/ShopScreen.tscn").instantiate()
+	add_child(screen)
+	screen.screen_closed.connect(func() -> void:
+		_is_active = true
+	)
 
 func _on_training_requested() -> void:
 	_is_active = false
@@ -88,32 +91,53 @@ func _on_menu_requested() -> void:
 	_pause_menu.open()
 
 func _on_hire_requested() -> void:
-	_is_active = false
-	get_tree().change_scene_to_file("res://scenes/HireScreen.tscn")
+	var screen: Node = load("res://scenes/HireScreen.tscn").instantiate()
+	add_child(screen)
+	screen.screen_closed.connect(func() -> void:
+		_is_active = true
+	)
 
 func _on_project_board_requested() -> void:
-	_is_active = false
-	get_tree().change_scene_to_file("res://scenes/ProjectBoard.tscn")
+	var screen: Node = load("res://scenes/ProjectBoard.tscn").instantiate()
+	add_child(screen)
+	screen.screen_closed.connect(func() -> void:
+		_is_active = true
+	)
 
 func _on_employee_list_requested() -> void:
-	_is_active = false
-	get_tree().change_scene_to_file("res://scenes/EmployeeListScreen.tscn")
+	var screen: Node = load("res://scenes/EmployeeListScreen.tscn").instantiate()
+	add_child(screen)
+	screen.screen_closed.connect(func() -> void:
+		_is_active = true
+	)
 
 func _on_build_requested() -> void:
-	_is_active = false
-	get_tree().change_scene_to_file("res://scenes/BuildScreen.tscn")
+	var screen: Node = load("res://scenes/BuildScreen.tscn").instantiate()
+	add_child(screen)
+	screen.screen_closed.connect(func() -> void:
+		_is_active = true
+	)
 
 func _on_research_requested() -> void:
-	_is_active = false
-	get_tree().change_scene_to_file("res://scenes/ResearchScreen.tscn")
+	var screen: Node = load("res://scenes/ResearchScreen.tscn").instantiate()
+	add_child(screen)
+	screen.screen_closed.connect(func() -> void:
+		_is_active = true
+	)
 
 func _on_evaluation_ready(_year: int, _results: Array) -> void:
-	_is_active = false
-	get_tree().change_scene_to_file("res://scenes/EvaluationScreen.tscn")
+	var screen: Node = load("res://scenes/EvaluationScreen.tscn").instantiate()
+	add_child(screen)
+	screen.screen_closed.connect(func() -> void:
+		_is_active = true
+	)
 
 func _on_score_requested() -> void:
-	_is_active = false
-	get_tree().change_scene_to_file("res://scenes/EvaluationScreen.tscn")
+	var screen: Node = load("res://scenes/EvaluationScreen.tscn").instantiate()
+	add_child(screen)
+	screen.screen_closed.connect(func() -> void:
+		_is_active = true
+	)
 
 func _on_project_completed(proj: Dictionary) -> void:
 	if not _is_active:

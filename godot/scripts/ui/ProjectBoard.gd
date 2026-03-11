@@ -1,14 +1,16 @@
-extends Control
+extends CanvasLayer
+
+signal screen_closed
 
 # ------------------------------------------
 #  NODE REFS
 # ------------------------------------------
-@onready var _cash_label:   Label         = $Header/HdrMargin/HdrHBox/CashLabel
-@onready var _active_list:  VBoxContainer = $Body/BodyMargin/BodyVBox/ActiveList
-@onready var _avail_list:   VBoxContainer = $Body/BodyMargin/BodyVBox/AvailList
-@onready var _assign_popup: Panel         = $AssignPopup
-@onready var _popup_title:  Label         = $AssignPopup/PopupVBox/PopupTitle
-@onready var _popup_list:   VBoxContainer = $AssignPopup/PopupVBox/PopupScroll/PopupList
+@onready var _cash_label:   Label         = $Dimmer/Card/Header/HdrMargin/HdrHBox/CashLabel
+@onready var _active_list:  VBoxContainer = $Dimmer/Card/Body/BodyMargin/BodyVBox/ActiveList
+@onready var _avail_list:   VBoxContainer = $Dimmer/Card/Body/BodyMargin/BodyVBox/AvailList
+@onready var _assign_popup: Panel         = $Dimmer/Card/AssignPopup
+@onready var _popup_title:  Label         = $Dimmer/Card/AssignPopup/PopupVBox/PopupTitle
+@onready var _popup_list:   VBoxContainer = $Dimmer/Card/AssignPopup/PopupVBox/PopupScroll/PopupList
 
 # ------------------------------------------
 #  STATE
@@ -20,6 +22,7 @@ var _selected_pid: int   = -1
 #  LIFECYCLE
 # ------------------------------------------
 func _ready() -> void:
+	process_mode = Node.PROCESS_MODE_ALWAYS
 	await get_tree().process_frame
 	_gm = get_node_or_null("/root/GameManager")
 	if _gm == null:
@@ -35,7 +38,8 @@ func _ready() -> void:
 #  SIGNAL HANDLERS (wired in .tscn)
 # ------------------------------------------
 func _on_back_pressed() -> void:
-	get_tree().change_scene_to_file("res://scenes/Main.tscn")
+	screen_closed.emit()
+	queue_free()
 
 func _on_popup_close_pressed() -> void:
 	_assign_popup.visible = false

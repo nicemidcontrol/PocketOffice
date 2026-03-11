@@ -1,7 +1,9 @@
-extends Control
+extends CanvasLayer
 
-@onready var _cp_label:    Label         = $Header/HBox/CpLabel
-@onready var _vbox:        VBoxContainer = $Scroll/VBox
+signal screen_closed
+
+@onready var _cp_label:    Label         = $Dimmer/Card/Header/HBox/CpLabel
+@onready var _vbox:        VBoxContainer = $Dimmer/Card/Scroll/VBox
 @onready var _notif_panel: Panel         = $NotifLayer/NotifPanel
 @onready var _notif_label: Label         = $NotifLayer/NotifPanel/Margin/VBox/NotifLabel
 @onready var _notif_timer: Timer         = $NotifLayer/NotifPanel/NotifTimer
@@ -10,6 +12,7 @@ var _gm: Node = null
 var _dm: Node = null
 
 func _ready() -> void:
+	process_mode = Node.PROCESS_MODE_ALWAYS
 	_gm = get_node_or_null("/root/GameManager")
 	_dm = get_node_or_null("/root/DonorManager")
 
@@ -23,7 +26,8 @@ func _ready() -> void:
 	_build_cards()
 
 func _on_back_pressed() -> void:
-	get_tree().change_scene_to_file("res://scenes/Main.tscn")
+	screen_closed.emit()
+	queue_free()
 
 func _on_notif_timer_timeout() -> void:
 	_notif_panel.visible = false
@@ -87,14 +91,12 @@ func _make_card(donor: Dictionary) -> Control:
 	col.add_theme_constant_override("separation", 5)
 	margin.add_child(col)
 
-	# Name
 	var name_lbl: Label = Label.new()
 	name_lbl.text = donor["name"]
 	name_lbl.add_theme_color_override("font_color", Color(1.0, 1.0, 1.0, 1.0))
 	name_lbl.add_theme_font_size_override("font_size", 16)
 	col.add_child(name_lbl)
 
-	# Description
 	var desc_lbl: Label = Label.new()
 	desc_lbl.text = donor["description"]
 	desc_lbl.add_theme_color_override("font_color", Color(0.65, 0.65, 0.65, 1.0))
@@ -102,13 +104,9 @@ func _make_card(donor: Dictionary) -> Control:
 	desc_lbl.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	col.add_child(desc_lbl)
 
-	# Separator
 	col.add_child(_make_sep())
-
-	# Requirements row
 	col.add_child(_make_req_row(donor, _gm, _dm.won_donors.has(id)))
 
-	# Cost / Rewards row
 	var reward_row: HBoxContainer = HBoxContainer.new()
 	reward_row.add_theme_constant_override("separation", 12)
 	col.add_child(reward_row)
@@ -131,7 +129,6 @@ func _make_card(donor: Dictionary) -> Control:
 	one_cp_lbl.add_theme_font_size_override("font_size", 13)
 	reward_row.add_child(one_cp_lbl)
 
-	# Unlocks row
 	var hero_names: Array  = donor["unlocks_hero_names"]
 	var proj_names: Array  = donor["unlocks_projects"]
 	if hero_names.size() > 0 or proj_names.size() > 0:
@@ -147,7 +144,6 @@ func _make_card(donor: Dictionary) -> Control:
 		unlock_lbl.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 		col.add_child(unlock_lbl)
 
-	# Missing requirements list
 	var reasons: Array = check["reasons"]
 	if not is_won and reasons.size() > 0:
 		for reason in reasons:
@@ -157,7 +153,6 @@ func _make_card(donor: Dictionary) -> Control:
 			req_lbl.add_theme_font_size_override("font_size", 11)
 			col.add_child(req_lbl)
 
-	# Button
 	var btn: Button = Button.new()
 	btn.custom_minimum_size = Vector2(0, 40)
 	btn.size_flags_horizontal = Control.SIZE_EXPAND_FILL
