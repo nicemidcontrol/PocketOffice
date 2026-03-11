@@ -2,13 +2,13 @@ extends CanvasLayer
 
 signal screen_closed
 
-@onready var _cash_label:        Label           = $Dimmer/Card/Header/HBox/CashLabel
-@onready var _tab_facilities:    Button          = $Dimmer/Card/TabBar/FacilitiesTab
-@onready var _tab_combos:        Button          = $Dimmer/Card/TabBar/CombosTab
-@onready var _facilities_scroll: ScrollContainer = $Dimmer/Card/FacilitiesScroll
-@onready var _combos_scroll:     ScrollContainer = $Dimmer/Card/CombosScroll
-@onready var _facilities_list:   VBoxContainer   = $Dimmer/Card/FacilitiesScroll/FacilitiesList
-@onready var _combos_list:       VBoxContainer   = $Dimmer/Card/CombosScroll/CombosList
+@onready var _cash_label:        Label           = $Card/Header/HBox/CashLabel
+@onready var _tab_facilities:    Button          = $Card/TabBar/FacilitiesTab
+@onready var _tab_combos:        Button          = $Card/TabBar/CombosTab
+@onready var _facilities_scroll: ScrollContainer = $Card/FacilitiesScroll
+@onready var _combos_scroll:     ScrollContainer = $Card/CombosScroll
+@onready var _facilities_list:   VBoxContainer   = $Card/FacilitiesScroll/FacilitiesList
+@onready var _combos_list:       VBoxContainer   = $Card/CombosScroll/CombosList
 
 var _gm: Node = null
 var _fm: Node = null

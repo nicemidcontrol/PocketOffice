@@ -2,8 +2,8 @@ extends CanvasLayer
 
 signal screen_closed
 
-@onready var _count_label: Label         = $Dimmer/Card/Header/HBox/CountLabel
-@onready var _card_list:   VBoxContainer = $Dimmer/Card/Body/CardList
+@onready var _count_label: Label         = $Card/Header/HBox/CountLabel
+@onready var _card_list:   VBoxContainer = $Card/Body/CardList
 
 var _gm: Node = null
 

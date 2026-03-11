@@ -2,15 +2,15 @@ extends CanvasLayer
 
 signal screen_closed
 
-@onready var _back_btn:    Button        = $Dimmer/Card/Header/HBox/BackBtn
-@onready var _title_lbl:   Label         = $Dimmer/Card/Header/HBox/TitleLabel
-@onready var _body_vbox:   VBoxContainer = $Dimmer/Card/Body/BodyMargin/BodyVBox
-@onready var _footer_btn:  Button        = $Dimmer/Card/FooterBar/FooterBtn
-@onready var _win_panel:   Control       = $Dimmer/Card/WinLosePanel
-@onready var _win_title:   Label         = $Dimmer/Card/WinLosePanel/WinLoseMargin/WinLoseScroll/WinLoseVBox/WinLoseTitle
-@onready var _win_sub:     Label         = $Dimmer/Card/WinLosePanel/WinLoseMargin/WinLoseScroll/WinLoseVBox/WinLoseSubtitle
-@onready var _final_ranks: VBoxContainer = $Dimmer/Card/WinLosePanel/WinLoseMargin/WinLoseScroll/WinLoseVBox/FinalRankList
-@onready var _play_again:  Button        = $Dimmer/Card/WinLosePanel/WinLoseMargin/WinLoseScroll/WinLoseVBox/PlayAgainBtn
+@onready var _back_btn:    Button        = $Card/Header/HBox/BackBtn
+@onready var _title_lbl:   Label         = $Card/Header/HBox/TitleLabel
+@onready var _body_vbox:   VBoxContainer = $Card/Body/BodyMargin/BodyVBox
+@onready var _footer_btn:  Button        = $Card/FooterBar/FooterBtn
+@onready var _win_panel:   Control       = $Card/WinLosePanel
+@onready var _win_title:   Label         = $Card/WinLosePanel/WinLoseMargin/WinLoseScroll/WinLoseVBox/WinLoseTitle
+@onready var _win_sub:     Label         = $Card/WinLosePanel/WinLoseMargin/WinLoseScroll/WinLoseVBox/WinLoseSubtitle
+@onready var _final_ranks: VBoxContainer = $Card/WinLosePanel/WinLoseMargin/WinLoseScroll/WinLoseVBox/FinalRankList
+@onready var _play_again:  Button        = $Card/WinLosePanel/WinLoseMargin/WinLoseScroll/WinLoseVBox/PlayAgainBtn
 
 var _results:     Array = []
 var _game_year:   int   = 1

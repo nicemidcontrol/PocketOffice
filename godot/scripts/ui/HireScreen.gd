@@ -5,17 +5,17 @@ signal screen_closed
 # ─────────────────────────────────────────
 #  NODES
 # ─────────────────────────────────────────
-@onready var _cash_label:     Label         = $Dimmer/Card/Header/HBox/CashLabel
-@onready var _title_label:    Label         = $Dimmer/Card/Header/HBox/TitleLabel
-@onready var _ad_layer:       Control       = $Dimmer/Card/AdSelectLayer
-@onready var _ad_vbox:        VBoxContainer = $Dimmer/Card/AdSelectLayer/Scroll/VBox
-@onready var _champ_layer:    Control       = $Dimmer/Card/ChampDialogLayer
-@onready var _champ_dialogue: Label         = $Dimmer/Card/ChampDialogLayer/ChampPanel/Margin/VBox/ChampDialogue
-@onready var _champ_dots:     Label         = $Dimmer/Card/ChampDialogLayer/ChampPanel/Margin/VBox/ChampDots
-@onready var _champ_continue: Button        = $Dimmer/Card/ChampDialogLayer/ChampPanel/Margin/VBox/ContinueBtn
-@onready var _champ_timer:    Timer         = $Dimmer/Card/ChampDialogLayer/ChampTimer
-@onready var _cand_layer:     Control       = $Dimmer/Card/CandidateLayer
-@onready var _cand_vbox:      VBoxContainer = $Dimmer/Card/CandidateLayer/Scroll/VBox
+@onready var _cash_label:     Label         = $Card/Header/HBox/CashLabel
+@onready var _title_label:    Label         = $Card/Header/HBox/TitleLabel
+@onready var _ad_layer:       Control       = $Card/AdSelectLayer
+@onready var _ad_vbox:        VBoxContainer = $Card/AdSelectLayer/Scroll/VBox
+@onready var _champ_layer:    Control       = $Card/ChampDialogLayer
+@onready var _champ_dialogue: Label         = $Card/ChampDialogLayer/ChampPanel/Margin/VBox/ChampDialogue
+@onready var _champ_dots:     Label         = $Card/ChampDialogLayer/ChampPanel/Margin/VBox/ChampDots
+@onready var _champ_continue: Button        = $Card/ChampDialogLayer/ChampPanel/Margin/VBox/ContinueBtn
+@onready var _champ_timer:    Timer         = $Card/ChampDialogLayer/ChampTimer
+@onready var _cand_layer:     Control       = $Card/CandidateLayer
+@onready var _cand_vbox:      VBoxContainer = $Card/CandidateLayer/Scroll/VBox
 
 # ─────────────────────────────────────────
 #  AD CONFIG
