@@ -72,6 +72,11 @@ func experience_to_next_level() -> int:
 @export var ot_level: int = 0
 @export var stress: int = 0
 
+# Internal problem tracking
+@export var ot_months_consecutive: int = 0
+@export var low_morale_months: int = 0
+@export var idle_months: int = 0
+
 # ─────────────────────────────────────────
 #  CONSTRUCTOR
 # ─────────────────────────────────────────
@@ -88,6 +93,9 @@ static func create(p_first: String, p_last: String, p_role: Role, p_personality:
 	emp.is_burned_out = false
 	emp.ot_level = 0
 	emp.stress   = 0
+	emp.ot_months_consecutive = 0
+	emp.low_morale_months     = 0
+	emp.idle_months           = 0
 
 	# Randomise base stats
 	var rng := RandomNumberGenerator.new()
@@ -201,7 +209,10 @@ func to_dict() -> Dictionary:
 		"is_hired": is_hired, "is_burned_out": is_burned_out,
 		"is_assigned_to_project": is_assigned_to_project,
 		"current_project_id": current_project_id,
-		"ot_level": ot_level, "stress": stress
+		"ot_level": ot_level, "stress": stress,
+		"ot_months_consecutive": ot_months_consecutive,
+		"low_morale_months": low_morale_months,
+		"idle_months": idle_months
 	}
 
 static func from_dict(d: Dictionary) -> Employee:
@@ -224,4 +235,7 @@ static func from_dict(d: Dictionary) -> Employee:
 	emp.current_project_id     = d.get("current_project_id", "")
 	emp.ot_level               = d.get("ot_level", 0)
 	emp.stress                 = d.get("stress", 0)
+	emp.ot_months_consecutive  = d.get("ot_months_consecutive", 0)
+	emp.low_morale_months      = d.get("low_morale_months", 0)
+	emp.idle_months            = d.get("idle_months", 0)
 	return emp
