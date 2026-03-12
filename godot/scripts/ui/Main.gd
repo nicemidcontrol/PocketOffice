@@ -7,6 +7,7 @@ extends Control
 @onready var _notif_label:  Label        = $NotifLayer/NotifPanel/Margin/VBox/NotifLabel
 @onready var _notif_timer:  Timer        = $NotifLayer/NotifPanel/NotifTimer
 @onready var _notif_close:  Button       = $NotifLayer/NotifPanel/Margin/VBox/NotifCloseBtn
+@onready var _notif_dimmer: ColorRect    = $NotifLayer/NotifDimmer
 @onready var _event_popup:  Node         = $EventPopup
 @onready var _fever_bar:    ProgressBar  = $FeverLayer/FeverPanel/FeverBar
 @onready var _fever_label:  Label        = $FeverLayer/FeverPanel/FeverLabel
@@ -22,8 +23,11 @@ func _ready() -> void:
 	_pause_menu.research_requested.connect(_on_research_requested)
 	_pause_menu.shop_requested.connect(_on_shop_requested)
 	_pause_menu.training_requested.connect(_on_training_requested)
+	_notif_panel.process_mode = Node.PROCESS_MODE_ALWAYS
+	_notif_dimmer.process_mode = Node.PROCESS_MODE_ALWAYS
 	_notif_timer.timeout.connect(_on_notif_timer_timeout)
 	_notif_close.pressed.connect(_on_notif_close_pressed)
+	_notif_dimmer.gui_input.connect(_on_notif_dimmer_input)
 
 	await get_tree().process_frame
 	var gm: Node = get_node_or_null("/root/GameManager")
@@ -147,19 +151,28 @@ func _on_project_completed(proj: Dictionary) -> void:
 	var cp: int   = proj.get("reward_corp_points", 0)
 	_notif_label.text = "%s Complete!\n+$%d  +%d CP" % [proj_name, cash, cp]
 	get_tree().paused = true
+	_notif_dimmer.visible = true
 	_notif_panel.visible = true
 	_notif_timer.start()
 
 func _on_notif_timer_timeout() -> void:
 	_notif_panel.visible = false
+	_notif_dimmer.visible = false
 	_notif_label.remove_theme_color_override("font_color")
 	_notif_panel.remove_theme_stylebox_override("panel")
 	get_tree().paused = false
 
 func _on_notif_close_pressed() -> void:
 	_notif_panel.visible = false
+	_notif_dimmer.visible = false
 	_notif_timer.stop()
 	get_tree().paused = false
+
+func _on_notif_dimmer_input(event: InputEvent) -> void:
+	if event is InputEventMouseButton:
+		var mb: InputEventMouseButton = event as InputEventMouseButton
+		if mb.pressed and mb.button_index == MOUSE_BUTTON_LEFT:
+			_on_notif_close_pressed()
 
 func _on_employee_burnout(emp_name: String) -> void:
 	if not _is_active:
@@ -179,6 +192,7 @@ func _on_employee_burnout(emp_name: String) -> void:
 	_notif_panel.add_theme_stylebox_override("panel", red_style)
 	_notif_label.add_theme_color_override("font_color", Color(1.0, 0.35, 0.35, 1.0))
 	get_tree().paused = true
+	_notif_dimmer.visible = true
 	_notif_panel.visible = true
 	_notif_timer.start()
 
@@ -187,6 +201,7 @@ func _on_hero_unlocked(_hero_name: String) -> void:
 		return
 	_notif_label.text = "A legendary employee is now available!\nCheck HR > Recruit."
 	get_tree().paused = true
+	_notif_dimmer.visible = true
 	_notif_panel.visible = true
 	_notif_timer.start()
 
@@ -213,6 +228,7 @@ func _on_donor_won(donor_name: String, monthly: int) -> void:
 	_notif_label.add_theme_color_override("font_color", Color(0.3, 1.0, 0.4, 1.0))
 	_notif_label.text = "%s secured!\n+$%d/mo funding" % [donor_name, monthly]
 	get_tree().paused = true
+	_notif_dimmer.visible = true
 	_notif_panel.visible = true
 	_notif_timer.start()
 

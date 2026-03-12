@@ -132,10 +132,22 @@ vertical_alignment = 1
 
 [node name="NotifLayer" type="CanvasLayer" parent="."]
 layer = 20
-process_mode = 6
+process_mode = 3
+
+[node name="NotifDimmer" type="ColorRect" parent="NotifLayer"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0.0, 0.0, 0.0, 0.45)
+mouse_filter = 0
+process_mode = 3
+visible = false
 
 [node name="NotifPanel" type="Panel" parent="NotifLayer"]
-process_mode = 6
+process_mode = 3
 visible = false
 anchors_preset = -1
 anchor_left = 0.05
@@ -175,7 +187,7 @@ theme_override_font_sizes/font_size = 11
 text = "CLOSE"
 
 [node name="NotifTimer" type="Timer" parent="NotifLayer/NotifPanel"]
-process_mode = 6
+process_mode = 3
 wait_time = 3.0
 one_shot = true
 
