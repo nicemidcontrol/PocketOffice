@@ -19,6 +19,7 @@ var _player_rank: int   = 1
 
 func _ready() -> void:
 	process_mode = Node.PROCESS_MODE_ALWAYS
+	$Dimmer.gui_input.connect(_on_dimmer_input)
 	var gm: Node = get_node_or_null("/root/GameManager")
 	if gm != null:
 		_results   = gm.last_evaluation_results
@@ -346,3 +347,9 @@ func _on_footer_btn_pressed() -> void:
 
 func _on_play_again_pressed() -> void:
 	get_tree().change_scene_to_file("res://scenes/Main.tscn")
+
+func _on_dimmer_input(event: InputEvent) -> void:
+	if event is InputEventMouseButton:
+		var mb: InputEventMouseButton = event as InputEventMouseButton
+		if mb.pressed and mb.button_index == MOUSE_BUTTON_LEFT:
+			queue_free()

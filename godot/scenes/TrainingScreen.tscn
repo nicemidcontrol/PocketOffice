@@ -79,6 +79,7 @@ anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
 color = Color(0.0, 0.0, 0.0, 0.55)
+mouse_filter = 0
 
 [node name="Card" type="Panel" parent="."]
 layout_mode = 3
@@ -94,6 +95,7 @@ offset_bottom = 310.0
 grow_horizontal = 2
 grow_vertical = 2
 theme_override_styles/panel = SubResource("SBFlat_card")
+mouse_filter = 0
 
 [node name="VBox" type="VBoxContainer" parent="Card"]
 layout_mode = 1
@@ -242,6 +244,16 @@ theme_override_styles/pressed = SubResource("SBFlat_run")
 text = "START TRAINING"
 disabled = true
 
+[node name="ErrorLabel" type="Label" parent="Card/VBox"]
+layout_mode = 2
+size_flags_horizontal = 3
+text = ""
+horizontal_alignment = 1
+autowrap_mode = 3
+visible = false
+theme_override_font_sizes/font_size = 11
+theme_override_colors/font_color = Color(1.0, 0.4, 0.4, 1.0)
+
 [node name="BottomRow" type="HBoxContainer" parent="Card/VBox"]
 layout_mode = 2
 size_flags_horizontal = 3
@@ -333,3 +345,7 @@ grow_vertical = 0
 theme_override_colors/font_color = Color(0.72, 0.72, 0.78, 1)
 theme_override_font_sizes/font_size = 13
 text = "CLOSE"
+
+[node name="ErrorTimer" type="Timer" parent="."]
+wait_time = 2.0
+one_shot = true

@@ -64,6 +64,7 @@ const _SHOP_ITEMS: Array = [
 # ------------------------------------------
 func _ready() -> void:
 	process_mode = Node.PROCESS_MODE_ALWAYS
+	$Dimmer.gui_input.connect(_on_dimmer_input)
 	await get_tree().process_frame
 	_gm = get_node_or_null("/root/GameManager")
 	var rng: RandomNumberGenerator = RandomNumberGenerator.new()
@@ -158,3 +159,9 @@ func _on_buy_pressed() -> void:
 
 func _on_close_pressed() -> void:
 	queue_free()
+
+func _on_dimmer_input(event: InputEvent) -> void:
+	if event is InputEventMouseButton:
+		var mb: InputEventMouseButton = event as InputEventMouseButton
+		if mb.pressed and mb.button_index == MOUSE_BUTTON_LEFT:
+			queue_free()

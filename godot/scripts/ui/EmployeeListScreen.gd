@@ -9,6 +9,7 @@ var _gm: Node = null
 
 func _ready() -> void:
 	process_mode = Node.PROCESS_MODE_ALWAYS
+	$Dimmer.gui_input.connect(_on_dimmer_input)
 	await get_tree().process_frame
 	_gm = get_node_or_null("/root/GameManager")
 	if _gm == null:
@@ -298,3 +299,9 @@ func _pers_str(p: int) -> String:
 func _on_back_pressed() -> void:
 	screen_closed.emit()
 	queue_free()
+
+func _on_dimmer_input(event: InputEvent) -> void:
+	if event is InputEventMouseButton:
+		var mb: InputEventMouseButton = event as InputEventMouseButton
+		if mb.pressed and mb.button_index == MOUSE_BUTTON_LEFT:
+			queue_free()
