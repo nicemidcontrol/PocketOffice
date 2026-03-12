@@ -32,6 +32,7 @@ var _active_tab:      String = "facilities"
 # ─────────────────────────────────────────
 func _ready() -> void:
 	process_mode = Node.PROCESS_MODE_ALWAYS
+	$Dimmer.gui_input.connect(_on_dimmer_input)
 	_gm = get_node_or_null("/root/GameManager")
 	_fm = get_node_or_null("/root/FacilityManager")
 	if _fm != null:
@@ -214,3 +215,9 @@ func _refresh() -> void:
 
 func _on_close_pressed() -> void:
 	queue_free()
+
+func _on_dimmer_input(event: InputEvent) -> void:
+	if event is InputEventMouseButton:
+		var mb: InputEventMouseButton = event as InputEventMouseButton
+		if mb.pressed and mb.button_index == MOUSE_BUTTON_LEFT:
+			queue_free()

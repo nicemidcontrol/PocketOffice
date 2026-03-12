@@ -25,6 +25,8 @@ signal training_done
 @onready var _result_panel:     Panel           = $ResultPanel
 @onready var _result_label:     Label           = $ResultPanel/Margin/ResultLabel
 @onready var _result_close:     Button          = $ResultPanel/CloseBtn
+@onready var _error_label:      Label           = $Card/VBox/ErrorLabel
+@onready var _error_timer:      Timer           = $ErrorTimer
 
 # -----------------------------------------
 #  STATE
@@ -53,6 +55,7 @@ var _available_trainings: Array = []
 # -----------------------------------------
 func _ready() -> void:
 	process_mode = Node.PROCESS_MODE_ALWAYS
+	$Dimmer.gui_input.connect(_on_dimmer_input)
 	await get_tree().process_frame
 	_gm = get_node_or_null("/root/GameManager")
 	_em = get_node_or_null("/root/EmployeeManager")
@@ -71,6 +74,8 @@ func _ready() -> void:
 	_next_btn.pressed.connect(_on_next_training)
 	_result_close.pressed.connect(func() -> void: _result_panel.visible = false)
 	_result_panel.visible = false
+	_error_label.visible = false
+	_error_timer.timeout.connect(func() -> void: _error_label.visible = false)
 	_build_slot_area()
 	_show_train_tab()
 
@@ -119,6 +124,7 @@ func _load_available_trainings() -> void:
 	_selected_training = _available_trainings[_training_index]
 
 func _on_prev_training() -> void:
+	_error_label.visible = false
 	if _available_trainings.is_empty():
 		return
 	_training_index -= 1
@@ -130,6 +136,7 @@ func _on_prev_training() -> void:
 	_refresh_cost()
 
 func _on_next_training() -> void:
+	_error_label.visible = false
 	if _available_trainings.is_empty():
 		return
 	_training_index += 1
@@ -429,9 +436,10 @@ func _on_run_training() -> void:
 	var total_cost: int = _tm.get_total_cp_cost(
 		_selected_training, valid_emps.size(), valid_emps, _discovered_combos)
 	if _gm.corp_points < total_cost:
-		_result_label.text = "Not enough CP!\nNeed %d CP, have %d CP." % [
+		_error_label.text = "Not enough CP! Need %d CP, have %d CP." % [
 			total_cost, _gm.corp_points]
-		_result_panel.visible = true
+		_error_label.visible = true
+		_error_timer.start()
 		return
 	print("[Training] cost=%d cp=%d" % [total_cost, _gm.corp_points])
 	_gm.corp_points -= total_cost
@@ -496,3 +504,9 @@ func _on_back_pressed() -> void:
 
 func _on_cancel_pressed() -> void:
 	queue_free()
+
+func _on_dimmer_input(event: InputEvent) -> void:
+	if event is InputEventMouseButton:
+		var mb: InputEventMouseButton = event as InputEventMouseButton
+		if mb.pressed and mb.button_index == MOUSE_BUTTON_LEFT:
+			queue_free()

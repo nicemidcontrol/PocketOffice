@@ -60,6 +60,7 @@ var _hero_templates: Array    = []
 # ─────────────────────────────────────────
 func _ready() -> void:
 	process_mode = Node.PROCESS_MODE_ALWAYS
+	$Dimmer.gui_input.connect(_on_dimmer_input)
 	_em = load("res://EmployeeManager.gd") as GDScript
 
 	await get_tree().process_frame
@@ -566,3 +567,9 @@ func _fmt(n: int) -> String:
 	if n >= 1_000:
 		return "%.1fK" % (n / 1_000.0)
 	return str(n)
+
+func _on_dimmer_input(event: InputEvent) -> void:
+	if event is InputEventMouseButton:
+		var mb: InputEventMouseButton = event as InputEventMouseButton
+		if mb.pressed and mb.button_index == MOUSE_BUTTON_LEFT:
+			queue_free()

@@ -13,6 +13,7 @@ var _dm: Node = null
 
 func _ready() -> void:
 	process_mode = Node.PROCESS_MODE_ALWAYS
+	$Dimmer.gui_input.connect(_on_dimmer_input)
 	_gm = get_node_or_null("/root/GameManager")
 	_dm = get_node_or_null("/root/DonorManager")
 
@@ -243,3 +244,9 @@ func _on_pursue_pressed(id: String) -> void:
 	if _dm == null or _gm == null:
 		return
 	var _result: bool = _dm.try_win_donor(id, _gm)
+
+func _on_dimmer_input(event: InputEvent) -> void:
+	if event is InputEventMouseButton:
+		var mb: InputEventMouseButton = event as InputEventMouseButton
+		if mb.pressed and mb.button_index == MOUSE_BUTTON_LEFT:
+			queue_free()
