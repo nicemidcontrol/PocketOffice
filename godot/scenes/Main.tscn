@@ -172,7 +172,7 @@ autowrap_mode = 3
 [node name="NotifCloseBtn" type="Button" parent="NotifLayer/NotifPanel/Margin/VBox"]
 layout_mode = 2
 theme_override_font_sizes/font_size = 11
-text = "OK"
+text = "CLOSE"
 
 [node name="NotifTimer" type="Timer" parent="NotifLayer/NotifPanel"]
 process_mode = 6
