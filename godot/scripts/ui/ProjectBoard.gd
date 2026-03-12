@@ -2,356 +2,280 @@ extends CanvasLayer
 
 signal screen_closed
 
-# ------------------------------------------
+# ─────────────────────────────────────────
+#  TABS
+# ─────────────────────────────────────────
+const TAB_ACTIVE: int = 0
+const TAB_AVAIL:  int = 1
+
+# ─────────────────────────────────────────
 #  NODE REFS
-# ------------------------------------------
-@onready var _cash_label:   Label         = $Card/Header/HdrMargin/HdrHBox/CashLabel
-@onready var _active_list:  VBoxContainer = $Card/Body/BodyMargin/BodyVBox/ActiveList
-@onready var _avail_list:   VBoxContainer = $Card/Body/BodyMargin/BodyVBox/AvailList
-@onready var _assign_popup: Panel         = $Card/AssignPopup
-@onready var _popup_title:  Label         = $Card/AssignPopup/PopupVBox/PopupTitle
-@onready var _popup_list:   VBoxContainer = $Card/AssignPopup/PopupVBox/PopupScroll/PopupList
+# ─────────────────────────────────────────
+@onready var _cash_label:   Label         = $Card/VBox/CashLabel
+@onready var _item_name:    Label         = $Card/VBox/ArrowRow/ItemNameLabel
+@onready var _page_label:   Label         = $Card/VBox/PageLabel
+@onready var _active_tab:   Button        = $Card/VBox/TabRow/ActiveTab
+@onready var _avail_tab:    Button        = $Card/VBox/TabRow/AvailTab
+@onready var _role_label:   Label         = $Card/VBox/DetailCard/Margin/DetailVBox/RoleLabel
+@onready var _info_label:   Label         = $Card/VBox/DetailCard/Margin/DetailVBox/InfoLabel
+@onready var _reward_label: Label         = $Card/VBox/DetailCard/Margin/DetailVBox/RewardLabel
+@onready var _team_label:   Label         = $Card/VBox/DetailCard/Margin/DetailVBox/TeamLabel
+@onready var _ot_list:      VBoxContainer = $Card/VBox/DetailCard/Margin/DetailVBox/OtList
+@onready var _action_btn:   Button        = $Card/VBox/ActionBtn
+@onready var _status_label: Label         = $Card/VBox/StatusLabel
+@onready var _assign_panel: Panel         = $AssignPanel
+@onready var _assign_title: Label         = $AssignPanel/AssignMargin/AssignVBox/AssignTitle
+@onready var _assign_list:  VBoxContainer = $AssignPanel/AssignMargin/AssignVBox/AssignScroll/AssignList
 
-# ------------------------------------------
+# ─────────────────────────────────────────
 #  STATE
-# ------------------------------------------
-var _gm: Node            = null
-var _selected_pid: int   = -1
+# ─────────────────────────────────────────
+var _gm:            Node  = null
+var _tab:           int   = TAB_ACTIVE
+var _projects:      Array = []
+var current_index:  int   = 0
+var _selected_pid:  int   = -1
 
-# ------------------------------------------
+# ─────────────────────────────────────────
 #  LIFECYCLE
-# ------------------------------------------
+# ─────────────────────────────────────────
 func _ready() -> void:
 	process_mode = Node.PROCESS_MODE_ALWAYS
-	await get_tree().process_frame
+	$Dimmer.gui_input.connect(_on_dimmer_input)
 	_gm = get_node_or_null("/root/GameManager")
-	if _gm == null:
-		push_error("[ProjectBoard] GameManager not found.")
-		return
-	_gm.economy.cash_changed.connect(_on_cash_changed)
-	_gm.projects.projects_updated.connect(_refresh_board)
-	_assign_popup.visible = false
-	_refresh_cash()
-	_refresh_board()
+	if _gm != null:
+		_gm.economy.cash_changed.connect(_on_cash_changed)
+		_gm.projects.projects_updated.connect(_on_projects_updated)
+		_cash_label.text = "$%d" % _gm.economy.current_cash
+	_assign_panel.visible = false
+	_on_active_tab()
 
-# ------------------------------------------
-#  SIGNAL HANDLERS (wired in .tscn)
-# ------------------------------------------
-func _on_back_pressed() -> void:
+# ─────────────────────────────────────────
+#  TABS
+# ─────────────────────────────────────────
+func _on_active_tab() -> void:
+	_tab = TAB_ACTIVE
+	current_index = 0
+	_status_label.text = ""
+	_active_tab.add_theme_color_override("font_color", Color(0.22, 0.9, 0.42, 1.0))
+	_avail_tab.add_theme_color_override("font_color",  Color(0.6, 0.7, 0.9, 1.0))
+	_reload_projects()
+
+func _on_avail_tab() -> void:
+	_tab = TAB_AVAIL
+	current_index = 0
+	_status_label.text = ""
+	_active_tab.add_theme_color_override("font_color", Color(0.6, 0.7, 0.9, 1.0))
+	_avail_tab.add_theme_color_override("font_color",  Color(0.2, 0.85, 0.94, 1.0))
+	_reload_projects()
+
+func _reload_projects() -> void:
+	if _gm == null:
+		_projects = []
+	elif _tab == TAB_ACTIVE:
+		_projects = _gm.projects.get_active_projects()
+	else:
+		_projects = _gm.projects.get_available_projects()
+	if not _projects.is_empty() and current_index >= _projects.size():
+		current_index = _projects.size() - 1
+	_refresh_display()
+
+# ─────────────────────────────────────────
+#  NAVIGATION
+# ─────────────────────────────────────────
+func _on_prev_pressed() -> void:
+	if _projects.is_empty():
+		return
+	current_index = (current_index - 1 + _projects.size()) % _projects.size()
+	_status_label.text = ""
+	_refresh_display()
+
+func _on_next_pressed() -> void:
+	if _projects.is_empty():
+		return
+	current_index = (current_index + 1) % _projects.size()
+	_status_label.text = ""
+	_refresh_display()
+
+# ─────────────────────────────────────────
+#  DISPLAY
+# ─────────────────────────────────────────
+func _refresh_display() -> void:
+	for child in _ot_list.get_children():
+		child.queue_free()
+
+	if _projects.is_empty():
+		_item_name.text     = "None"
+		_page_label.text    = "0 / 0"
+		_role_label.text    = ""
+		_info_label.text    = "No projects in this category."
+		_reward_label.text  = ""
+		_team_label.text    = ""
+		_action_btn.visible = false
+		return
+
+	_action_btn.visible = true
+	var proj: Dictionary = _projects[current_index]
+	var role: int        = int(proj.get("required_role", 0))
+
+	_item_name.text    = proj.get("name", "Project")
+	_page_label.text   = "%d / %d" % [current_index + 1, _projects.size()]
+	_role_label.text   = _role_name(role)
+	_reward_label.text = "$%d  +%d CP" % [int(proj.get("reward_cash", 0)), int(proj.get("reward_corp_points", 0))]
+
+	if _tab == TAB_ACTIVE:
+		var progress: float  = float(proj.get("progress", 0.0))
+		_info_label.text = "%d%% complete" % int(progress * 100.0)
+		var ids: Array = proj.get("assigned_employee_ids", [])
+		if ids.is_empty():
+			_team_label.text = "No employees assigned"
+		else:
+			var names: Array[String] = []
+			if _gm != null:
+				for emp in _gm.employees.get_hired_employees():
+					if emp.id in ids:
+						names.append(str(emp.first_name))
+			_team_label.text = "Team: " + ", ".join(names)
+		_build_ot_list(proj)
+		_action_btn.text = "ASSIGN"
+		_action_btn.add_theme_color_override("font_color", Color(0.4, 0.8, 1.0, 1.0))
+	else:
+		var dur: int = int(proj.get("duration_ticks", proj.get("duration_days", 0)))
+		_info_label.text = "%d ticks" % dur
+		_team_label.text = ""
+		_action_btn.text = "ACCEPT"
+		_action_btn.add_theme_color_override("font_color", Color(0.3, 1.0, 0.4, 1.0))
+
+func _build_ot_list(proj: Dictionary) -> void:
+	var ids: Array = proj.get("assigned_employee_ids", [])
+	if ids.is_empty() or _gm == null:
+		return
+	var hdr: Label = Label.new()
+	hdr.text = "OT:"
+	hdr.add_theme_font_size_override("font_size", 10)
+	hdr.add_theme_color_override("font_color", Color(0.6, 0.6, 0.7, 1.0))
+	_ot_list.add_child(hdr)
+	for emp in _gm.employees.get_hired_employees():
+		if not (emp.id in ids):
+			continue
+		var row: HBoxContainer = HBoxContainer.new()
+		row.add_theme_constant_override("separation", 6)
+		_ot_list.add_child(row)
+		var n_lbl: Label = Label.new()
+		n_lbl.text = str(emp.first_name)
+		n_lbl.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		n_lbl.add_theme_font_size_override("font_size", 10)
+		n_lbl.add_theme_color_override("font_color", Color(0.7, 0.71, 0.82, 1.0))
+		n_lbl.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+		row.add_child(n_lbl)
+		var ot_btn: Button = Button.new()
+		ot_btn.text = _ot_label(int(emp.ot_level))
+		ot_btn.add_theme_font_size_override("font_size", 9)
+		ot_btn.add_theme_color_override("font_color", _ot_color(int(emp.ot_level)))
+		ot_btn.custom_minimum_size = Vector2(100, 22)
+		var eid: String = str(emp.id)
+		ot_btn.pressed.connect(func() -> void: _cycle_ot(eid))
+		row.add_child(ot_btn)
+
+# ─────────────────────────────────────────
+#  ACTIONS
+# ─────────────────────────────────────────
+func _on_action_pressed() -> void:
+	if _projects.is_empty() or _gm == null:
+		return
+	var proj: Dictionary = _projects[current_index]
+	var pid: int         = int(proj.get("id", -1))
+	if _tab == TAB_ACTIVE:
+		_open_assign(pid, proj.get("name", "Project"))
+	else:
+		_gm.projects.accept_project(pid)
+		_status_label.text = "Project accepted!"
+		_status_label.add_theme_color_override("font_color", Color(0.3, 1.0, 0.4, 1.0))
+
+func _open_assign(pid: int, proj_name: String) -> void:
+	_selected_pid = pid
+	_assign_title.text = "Assign to: " + proj_name
+	for child in _assign_list.get_children():
+		child.queue_free()
+	if _gm == null:
+		return
+	var avail: Array = _gm.employees.get_available_employees()
+	if avail.is_empty():
+		var lbl: Label = Label.new()
+		lbl.text = "No available employees."
+		lbl.add_theme_color_override("font_color", Color(0.5, 0.51, 0.62, 1.0))
+		lbl.add_theme_font_size_override("font_size", 12)
+		_assign_list.add_child(lbl)
+	else:
+		for emp in avail:
+			var btn: Button = Button.new()
+			btn.text = "%s  (%s)" % [emp.full_name(), _role_name(int(emp.role))]
+			btn.custom_minimum_size = Vector2(0, 36)
+			btn.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+			btn.add_theme_color_override("font_color", _role_color(int(emp.role)))
+			btn.add_theme_font_size_override("font_size", 12)
+			var eid: String = str(emp.id)
+			btn.pressed.connect(func() -> void: _on_assign_employee(eid))
+			_assign_list.add_child(btn)
+	_assign_panel.visible = true
+
+func _on_assign_close_pressed() -> void:
+	_assign_panel.visible = false
+	_selected_pid = -1
+
+func _on_assign_employee(emp_id: String) -> void:
+	if _gm == null:
+		return
+	_gm.projects.assign_employee(_selected_pid, emp_id, _gm)
+	_assign_panel.visible = false
+	_selected_pid = -1
+	_reload_projects()
+
+func _cycle_ot(emp_id: String) -> void:
+	if _gm == null:
+		return
+	for emp in _gm.employees.get_hired_employees():
+		if str(emp.id) == emp_id:
+			emp.ot_level = (int(emp.ot_level) + 1) % 4
+			_refresh_display()
+			return
+
+func _on_close_pressed() -> void:
 	screen_closed.emit()
 	queue_free()
 
-func _on_popup_close_pressed() -> void:
-	_assign_popup.visible = false
-	_selected_pid = -1
+func _on_dimmer_input(event: InputEvent) -> void:
+	if event is InputEventMouseButton:
+		var mb: InputEventMouseButton = event as InputEventMouseButton
+		if mb.pressed and mb.button_index == MOUSE_BUTTON_LEFT:
+			queue_free()
 
-# ------------------------------------------
-#  CASH DISPLAY
-# ------------------------------------------
-func _refresh_cash() -> void:
-	_cash_label.text = "$" + _fmt(_gm.economy.current_cash)
+# ─────────────────────────────────────────
+#  SIGNAL HANDLERS
+# ─────────────────────────────────────────
+func _on_cash_changed(new_cash: int) -> void:
+	_cash_label.text = "$%d" % new_cash
 
-func _on_cash_changed(_new_cash: int) -> void:
-	_refresh_cash()
+func _on_projects_updated() -> void:
+	_reload_projects()
 
-func _fmt(n: int) -> String:
-	if n >= 1_000_000:
-		return "%.1fM" % (n / 1_000_000.0)
-	if n >= 1_000:
-		return "%.1fK" % (n / 1_000.0)
-	return str(n)
-
-# ------------------------------------------
-#  BOARD REFRESH
-# ------------------------------------------
-func _refresh_board() -> void:
-	_build_active_section()
-	_build_available_section()
-
-func _build_active_section() -> void:
-	for child in _active_list.get_children():
-		child.queue_free()
-	var active: Array = _gm.projects.get_active_projects()
-	if active.is_empty():
-		var lbl: Label = Label.new()
-		lbl.text = "No active projects."
-		lbl.add_theme_color_override("font_color", Color(0.5, 0.51, 0.62))
-		lbl.add_theme_font_size_override("font_size", 12)
-		_active_list.add_child(lbl)
-		return
-	for proj in active:
-		_active_list.add_child(_make_active_card(proj))
-
-func _build_available_section() -> void:
-	for child in _avail_list.get_children():
-		child.queue_free()
-	var avail: Array = _gm.projects.get_available_projects()
-	if avail.is_empty():
-		var lbl: Label = Label.new()
-		lbl.text = "No projects available. New projects coming soon!"
-		lbl.add_theme_color_override("font_color", Color(0.5, 0.51, 0.62))
-		lbl.add_theme_font_size_override("font_size", 12)
-		_avail_list.add_child(lbl)
-		return
-	for proj in avail:
-		_avail_list.add_child(_make_avail_card(proj))
-
-# ------------------------------------------
-#  CARD BUILDERS
-# ------------------------------------------
-func _make_active_card(proj: Dictionary) -> Control:
-	var card: PanelContainer = PanelContainer.new()
-	card.add_theme_stylebox_override("panel", _card_style())
-	var margin: MarginContainer = MarginContainer.new()
-	margin.add_theme_constant_override("margin_left",   12)
-	margin.add_theme_constant_override("margin_top",    10)
-	margin.add_theme_constant_override("margin_right",  12)
-	margin.add_theme_constant_override("margin_bottom", 10)
-	var vbox: VBoxContainer = VBoxContainer.new()
-	vbox.add_theme_constant_override("separation", 6)
-	margin.add_child(vbox)
-	card.add_child(margin)
-
-	var role: int = proj.get("required_role", 0)
-
-	var name_lbl: Label = Label.new()
-	name_lbl.text = proj.get("name", "Project")
-	name_lbl.add_theme_color_override("font_color", Color(0.92, 0.92, 0.95))
-	name_lbl.add_theme_font_size_override("font_size", 14)
-	vbox.add_child(name_lbl)
-
-	var role_lbl: Label = Label.new()
-	role_lbl.text = _role_name(role)
-	role_lbl.add_theme_color_override("font_color", _role_color(role))
-	role_lbl.add_theme_font_size_override("font_size", 10)
-	vbox.add_child(role_lbl)
-
-	var progress: float = proj.get("progress", 0.0)
-	var pbar: ProgressBar = ProgressBar.new()
-	pbar.min_value = 0.0
-	pbar.max_value = 1.0
-	pbar.value = progress
-	pbar.custom_minimum_size = Vector2(0, 14)
-	vbox.add_child(pbar)
-
-	var pct_lbl: Label = Label.new()
-	pct_lbl.text = "%d%% complete" % int(progress * 100.0)
-	pct_lbl.add_theme_color_override("font_color", Color(0.5, 0.51, 0.62))
-	pct_lbl.add_theme_font_size_override("font_size", 10)
-	vbox.add_child(pct_lbl)
-
-	var ids: Array = proj.get("assigned_employee_ids", [])
-	if ids.is_empty():
-		var no_emp: Label = Label.new()
-		no_emp.text = "No employees assigned"
-		no_emp.add_theme_color_override("font_color", Color(0.5, 0.51, 0.62))
-		no_emp.add_theme_font_size_override("font_size", 10)
-		vbox.add_child(no_emp)
-	else:
-		var names: Array = []
-		var assigned_emps: Array = []
-		for emp in _gm.employees.get_hired_employees():
-			if emp.id in ids:
-				names.append(emp.first_name + " " + emp.last_name)
-				assigned_emps.append(emp)
-		var emp_lbl: Label = Label.new()
-		emp_lbl.text = "Team: " + ", ".join(names)
-		emp_lbl.add_theme_color_override("font_color", Color(0.22, 0.9, 0.42))
-		emp_lbl.add_theme_font_size_override("font_size", 10)
-		vbox.add_child(emp_lbl)
-
-		var ot_sep: HSeparator = HSeparator.new()
-		vbox.add_child(ot_sep)
-
-		var ot_hdr: Label = Label.new()
-		ot_hdr.text = "OT:"
-		ot_hdr.add_theme_font_size_override("font_size", 10)
-		ot_hdr.add_theme_color_override("font_color", Color(0.6, 0.6, 0.7))
-		vbox.add_child(ot_hdr)
-
-		for ot_emp in assigned_emps:
-			var ot_row: HBoxContainer = HBoxContainer.new()
-			ot_row.add_theme_constant_override("separation", 6)
-			vbox.add_child(ot_row)
-
-			var n_lbl: Label = Label.new()
-			n_lbl.text = ot_emp.first_name
-			n_lbl.add_theme_font_size_override("font_size", 10)
-			n_lbl.add_theme_color_override("font_color", Color(0.7, 0.71, 0.82))
-			n_lbl.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-			ot_row.add_child(n_lbl)
-
-			var ot_col: Color = _ot_color(ot_emp.ot_level)
-			var border_col: Color = Color(ot_col.r, ot_col.g, ot_col.b, 0.5)
-			var ot_btn: Button = Button.new()
-			ot_btn.text = _ot_label(ot_emp.ot_level)
-			ot_btn.add_theme_font_size_override("font_size", 10)
-			ot_btn.add_theme_color_override("font_color", ot_col)
-			ot_btn.add_theme_stylebox_override("normal",  _btn_style(Color(0.06, 0.06, 0.14), border_col))
-			ot_btn.add_theme_stylebox_override("hover",   _btn_style(Color(0.08, 0.08, 0.18), border_col))
-			ot_btn.add_theme_stylebox_override("pressed", _btn_style(Color(0.04, 0.04, 0.10), border_col))
-			ot_btn.custom_minimum_size = Vector2(110, 26)
-			var eid: String = ot_emp.id
-			ot_btn.pressed.connect(func() -> void: _cycle_ot(eid))
-			ot_row.add_child(ot_btn)
-
-	var assign_btn: Button = Button.new()
-	assign_btn.text = "ASSIGN"
-	assign_btn.custom_minimum_size = Vector2(0, 32)
-	assign_btn.add_theme_stylebox_override("normal",  _btn_style(Color(0.08, 0.22, 0.36), Color(0.18, 0.42, 0.78, 0.7)))
-	assign_btn.add_theme_stylebox_override("hover",   _btn_style(Color(0.10, 0.28, 0.44), Color(0.18, 0.42, 0.78, 0.7)))
-	assign_btn.add_theme_stylebox_override("pressed", _btn_style(Color(0.06, 0.16, 0.28), Color(0.18, 0.42, 0.78, 0.7)))
-	var pid: int = proj.get("id", -1)
-	assign_btn.pressed.connect(func() -> void: _open_assign_popup(pid))
-	vbox.add_child(assign_btn)
-
-	return card
-
-func _make_avail_card(proj: Dictionary) -> Control:
-	var card: PanelContainer = PanelContainer.new()
-	card.add_theme_stylebox_override("panel", _card_style())
-	var margin: MarginContainer = MarginContainer.new()
-	margin.add_theme_constant_override("margin_left",   12)
-	margin.add_theme_constant_override("margin_top",    10)
-	margin.add_theme_constant_override("margin_right",  12)
-	margin.add_theme_constant_override("margin_bottom", 10)
-	var vbox: VBoxContainer = VBoxContainer.new()
-	vbox.add_theme_constant_override("separation", 6)
-	margin.add_child(vbox)
-	card.add_child(margin)
-
-	var role: int = proj.get("required_role", 0)
-
-	var name_lbl: Label = Label.new()
-	name_lbl.text = proj.get("name", "Project")
-	name_lbl.add_theme_color_override("font_color", Color(0.92, 0.92, 0.95))
-	name_lbl.add_theme_font_size_override("font_size", 14)
-	vbox.add_child(name_lbl)
-
-	var info_lbl: Label = Label.new()
-	info_lbl.text = "%s  |  %d ticks" % [_role_name(role), proj.get("duration_ticks", proj.get("duration_days", 0))]
-	info_lbl.add_theme_color_override("font_color", _role_color(role))
-	info_lbl.add_theme_font_size_override("font_size", 10)
-	vbox.add_child(info_lbl)
-
-	var reward_lbl: Label = Label.new()
-	reward_lbl.text = "$%s  +%d CP" % [_fmt(proj.get("reward_cash", 0)), proj.get("reward_corp_points", 0)]
-	reward_lbl.add_theme_color_override("font_color", Color(1.0, 0.82, 0.1))
-	reward_lbl.add_theme_font_size_override("font_size", 12)
-	vbox.add_child(reward_lbl)
-
-	var accept_btn: Button = Button.new()
-	accept_btn.text = "ACCEPT"
-	accept_btn.custom_minimum_size = Vector2(0, 32)
-	accept_btn.add_theme_stylebox_override("normal",  _btn_style(Color(0.08, 0.36, 0.17), Color(0.22, 0.9, 0.42, 0.7)))
-	accept_btn.add_theme_stylebox_override("hover",   _btn_style(Color(0.10, 0.44, 0.20), Color(0.22, 0.9, 0.42, 0.7)))
-	accept_btn.add_theme_stylebox_override("pressed", _btn_style(Color(0.06, 0.28, 0.13), Color(0.22, 0.9, 0.42, 0.7)))
-	var pid: int = proj.get("id", -1)
-	accept_btn.pressed.connect(func() -> void: _on_accept_pressed(pid))
-	vbox.add_child(accept_btn)
-
-	return card
-
-# ------------------------------------------
-#  ACCEPT / ASSIGN FLOW
-# ------------------------------------------
-func _on_accept_pressed(pid: int) -> void:
-	_gm.projects.accept_project(pid)
-
-func _open_assign_popup(project_id: int) -> void:
-	_selected_pid = project_id
-	for proj in _gm.projects.get_active_projects():
-		if proj.get("id", -1) == project_id:
-			_popup_title.text = "Assign to: " + proj.get("name", "Project")
-			break
-	for child in _popup_list.get_children():
-		child.queue_free()
-	var available: Array = _gm.employees.get_available_employees()
-	if available.is_empty():
-		var lbl: Label = Label.new()
-		lbl.text = "No available employees."
-		lbl.add_theme_color_override("font_color", Color(0.5, 0.51, 0.62))
-		lbl.add_theme_font_size_override("font_size", 12)
-		_popup_list.add_child(lbl)
-	else:
-		for emp in available:
-			var btn: Button = Button.new()
-			btn.text = "%s  (%s)" % [emp.full_name(), _role_name(emp.role)]
-			btn.custom_minimum_size = Vector2(0, 36)
-			btn.add_theme_color_override("font_color", _role_color(emp.role))
-			btn.add_theme_font_size_override("font_size", 12)
-			var eid: String = emp.id
-			btn.pressed.connect(func() -> void: _on_assign_employee(eid))
-			_popup_list.add_child(btn)
-	_assign_popup.visible = true
-
-func _on_assign_employee(employee_id: String) -> void:
-	_gm.projects.assign_employee(_selected_pid, employee_id, _gm)
-	_assign_popup.visible = false
-	_selected_pid = -1
-
-# ------------------------------------------
-#  STYLE HELPERS
-# ------------------------------------------
-func _card_style() -> StyleBoxFlat:
-	var s: StyleBoxFlat = StyleBoxFlat.new()
-	s.bg_color = Color(0.078, 0.078, 0.172)
-	s.border_width_left   = 1
-	s.border_width_top    = 1
-	s.border_width_right  = 1
-	s.border_width_bottom = 1
-	s.border_color = Color(0.18, 0.42, 0.78, 0.55)
-	s.corner_radius_top_left     = 6
-	s.corner_radius_top_right    = 6
-	s.corner_radius_bottom_right = 6
-	s.corner_radius_bottom_left  = 6
-	return s
-
-func _btn_style(bg: Color, border: Color) -> StyleBoxFlat:
-	var s: StyleBoxFlat = StyleBoxFlat.new()
-	s.bg_color = bg
-	s.border_width_left   = 1
-	s.border_width_top    = 1
-	s.border_width_right  = 1
-	s.border_width_bottom = 1
-	s.border_color = border
-	s.corner_radius_top_left     = 4
-	s.corner_radius_top_right    = 4
-	s.corner_radius_bottom_right = 4
-	s.corner_radius_bottom_left  = 4
-	s.content_margin_left   = 8.0
-	s.content_margin_top    = 4.0
-	s.content_margin_right  = 8.0
-	s.content_margin_bottom = 4.0
-	return s
-
-# ------------------------------------------
-#  OT HELPERS
-# ------------------------------------------
+# ─────────────────────────────────────────
+#  HELPERS
+# ─────────────────────────────────────────
 func _ot_label(level: int) -> String:
 	match level:
 		1: return "Light OT +2h"
 		2: return "Heavy OT +4h"
 		3: return "CRUNCH +8h"
-		_: return "No OT"
+	return "No OT"
 
 func _ot_color(level: int) -> Color:
 	match level:
-		1: return Color(1.0, 0.9, 0.2)
-		2: return Color(1.0, 0.55, 0.1)
-		3: return Color(1.0, 0.2, 0.2)
-		_: return Color(0.5, 0.51, 0.62)
+		1: return Color(1.0, 0.9, 0.2, 1.0)
+		2: return Color(1.0, 0.55, 0.1, 1.0)
+		3: return Color(1.0, 0.2, 0.2, 1.0)
+	return Color(0.5, 0.51, 0.62, 1.0)
 
-func _cycle_ot(emp_id: String) -> void:
-	for emp in _gm.employees.get_hired_employees():
-		if emp.id == emp_id:
-			emp.ot_level = (emp.ot_level + 1) % 4
-			_refresh_board()
-			return
-
-# ------------------------------------------
-#  ROLE HELPERS
-# ------------------------------------------
 func _role_name(role: int) -> String:
 	match role:
 		0: return "Developer"
@@ -361,14 +285,14 @@ func _role_name(role: int) -> String:
 		4: return "Accountant"
 		5: return "Manager"
 		6: return "Intern"
-		_: return "Unknown"
+	return "Unknown"
 
 func _role_color(role: int) -> Color:
 	match role:
-		0: return Color(0.22, 0.9,  0.42)
-		1: return Color(0.94, 0.47, 0.20)
-		2: return Color(0.20, 0.85, 0.94)
-		3: return Color(0.90, 0.22, 0.42)
-		4: return Color(1.00, 0.82, 0.10)
-		5: return Color(0.78, 0.22, 0.90)
-		_: return Color(0.50, 0.51, 0.62)
+		0: return Color(0.22, 0.9,  0.42, 1.0)
+		1: return Color(0.94, 0.47, 0.20, 1.0)
+		2: return Color(0.20, 0.85, 0.94, 1.0)
+		3: return Color(0.90, 0.22, 0.42, 1.0)
+		4: return Color(1.00, 0.82, 0.10, 1.0)
+		5: return Color(0.78, 0.22, 0.90, 1.0)
+	return Color(0.50, 0.51, 0.62, 1.0)

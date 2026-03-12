@@ -3,22 +3,14 @@ extends CanvasLayer
 signal screen_closed
 
 # ─────────────────────────────────────────
-#  NODES
+#  PHASES
 # ─────────────────────────────────────────
-@onready var _cash_label:     Label         = $Card/Header/HBox/CashLabel
-@onready var _title_label:    Label         = $Card/Header/HBox/TitleLabel
-@onready var _ad_layer:       Control       = $Card/AdSelectLayer
-@onready var _ad_vbox:        VBoxContainer = $Card/AdSelectLayer/Scroll/VBox
-@onready var _champ_layer:    Control       = $Card/ChampDialogLayer
-@onready var _champ_dialogue: Label         = $Card/ChampDialogLayer/ChampPanel/Margin/VBox/ChampDialogue
-@onready var _champ_dots:     Label         = $Card/ChampDialogLayer/ChampPanel/Margin/VBox/ChampDots
-@onready var _champ_continue: Button        = $Card/ChampDialogLayer/ChampPanel/Margin/VBox/ContinueBtn
-@onready var _champ_timer:    Timer         = $Card/ChampDialogLayer/ChampTimer
-@onready var _cand_layer:     Control       = $Card/CandidateLayer
-@onready var _cand_vbox:      VBoxContainer = $Card/CandidateLayer/Scroll/VBox
+const PHASE_ADS:   int = 0
+const PHASE_CHAMP: int = 1
+const PHASE_CANDS: int = 2
 
 # ─────────────────────────────────────────
-#  AD CONFIG
+#  CONSTANTS  (preserved from original)
 # ─────────────────────────────────────────
 const AD_DATA: Array = [
 	{"name": "Milk Carton",    "cost": 300,  "tier": 0, "count": 2, "desc": "Desperate times..."},
@@ -29,31 +21,48 @@ const AD_DATA: Array = [
 	{"name": "CHAMP's Agency", "cost": 3500, "tier": 5, "count": 3, "desc": "The best. Period."},
 ]
 
-const TIER_NAMES: Array = ["E", "D", "C", "B", "A", "S"]
-
+const TIER_NAMES: Array    = ["E", "D", "C", "B", "A", "S"]
 const TIER_SKILL_MIN: Array = [10, 25, 40, 55, 70, 85]
 const TIER_SKILL_MAX: Array = [25, 40, 55, 70, 85, 100]
 const TIER_MOT_MIN: Array   = [10, 25, 40, 55, 70, 85]
 const TIER_MOT_MAX: Array   = [30, 45, 60, 75, 90, 100]
 
 const CHAMP_LINES: Array = [
-	"Hey hey hey! CHAMP here! Leave the recruiting to the BEST in the business. Stand by...",
+	"Hey hey hey! CHAMP here! Leave the recruiting to the BEST. Stand by...",
 	"You want the best? You came to the right place. CHAMP delivers. Always.",
-	"CHAMP's Guarantee: If you're not satisfied... well, no refunds. But you WILL be satisfied.",
+	"CHAMP's Guarantee: If not satisfied... no refunds. But you WILL be satisfied.",
 	"Top talent incoming. CHAMP has never failed a client. Today is no exception.",
 ]
 const CHAMP_HERO_LINE: String = "Even I'm surprised by this one. Truly special. You're welcome."
 
 # ─────────────────────────────────────────
+#  NODE REFS
+# ─────────────────────────────────────────
+@onready var _title_label:  Label         = $Card/VBox/TitleLabel
+@onready var _cash_label:   Label         = $Card/VBox/CashLabel
+@onready var _arrow_row:    HBoxContainer = $Card/VBox/ArrowRow
+@onready var _item_name:    Label         = $Card/VBox/ArrowRow/ItemNameLabel
+@onready var _page_label:   Label         = $Card/VBox/PageLabel
+@onready var _desc_label:   Label         = $Card/VBox/DetailCard/Margin/DetailVBox/DescLabel
+@onready var _badge_label:  Label         = $Card/VBox/DetailCard/Margin/DetailVBox/BadgeLabel
+@onready var _stats_label:  Label         = $Card/VBox/DetailCard/Margin/DetailVBox/StatsLabel
+@onready var _cost_label:   Label         = $Card/VBox/DetailCard/Margin/DetailVBox/CostLabel
+@onready var _action_btn:   Button        = $Card/VBox/ActionBtn
+@onready var _status_label: Label         = $Card/VBox/StatusLabel
+@onready var _champ_timer:  Timer         = $ChampTimer
+
+# ─────────────────────────────────────────
 #  STATE
 # ─────────────────────────────────────────
-var _gm: Node     = null
-var _em: GDScript = null
-
-var current_screen: int    = 0   # 0=ad_select  1=champ_dialogue  2=candidates
-var selected_tier: int     = 0
-var current_candidates: Array = []
-var _hero_templates: Array    = []
+var _gm:            Node     = null
+var _em:            GDScript = null
+var _phase:         int      = PHASE_ADS
+var _ad_index:      int      = 0
+var _cand_index:    int      = 0
+var _current_cands: Array    = []
+var _hero_templates:Array    = []
+var _selected_tier: int      = 0
+var _hired_emps:    Array    = []
 
 # ─────────────────────────────────────────
 #  LIFECYCLE
@@ -62,397 +71,199 @@ func _ready() -> void:
 	process_mode = Node.PROCESS_MODE_ALWAYS
 	$Dimmer.gui_input.connect(_on_dimmer_input)
 	_em = load("res://EmployeeManager.gd") as GDScript
-
-	await get_tree().process_frame
 	_gm = get_node_or_null("/root/GameManager")
-	if _gm == null:
-		push_error("[HireScreen] GameManager autoload not found.")
-		return
-
-	_gm.economy.cash_changed.connect(_on_cash_changed)
-	_on_cash_changed(_gm.economy.current_cash)
-	_show_ad_select()
+	if _gm != null:
+		_gm.economy.cash_changed.connect(_on_cash_changed)
+		_on_cash_changed(_gm.economy.current_cash)
+	_champ_timer.timeout.connect(_on_champ_timer_timeout)
+	_show_phase(PHASE_ADS)
 
 # ─────────────────────────────────────────
-#  SCREEN TRANSITIONS
+#  PHASE MANAGEMENT
 # ─────────────────────────────────────────
-func _show_ad_select() -> void:
-	current_screen = 0
-	_title_label.text = "RECRUIT"
-	_ad_layer.visible    = true
-	_champ_layer.visible = false
-	_cand_layer.visible  = false
-	_build_ad_cards()
-
-func _show_champ_dialogue() -> void:
-	current_screen = 1
-	_ad_layer.visible    = false
-	_champ_layer.visible = true
-	_cand_layer.visible  = false
-
-	_champ_continue.visible = false
-	_champ_dots.visible     = true
-
-	if not _hero_templates.is_empty():
-		_champ_dialogue.text = CHAMP_HERO_LINE
-	else:
-		var rng: RandomNumberGenerator = RandomNumberGenerator.new()
-		rng.randomize()
-		_champ_dialogue.text = CHAMP_LINES[rng.randi_range(0, CHAMP_LINES.size() - 1)]
-
-	_champ_timer.start()
-
-func _show_candidates() -> void:
-	current_screen = 2
-	_title_label.text = "TIER %s CANDIDATES" % TIER_NAMES[selected_tier]
-	_ad_layer.visible    = false
-	_champ_layer.visible = false
-	_cand_layer.visible  = true
-	_build_candidate_cards()
+func _show_phase(phase: int) -> void:
+	_phase = phase
+	_status_label.text = ""
+	match phase:
+		PHASE_ADS:
+			_title_label.text      = "RECRUIT"
+			_arrow_row.visible     = true
+			_page_label.visible    = true
+			_action_btn.visible    = true
+			_refresh_ad_display()
+		PHASE_CHAMP:
+			_title_label.text      = "CHAMP'S AGENCY"
+			_arrow_row.visible     = false
+			_page_label.visible    = false
+			_action_btn.visible    = false
+			var rng: RandomNumberGenerator = RandomNumberGenerator.new()
+			rng.randomize()
+			var line: String = CHAMP_HERO_LINE if not _hero_templates.is_empty() else CHAMP_LINES[rng.randi_range(0, CHAMP_LINES.size() - 1)]
+			_item_name.text   = ""
+			_desc_label.text  = line
+			_badge_label.text = "CHAMP"
+			_stats_label.text = "..."
+			_cost_label.text  = ""
+			_champ_timer.start()
+		PHASE_CANDS:
+			_title_label.text   = "TIER %s CANDIDATES" % TIER_NAMES[_selected_tier]
+			_arrow_row.visible  = true
+			_page_label.visible = true
+			_action_btn.visible = true
+			_cand_index         = 0
+			_refresh_cand_display()
 
 # ─────────────────────────────────────────
-#  AD CARD BUILDER
+#  NAVIGATION
 # ─────────────────────────────────────────
-func _build_ad_cards() -> void:
-	for child in _ad_vbox.get_children():
-		child.queue_free()
+func _on_prev_pressed() -> void:
+	match _phase:
+		PHASE_ADS:
+			_ad_index = (_ad_index - 1 + AD_DATA.size()) % AD_DATA.size()
+			_refresh_ad_display()
+		PHASE_CANDS:
+			if not _current_cands.is_empty():
+				_cand_index = (_cand_index - 1 + _current_cands.size()) % _current_cands.size()
+				_refresh_cand_display()
 
-	var cash: int = 0
+func _on_next_pressed() -> void:
+	match _phase:
+		PHASE_ADS:
+			_ad_index = (_ad_index + 1) % AD_DATA.size()
+			_refresh_ad_display()
+		PHASE_CANDS:
+			if not _current_cands.is_empty():
+				_cand_index = (_cand_index + 1) % _current_cands.size()
+				_refresh_cand_display()
+
+# ─────────────────────────────────────────
+#  DISPLAY
+# ─────────────────────────────────────────
+func _refresh_ad_display() -> void:
+	var ad: Dictionary   = AD_DATA[_ad_index]
+	var cash: int        = 0
 	if _gm != null:
 		cash = _gm.economy.current_cash
-
-	for i: int in range(AD_DATA.size()):
-		var ad: Dictionary  = AD_DATA[i]
-		var can_afford: bool = cash >= int(ad["cost"])
-		var is_champ: bool   = int(ad["tier"]) == 5
-		var card: PanelContainer = _make_ad_card(ad, can_afford, is_champ)
-		_ad_vbox.add_child(card)
-
-func _make_ad_card(ad: Dictionary, can_afford: bool, is_champ: bool) -> PanelContainer:
-	var panel: PanelContainer = PanelContainer.new()
-	panel.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-
-	var card_style: StyleBoxFlat = StyleBoxFlat.new()
+	var can_afford: bool = cash >= int(ad.get("cost", 0))
+	var tier: int        = int(ad.get("tier", 0))
+	var is_champ: bool   = tier == 5
+	_item_name.text  = ad.get("name", "")
+	_page_label.text = "%d / %d" % [_ad_index + 1, AD_DATA.size()]
+	_desc_label.text = ad.get("desc", "")
 	if is_champ:
-		card_style.bg_color         = Color(0.10, 0.09, 0.03, 1.0)
-		card_style.border_width_left   = 2
-		card_style.border_width_top    = 2
-		card_style.border_width_right  = 2
-		card_style.border_width_bottom = 2
-		card_style.border_color     = Color(1.0, 0.78, 0.15, 1.0)
+		_badge_label.text = "TIER %s  GUARANTEED S-TIER" % TIER_NAMES[tier]
 	else:
-		card_style.bg_color         = Color(0.078, 0.078, 0.172, 1.0)
-		card_style.border_width_left   = 1
-		card_style.border_width_top    = 1
-		card_style.border_width_right  = 1
-		card_style.border_width_bottom = 1
-		card_style.border_color     = Color(0.18, 0.42, 0.78, 0.55)
-	card_style.corner_radius_top_left     = 6
-	card_style.corner_radius_top_right    = 6
-	card_style.corner_radius_bottom_right = 6
-	card_style.corner_radius_bottom_left  = 6
-	panel.add_theme_stylebox_override("panel", card_style)
-
-	var margin: MarginContainer = MarginContainer.new()
-	margin.add_theme_constant_override("margin_left",   12)
-	margin.add_theme_constant_override("margin_top",    10)
-	margin.add_theme_constant_override("margin_right",  12)
-	margin.add_theme_constant_override("margin_bottom", 10)
-	panel.add_child(margin)
-
-	var vbox: VBoxContainer = VBoxContainer.new()
-	vbox.add_theme_constant_override("separation", 4)
-	margin.add_child(vbox)
-
-	var top_row: HBoxContainer = HBoxContainer.new()
-	top_row.add_theme_constant_override("separation", 8)
-	vbox.add_child(top_row)
-
-	var name_lbl: Label = Label.new()
-	name_lbl.text = ad["name"]
-	name_lbl.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	name_lbl.add_theme_color_override("font_color", Color(1.0, 1.0, 1.0, 1.0))
-	name_lbl.add_theme_font_size_override("font_size", 14)
-	top_row.add_child(name_lbl)
-
-	var tier_idx: int = int(ad["tier"])
-	var tier_badge: Label = Label.new()
-	tier_badge.text = "TIER %s" % TIER_NAMES[tier_idx]
-	tier_badge.add_theme_color_override("font_color", _tier_color(tier_idx))
-	tier_badge.add_theme_font_size_override("font_size", 11)
-	tier_badge.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
-	top_row.add_child(tier_badge)
-
-	if is_champ:
-		var guar_lbl: Label = Label.new()
-		guar_lbl.text = "GUARANTEED S-TIER"
-		guar_lbl.add_theme_color_override("font_color", Color(1.0, 0.78, 0.15, 1.0))
-		guar_lbl.add_theme_font_size_override("font_size", 10)
-		guar_lbl.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
-		top_row.add_child(guar_lbl)
-
-	var mid_row: HBoxContainer = HBoxContainer.new()
-	mid_row.add_theme_constant_override("separation", 8)
-	vbox.add_child(mid_row)
-
-	var cost_lbl: Label = Label.new()
-	cost_lbl.text = "$%d" % int(ad["cost"])
-	cost_lbl.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	cost_lbl.add_theme_color_override("font_color", Color(1.0, 0.85, 0.20, 1.0))
-	cost_lbl.add_theme_font_size_override("font_size", 13)
-	mid_row.add_child(cost_lbl)
-
-	var count_lbl: Label = Label.new()
-	count_lbl.text = "%d candidates" % int(ad["count"])
-	count_lbl.add_theme_color_override("font_color", Color(0.70, 0.70, 0.80, 1.0))
-	count_lbl.add_theme_font_size_override("font_size", 11)
-	count_lbl.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
-	mid_row.add_child(count_lbl)
-
-	var desc_lbl: Label = Label.new()
-	desc_lbl.text = ad["desc"]
-	desc_lbl.add_theme_color_override("font_color", Color(0.50, 0.52, 0.62, 1.0))
-	desc_lbl.add_theme_font_size_override("font_size", 11)
-	vbox.add_child(desc_lbl)
-
-	var select_btn: Button = Button.new()
-	var btn_style: StyleBoxFlat = StyleBoxFlat.new()
-	btn_style.corner_radius_top_left     = 4
-	btn_style.corner_radius_top_right    = 4
-	btn_style.corner_radius_bottom_right = 4
-	btn_style.corner_radius_bottom_left  = 4
-	btn_style.border_width_left   = 1
-	btn_style.border_width_top    = 1
-	btn_style.border_width_right  = 1
-	btn_style.border_width_bottom = 1
-
+		_badge_label.text = "TIER %s" % TIER_NAMES[tier]
+	_stats_label.text = "%d candidates" % int(ad.get("count", 0))
+	_cost_label.text  = "$%d" % int(ad.get("cost", 0))
+	_action_btn.disabled = not can_afford
 	if can_afford:
-		select_btn.text = "SELECT"
-		select_btn.add_theme_color_override("font_color", Color(0.9, 0.98, 0.92, 1.0))
-		btn_style.bg_color     = Color(0.08, 0.36, 0.17, 1.0)
-		btn_style.border_color = Color(0.22, 0.9, 0.42, 0.7)
+		_action_btn.text = "SELECT"
+		_action_btn.add_theme_color_override("font_color", Color(0.3, 1.0, 0.4, 1.0))
 	else:
-		select_btn.text     = "TOO POOR"
-		select_btn.disabled = true
-		select_btn.add_theme_color_override("font_color", Color(0.8, 0.3, 0.3, 1.0))
-		btn_style.bg_color     = Color(0.15, 0.06, 0.06, 1.0)
-		btn_style.border_color = Color(0.5, 0.2, 0.2, 0.7)
+		_action_btn.text = "TOO POOR"
+		_action_btn.add_theme_color_override("font_color", Color(1.0, 0.35, 0.35, 1.0))
 
-	select_btn.add_theme_stylebox_override("normal", btn_style)
-
-	var tier_val: int  = int(ad["tier"])
-	var cost_val: int  = int(ad["cost"])
-	var count_val: int = int(ad["count"])
-	select_btn.pressed.connect(func() -> void: _on_ad_selected(tier_val, cost_val, count_val))
-	vbox.add_child(select_btn)
-
-	return panel
+func _refresh_cand_display() -> void:
+	if _current_cands.is_empty():
+		_item_name.text   = "No candidates"
+		_page_label.text  = "0 / 0"
+		_desc_label.text  = ""
+		_badge_label.text = ""
+		_stats_label.text = ""
+		_cost_label.text  = ""
+		_action_btn.disabled = true
+		return
+	var emp: Object    = _current_cands[_cand_index]
+	var is_hero: bool  = _is_hero_candidate(emp)
+	var is_hired: bool = _hired_emps.has(emp)
+	_item_name.text  = emp.full_name()
+	_page_label.text = "%d / %d" % [_cand_index + 1, _current_cands.size()]
+	_desc_label.text = _pers_str(int(emp.personality))
+	var badges: Array[String] = [_role_str(int(emp.role))]
+	if is_hero:
+		badges.append("HERO")
+	if is_hired:
+		badges.append("HIRED")
+	_badge_label.text = "  ".join(badges)
+	_stats_label.text = "SKL %d   MOT %d" % [int(emp.skill), int(emp.motivation)]
+	_cost_label.text  = "$%d / mo" % int(emp.monthly_salary)
+	_action_btn.disabled = is_hired
+	if is_hired:
+		_action_btn.text = "HIRED"
+		_action_btn.add_theme_color_override("font_color", Color(0.5, 0.5, 0.5, 1.0))
+	else:
+		_action_btn.text = "HIRE"
+		_action_btn.add_theme_color_override("font_color", Color(0.3, 1.0, 0.4, 1.0))
 
 # ─────────────────────────────────────────
-#  CANDIDATE CARD BUILDER
+#  ACTIONS
 # ─────────────────────────────────────────
-func _build_candidate_cards() -> void:
-	for child in _cand_vbox.get_children():
-		child.queue_free()
+func _on_action_pressed() -> void:
+	match _phase:
+		PHASE_ADS:
+			_do_select_ad()
+		PHASE_CHAMP:
+			_show_phase(PHASE_CANDS)
+		PHASE_CANDS:
+			_do_hire()
 
-	var tier_lbl: Label = Label.new()
-	tier_lbl.text = "TIER %s CANDIDATES" % TIER_NAMES[selected_tier]
-	tier_lbl.add_theme_color_override("font_color", _tier_color(selected_tier))
-	tier_lbl.add_theme_font_size_override("font_size", 12)
-	tier_lbl.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	_cand_vbox.add_child(tier_lbl)
-
-	for emp in current_candidates:
-		var is_hero: bool = _is_hero_candidate(emp)
-		var card: PanelContainer = _make_candidate_card(emp, is_hero)
-		_cand_vbox.add_child(card)
-
-func _is_hero_candidate(emp: Object) -> bool:
-	for template in _hero_templates:
-		if template["id"] == emp.id:
-			return true
-	return false
-
-func _make_candidate_card(emp: Object, is_hero: bool) -> PanelContainer:
-	var panel: PanelContainer = PanelContainer.new()
-	panel.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-
-	var card_style: StyleBoxFlat = StyleBoxFlat.new()
-	if is_hero:
-		card_style.bg_color         = Color(0.10, 0.09, 0.05, 1.0)
-		card_style.border_width_left   = 2
-		card_style.border_width_top    = 2
-		card_style.border_width_right  = 2
-		card_style.border_width_bottom = 2
-		card_style.border_color     = Color(1.0, 0.78, 0.15, 1.0)
+func _do_select_ad() -> void:
+	if _gm == null:
+		return
+	var ad: Dictionary = AD_DATA[_ad_index]
+	var cost: int      = int(ad.get("cost", 0))
+	if not _gm.economy.spend(cost, "Recruitment Ad"):
+		_status_label.text = "Not enough cash!"
+		_status_label.add_theme_color_override("font_color", Color(1.0, 0.3, 0.3, 1.0))
+		return
+	_selected_tier = int(ad.get("tier", 0))
+	_hero_templates.clear()
+	_hired_emps.clear()
+	var count: int = int(ad.get("count", 2))
+	_current_cands = _generate_candidates(_selected_tier, count)
+	if _selected_tier == 5:
+		var heroes: Array = _gm.employees.get_available_heroes()
+		for template in heroes:
+			_hero_templates.append(template)
+			var hero_emp: Object = _gm.employees.create_hero_employee(template)
+			_current_cands.append(hero_emp)
+		_show_phase(PHASE_CHAMP)
 	else:
-		card_style.bg_color         = Color(0.078, 0.078, 0.172, 1.0)
-		card_style.border_width_left   = 1
-		card_style.border_width_top    = 1
-		card_style.border_width_right  = 1
-		card_style.border_width_bottom = 1
-		card_style.border_color     = Color(0.18, 0.42, 0.78, 0.55)
-	card_style.corner_radius_top_left     = 6
-	card_style.corner_radius_top_right    = 6
-	card_style.corner_radius_bottom_right = 6
-	card_style.corner_radius_bottom_left  = 6
-	panel.add_theme_stylebox_override("panel", card_style)
+		_show_phase(PHASE_CANDS)
 
-	var margin: MarginContainer = MarginContainer.new()
-	margin.add_theme_constant_override("margin_left",   12)
-	margin.add_theme_constant_override("margin_top",    12)
-	margin.add_theme_constant_override("margin_right",  12)
-	margin.add_theme_constant_override("margin_bottom", 12)
-	panel.add_child(margin)
+func _do_hire() -> void:
+	if _gm == null or _current_cands.is_empty():
+		return
+	var emp: Object = _current_cands[_cand_index]
+	if _hired_emps.has(emp):
+		return
+	_gm.employees.hire(emp)
+	_gm.broadcast("%s joined the team!" % emp.full_name())
+	_hired_emps.append(emp)
+	_refresh_cand_display()
 
-	var vbox: VBoxContainer = VBoxContainer.new()
-	vbox.add_theme_constant_override("separation", 8)
-	margin.add_child(vbox)
+func _on_close_pressed() -> void:
+	screen_closed.emit()
+	queue_free()
 
-	var top_row: HBoxContainer = HBoxContainer.new()
-	top_row.add_theme_constant_override("separation", 6)
-	vbox.add_child(top_row)
+func _on_dimmer_input(event: InputEvent) -> void:
+	if event is InputEventMouseButton:
+		var mb: InputEventMouseButton = event as InputEventMouseButton
+		if mb.pressed and mb.button_index == MOUSE_BUTTON_LEFT:
+			queue_free()
 
-	var name_lbl: Label = Label.new()
-	name_lbl.text = emp.full_name()
-	name_lbl.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	name_lbl.add_theme_color_override("font_color", Color(0.92, 0.92, 0.95, 1.0))
-	name_lbl.add_theme_font_size_override("font_size", 15)
-	top_row.add_child(name_lbl)
+# ─────────────────────────────────────────
+#  SIGNAL HANDLERS
+# ─────────────────────────────────────────
+func _on_cash_changed(amount: int) -> void:
+	_cash_label.text = "$%d" % amount
+	if _phase == PHASE_ADS:
+		_refresh_ad_display()
 
-	if is_hero:
-		var hero_tag: Label = Label.new()
-		hero_tag.text = "HERO"
-		hero_tag.add_theme_color_override("font_color", Color(1.0, 0.78, 0.15, 1.0))
-		hero_tag.add_theme_font_size_override("font_size", 11)
-		hero_tag.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
-		top_row.add_child(hero_tag)
-
-	var role_lbl: Label = Label.new()
-	role_lbl.text = _role_str(emp.role)
-	role_lbl.modulate = _role_color(emp.role)
-	role_lbl.add_theme_font_size_override("font_size", 11)
-	role_lbl.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
-	top_row.add_child(role_lbl)
-
-	var pers_lbl: Label = Label.new()
-	pers_lbl.text = _pers_str(emp.personality)
-	pers_lbl.add_theme_color_override("font_color", Color(0.60, 0.62, 0.72, 1.0))
-	pers_lbl.add_theme_font_size_override("font_size", 12)
-	vbox.add_child(pers_lbl)
-
-	var skl_row: HBoxContainer = HBoxContainer.new()
-	skl_row.add_theme_constant_override("separation", 8)
-	vbox.add_child(skl_row)
-
-	var skl_key: Label = Label.new()
-	skl_key.text = "SKL"
-	skl_key.custom_minimum_size = Vector2(32, 0)
-	skl_key.add_theme_color_override("font_color", Color(0.50, 0.51, 0.62, 1.0))
-	skl_key.add_theme_font_size_override("font_size", 10)
-	skl_key.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
-	skl_row.add_child(skl_key)
-
-	var skl_bar: ProgressBar = ProgressBar.new()
-	skl_bar.custom_minimum_size = Vector2(0, 14)
-	skl_bar.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	skl_bar.size_flags_vertical = Control.SIZE_SHRINK_CENTER
-	skl_bar.value = float(emp.skill)
-	skl_bar.show_percentage = false
-	var skl_bg: StyleBoxFlat = StyleBoxFlat.new()
-	skl_bg.bg_color = Color(0.08, 0.08, 0.18, 1.0)
-	skl_bg.corner_radius_top_left     = 3
-	skl_bg.corner_radius_top_right    = 3
-	skl_bg.corner_radius_bottom_right = 3
-	skl_bg.corner_radius_bottom_left  = 3
-	var skl_fill: StyleBoxFlat = StyleBoxFlat.new()
-	skl_fill.bg_color = Color(0.22, 0.9, 0.42, 1.0)
-	skl_fill.corner_radius_top_left     = 3
-	skl_fill.corner_radius_top_right    = 3
-	skl_fill.corner_radius_bottom_right = 3
-	skl_fill.corner_radius_bottom_left  = 3
-	skl_bar.add_theme_stylebox_override("background", skl_bg)
-	skl_bar.add_theme_stylebox_override("fill", skl_fill)
-	skl_row.add_child(skl_bar)
-
-	var mot_row: HBoxContainer = HBoxContainer.new()
-	mot_row.add_theme_constant_override("separation", 8)
-	vbox.add_child(mot_row)
-
-	var mot_key: Label = Label.new()
-	mot_key.text = "MOT"
-	mot_key.custom_minimum_size = Vector2(32, 0)
-	mot_key.add_theme_color_override("font_color", Color(0.50, 0.51, 0.62, 1.0))
-	mot_key.add_theme_font_size_override("font_size", 10)
-	mot_key.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
-	mot_row.add_child(mot_key)
-
-	var mot_bar: ProgressBar = ProgressBar.new()
-	mot_bar.custom_minimum_size = Vector2(0, 14)
-	mot_bar.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	mot_bar.size_flags_vertical = Control.SIZE_SHRINK_CENTER
-	mot_bar.value = float(emp.motivation)
-	mot_bar.show_percentage = false
-	var mot_bg: StyleBoxFlat = StyleBoxFlat.new()
-	mot_bg.bg_color = Color(0.08, 0.08, 0.18, 1.0)
-	mot_bg.corner_radius_top_left     = 3
-	mot_bg.corner_radius_top_right    = 3
-	mot_bg.corner_radius_bottom_right = 3
-	mot_bg.corner_radius_bottom_left  = 3
-	var mot_fill: StyleBoxFlat = StyleBoxFlat.new()
-	mot_fill.bg_color = Color(1.0, 0.75, 0.1, 1.0)
-	mot_fill.corner_radius_top_left     = 3
-	mot_fill.corner_radius_top_right    = 3
-	mot_fill.corner_radius_bottom_right = 3
-	mot_fill.corner_radius_bottom_left  = 3
-	mot_bar.add_theme_stylebox_override("background", mot_bg)
-	mot_bar.add_theme_stylebox_override("fill", mot_fill)
-	mot_row.add_child(mot_bar)
-
-	var bot_row: HBoxContainer = HBoxContainer.new()
-	bot_row.add_theme_constant_override("separation", 8)
-	vbox.add_child(bot_row)
-
-	var salary_lbl: Label = Label.new()
-	salary_lbl.text = "$%s / mo" % _fmt(emp.monthly_salary)
-	salary_lbl.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	salary_lbl.add_theme_color_override("font_color", Color(0.92, 0.92, 0.95, 1.0))
-	salary_lbl.add_theme_font_size_override("font_size", 13)
-	salary_lbl.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
-	bot_row.add_child(salary_lbl)
-
-	var hire_btn: Button = Button.new()
-	hire_btn.text = "HIRE"
-	hire_btn.custom_minimum_size = Vector2(80, 36)
-	hire_btn.add_theme_font_size_override("font_size", 13)
-	var hire_style: StyleBoxFlat = StyleBoxFlat.new()
-	hire_style.bg_color         = Color(0.08, 0.36, 0.17, 1.0)
-	hire_style.border_width_left   = 1
-	hire_style.border_width_top    = 1
-	hire_style.border_width_right  = 1
-	hire_style.border_width_bottom = 1
-	hire_style.border_color     = Color(0.22, 0.9, 0.42, 0.7)
-	hire_style.corner_radius_top_left     = 4
-	hire_style.corner_radius_top_right    = 4
-	hire_style.corner_radius_bottom_right = 4
-	hire_style.corner_radius_bottom_left  = 4
-	hire_btn.add_theme_stylebox_override("normal", hire_style)
-	if is_hero:
-		hire_btn.add_theme_color_override("font_color", Color(1.0, 0.78, 0.15, 1.0))
-	else:
-		hire_btn.add_theme_color_override("font_color", Color(0.9, 0.98, 0.92, 1.0))
-	bot_row.add_child(hire_btn)
-
-	hire_btn.pressed.connect(func() -> void:
-		if _gm == null:
-			return
-		_gm.employees.hire(emp)
-		_gm.broadcast("%s joined the team!" % emp.full_name())
-		hire_btn.text     = "HIRED"
-		hire_btn.disabled = true
-	)
-
-	return panel
+func _on_champ_timer_timeout() -> void:
+	_stats_label.text   = ""
+	_action_btn.visible = true
 
 # ─────────────────────────────────────────
 #  CANDIDATE GENERATION
@@ -469,65 +280,15 @@ func _generate_candidates(tier: int, count: int) -> Array:
 		result.append(emp)
 	return result
 
-# ─────────────────────────────────────────
-#  SIGNAL HANDLERS
-# ─────────────────────────────────────────
-func _on_cash_changed(amount: int) -> void:
-	_cash_label.text = "$" + _fmt(amount)
-
-func _on_ad_selected(tier: int, cost: int, count: int) -> void:
-	if _gm == null:
-		return
-	if not _gm.economy.spend(cost, "Recruitment Ad"):
-		_gm.broadcast("Not enough cash for this advertisement.")
-		return
-
-	selected_tier     = tier
-	_hero_templates.clear()
-	current_candidates = _generate_candidates(tier, count)
-
-	if tier == 5:
-		var heroes: Array = _gm.employees.get_available_heroes()
-		for template in heroes:
-			_hero_templates.append(template)
-			var hero_emp: Object = _gm.employees.create_hero_employee(template)
-			current_candidates.append(hero_emp)
-
-	if tier == 5:
-		_show_champ_dialogue()
-	else:
-		_show_candidates()
-
-func _on_champ_timer_timeout() -> void:
-	_champ_dots.visible     = false
-	_champ_continue.visible = true
-
-func _on_champ_continue_pressed() -> void:
-	_show_candidates()
-
-func _on_back_pressed() -> void:
-	match current_screen:
-		0:
-			screen_closed.emit()
-			queue_free()
-		1:
-			_show_ad_select()
-		2:
-			_show_ad_select()
+func _is_hero_candidate(emp: Object) -> bool:
+	for template in _hero_templates:
+		if template.get("id", "") == emp.id:
+			return true
+	return false
 
 # ─────────────────────────────────────────
 #  DISPLAY HELPERS
 # ─────────────────────────────────────────
-func _tier_color(tier: int) -> Color:
-	match tier:
-		0: return Color(0.60, 0.60, 0.60, 1.0)
-		1: return Color(0.55, 0.80, 0.45, 1.0)
-		2: return Color(0.35, 0.70, 1.00, 1.0)
-		3: return Color(0.70, 0.45, 1.00, 1.0)
-		4: return Color(1.00, 0.55, 0.20, 1.0)
-		5: return Color(1.00, 0.78, 0.15, 1.0)
-	return Color.WHITE
-
 func _role_str(role: int) -> String:
 	match role:
 		0: return "DEV"
@@ -539,17 +300,6 @@ func _role_str(role: int) -> String:
 		6: return "INT"
 	return "???"
 
-func _role_color(role: int) -> Color:
-	match role:
-		0: return Color(0.40, 0.80, 1.00, 1.0)
-		1: return Color(1.00, 0.60, 0.90, 1.0)
-		2: return Color(1.00, 0.85, 0.30, 1.0)
-		3: return Color(0.50, 1.00, 0.60, 1.0)
-		4: return Color(0.80, 0.70, 1.00, 1.0)
-		5: return Color(1.00, 0.50, 0.30, 1.0)
-		6: return Color(0.65, 0.65, 0.65, 1.0)
-	return Color.WHITE
-
 func _pers_str(p: int) -> String:
 	match p:
 		0: return "Normal"
@@ -560,16 +310,3 @@ func _pers_str(p: int) -> String:
 		5: return "Team Player"
 		6: return "Lone Star"
 	return "Unknown"
-
-func _fmt(n: int) -> String:
-	if n >= 1_000_000:
-		return "%.1fM" % (n / 1_000_000.0)
-	if n >= 1_000:
-		return "%.1fK" % (n / 1_000.0)
-	return str(n)
-
-func _on_dimmer_input(event: InputEvent) -> void:
-	if event is InputEventMouseButton:
-		var mb: InputEventMouseButton = event as InputEventMouseButton
-		if mb.pressed and mb.button_index == MOUSE_BUTTON_LEFT:
-			queue_free()
