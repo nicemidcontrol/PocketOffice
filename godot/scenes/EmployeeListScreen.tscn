@@ -133,6 +133,24 @@ horizontal_alignment = 1
 theme_override_font_sizes/font_size = 11
 theme_override_colors/font_color = Color(0.5, 0.5, 0.6, 1.0)
 
+[node name="ArtworkPanel" type="Panel" parent="Card/VBox"]
+layout_mode = 2
+size_flags_horizontal = 3
+custom_minimum_size = Vector2(0, 80)
+theme_override_styles/panel = SubResource("SBFlat_art")
+
+[node name="ArtLabel" type="Label" parent="Card/VBox/ArtworkPanel"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+text = "[ ART ]"
+horizontal_alignment = 1
+vertical_alignment = 1
+modulate = Color(0.3, 0.3, 0.5, 1.0)
+
 [node name="DetailCard" type="Panel" parent="Card/VBox"]
 layout_mode = 2
 size_flags_horizontal = 3
@@ -190,24 +208,6 @@ size_flags_horizontal = 3
 text = ""
 theme_override_font_sizes/font_size = 12
 theme_override_colors/font_color = Color(0.55, 0.55, 0.65, 1.0)
-
-[node name="ArtworkPanel" type="Panel" parent="Card/VBox"]
-layout_mode = 2
-size_flags_horizontal = 3
-custom_minimum_size = Vector2(0, 80)
-theme_override_styles/panel = SubResource("SBFlat_art")
-
-[node name="ArtLabel" type="Label" parent="Card/VBox/ArtworkPanel"]
-layout_mode = 1
-anchors_preset = 15
-anchor_right = 1.0
-anchor_bottom = 1.0
-grow_horizontal = 2
-grow_vertical = 2
-text = "[ ART ]"
-horizontal_alignment = 1
-vertical_alignment = 1
-modulate = Color(0.3, 0.3, 0.5, 1.0)
 
 [node name="Sep2" type="HSeparator" parent="Card/VBox"]
 layout_mode = 2

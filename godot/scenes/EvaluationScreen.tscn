@@ -94,35 +94,11 @@ theme_override_font_sizes/font_size = 17
 layout_mode = 2
 custom_minimum_size = Vector2(72, 0)
 
-[node name="Body" type="ScrollContainer" parent="Card"]
-layout_mode = 1
-anchor_right = 1.0
-anchor_bottom = 1.0
-offset_top = 56.0
-offset_bottom = -152.0
-grow_horizontal = 2
-grow_vertical = 2
-
-[node name="BodyMargin" type="MarginContainer" parent="Card/Body"]
-layout_mode = 2
-size_flags_horizontal = 3
-theme_override_constants/margin_left = 16
-theme_override_constants/margin_right = 16
-theme_override_constants/margin_top = 12
-theme_override_constants/margin_bottom = 12
-
-[node name="BodyVBox" type="VBoxContainer" parent="Card/Body/BodyMargin"]
-layout_mode = 2
-size_flags_horizontal = 3
-theme_override_constants/separation = 12
-
 [node name="ArtworkPanel" type="Panel" parent="Card"]
 layout_mode = 1
 anchor_right = 1.0
-anchor_top = 1.0
-anchor_bottom = 1.0
-offset_top = -148.0
-offset_bottom = -64.0
+offset_top = 60.0
+offset_bottom = 144.0
 grow_horizontal = 2
 grow_vertical = 0
 theme_override_styles/panel = SubResource("SBFlat_art")
@@ -138,6 +114,28 @@ text = "[ ART ]"
 horizontal_alignment = 1
 vertical_alignment = 1
 modulate = Color(0.3, 0.3, 0.5, 1.0)
+
+[node name="Body" type="ScrollContainer" parent="Card"]
+layout_mode = 1
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_top = 148.0
+offset_bottom = -64.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="BodyMargin" type="MarginContainer" parent="Card/Body"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/margin_left = 16
+theme_override_constants/margin_right = 16
+theme_override_constants/margin_top = 12
+theme_override_constants/margin_bottom = 12
+
+[node name="BodyVBox" type="VBoxContainer" parent="Card/Body/BodyMargin"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/separation = 12
 
 [node name="FooterBar" type="PanelContainer" parent="Card"]
 layout_mode = 1
