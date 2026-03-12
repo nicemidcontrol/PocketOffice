@@ -2,6 +2,18 @@
 
 [ext_resource type="Script" uid="uid://byvf11epv1pfk" path="res://scripts/ui/HireScreen.gd" id="1_hirescript"]
 
+[sub_resource type="StyleBoxFlat" id="SBFlat_card"]
+bg_color = Color(0.047, 0.047, 0.11, 0.97)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(0.18, 0.42, 0.78, 1.0)
+corner_radius_top_left = 10
+corner_radius_top_right = 10
+corner_radius_bottom_right = 10
+corner_radius_bottom_left = 10
+
 [sub_resource type="StyleBoxFlat" id="SBFlat_header"]
 bg_color = Color(0.047, 0.047, 0.11, 0.97)
 border_width_bottom = 2
@@ -19,25 +31,79 @@ corner_radius_top_right = 10
 corner_radius_bottom_right = 10
 corner_radius_bottom_left = 10
 
-[node name="HireScreen" type="Control"]
-layout_mode = 2
+[node name="HireScreen" type="CanvasLayer"]
+layer = 8
+script = ExtResource("1_hirescript")
+
+[node name="Dimmer" type="ColorRect" parent="."]
+layout_mode = 3
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
-script = ExtResource("1_hirescript")
+color = Color(0.0, 0.0, 0.0, 0.55)
+mouse_filter = 0
 
-[node name="Background" type="ColorRect" parent="."]
+[node name="Card" type="Panel" parent="."]
+layout_mode = 3
+anchors_preset = 8
+anchor_left = 0.5
+anchor_right = 0.5
+anchor_top = 0.5
+anchor_bottom = 0.5
+offset_left = -175.0
+offset_right = 175.0
+offset_top = -310.0
+offset_bottom = 310.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_styles/panel = SubResource("SBFlat_card")
+mouse_filter = 0
+
+[node name="Header" type="Panel" parent="Card"]
+layout_mode = 1
+anchors_preset = 10
+anchor_right = 1.0
+grow_horizontal = 2
+offset_bottom = 60.0
+theme_override_styles/panel = SubResource("SBFlat_header")
+
+[node name="HBox" type="HBoxContainer" parent="Card/Header"]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
-color = Color(0.047, 0.047, 0.11, 1)
+theme_override_constants/separation = 8
 
-[node name="AdSelectLayer" type="Control" parent="."]
+[node name="BackButton" type="Button" parent="Card/Header/HBox"]
+custom_minimum_size = Vector2(72, 0)
+layout_mode = 2
+theme_override_colors/font_color = Color(0.5, 0.7, 1, 1)
+theme_override_font_sizes/font_size = 12
+text = "< BACK"
+
+[node name="TitleLabel" type="Label" parent="Card/Header/HBox"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_colors/font_color = Color(0.92, 0.92, 0.95, 1)
+theme_override_font_sizes/font_size = 15
+text = "RECRUIT"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="CashLabel" type="Label" parent="Card/Header/HBox"]
+custom_minimum_size = Vector2(72, 0)
+layout_mode = 2
+theme_override_colors/font_color = Color(0.22, 0.9, 0.42, 1)
+theme_override_font_sizes/font_size = 14
+text = "$0"
+horizontal_alignment = 2
+vertical_alignment = 1
+
+[node name="AdSelectLayer" type="Control" parent="Card"]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
@@ -46,7 +112,7 @@ grow_horizontal = 2
 grow_vertical = 2
 offset_top = 60.0
 
-[node name="Scroll" type="ScrollContainer" parent="AdSelectLayer"]
+[node name="Scroll" type="ScrollContainer" parent="Card/AdSelectLayer"]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
@@ -58,12 +124,12 @@ offset_right = -8.0
 offset_bottom = -40.0
 horizontal_scroll_mode = 0
 
-[node name="VBox" type="VBoxContainer" parent="AdSelectLayer/Scroll"]
+[node name="VBox" type="VBoxContainer" parent="Card/AdSelectLayer/Scroll"]
 layout_mode = 2
 size_flags_horizontal = 3
 theme_override_constants/separation = 12
 
-[node name="HintLabel" type="Label" parent="AdSelectLayer"]
+[node name="HintLabel" type="Label" parent="Card/AdSelectLayer"]
 layout_mode = 1
 anchors_preset = 12
 anchor_right = 1.0
@@ -78,7 +144,7 @@ text = "Higher tier = better candidates"
 horizontal_alignment = 1
 vertical_alignment = 1
 
-[node name="CandidateLayer" type="Control" parent="."]
+[node name="CandidateLayer" type="Control" parent="Card"]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
@@ -88,7 +154,7 @@ grow_vertical = 2
 offset_top = 60.0
 visible = false
 
-[node name="Scroll" type="ScrollContainer" parent="CandidateLayer"]
+[node name="Scroll" type="ScrollContainer" parent="Card/CandidateLayer"]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
@@ -99,54 +165,12 @@ offset_left = 8.0
 offset_right = -8.0
 horizontal_scroll_mode = 0
 
-[node name="VBox" type="VBoxContainer" parent="CandidateLayer/Scroll"]
+[node name="VBox" type="VBoxContainer" parent="Card/CandidateLayer/Scroll"]
 layout_mode = 2
 size_flags_horizontal = 3
 theme_override_constants/separation = 16
 
-[node name="Header" type="Panel" parent="."]
-layout_mode = 1
-anchors_preset = 10
-anchor_right = 1.0
-grow_horizontal = 2
-offset_bottom = 60.0
-theme_override_styles/panel = SubResource("SBFlat_header")
-
-[node name="HBox" type="HBoxContainer" parent="Header"]
-layout_mode = 1
-anchors_preset = 15
-anchor_right = 1.0
-anchor_bottom = 1.0
-grow_horizontal = 2
-grow_vertical = 2
-theme_override_constants/separation = 8
-
-[node name="BackButton" type="Button" parent="Header/HBox"]
-custom_minimum_size = Vector2(72, 0)
-layout_mode = 2
-theme_override_colors/font_color = Color(0.5, 0.7, 1, 1)
-theme_override_font_sizes/font_size = 12
-text = "< BACK"
-
-[node name="TitleLabel" type="Label" parent="Header/HBox"]
-layout_mode = 2
-size_flags_horizontal = 3
-theme_override_colors/font_color = Color(0.92, 0.92, 0.95, 1)
-theme_override_font_sizes/font_size = 15
-text = "RECRUIT"
-horizontal_alignment = 1
-vertical_alignment = 1
-
-[node name="CashLabel" type="Label" parent="Header/HBox"]
-custom_minimum_size = Vector2(72, 0)
-layout_mode = 2
-theme_override_colors/font_color = Color(0.22, 0.9, 0.42, 1)
-theme_override_font_sizes/font_size = 14
-text = "$0"
-horizontal_alignment = 2
-vertical_alignment = 1
-
-[node name="ChampDialogLayer" type="Control" parent="."]
+[node name="ChampDialogLayer" type="Control" parent="Card"]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
@@ -155,7 +179,7 @@ grow_horizontal = 2
 grow_vertical = 2
 visible = false
 
-[node name="Overlay" type="ColorRect" parent="ChampDialogLayer"]
+[node name="Overlay" type="ColorRect" parent="Card/ChampDialogLayer"]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
@@ -164,7 +188,7 @@ grow_horizontal = 2
 grow_vertical = 2
 color = Color(0.0, 0.0, 0.0, 0.85)
 
-[node name="ChampPanel" type="PanelContainer" parent="ChampDialogLayer"]
+[node name="ChampPanel" type="PanelContainer" parent="Card/ChampDialogLayer"]
 layout_mode = 1
 anchors_preset = 8
 anchor_left = 0.5
@@ -179,35 +203,35 @@ grow_horizontal = 2
 grow_vertical = 2
 theme_override_styles/panel = SubResource("SBFlat_champ")
 
-[node name="Margin" type="MarginContainer" parent="ChampDialogLayer/ChampPanel"]
+[node name="Margin" type="MarginContainer" parent="Card/ChampDialogLayer/ChampPanel"]
 layout_mode = 2
 theme_override_constants/margin_left = 24
 theme_override_constants/margin_top = 24
 theme_override_constants/margin_right = 24
 theme_override_constants/margin_bottom = 24
 
-[node name="VBox" type="VBoxContainer" parent="ChampDialogLayer/ChampPanel/Margin"]
+[node name="VBox" type="VBoxContainer" parent="Card/ChampDialogLayer/ChampPanel/Margin"]
 layout_mode = 2
 theme_override_constants/separation = 10
 
-[node name="ChampTitle" type="Label" parent="ChampDialogLayer/ChampPanel/Margin/VBox"]
+[node name="ChampTitle" type="Label" parent="Card/ChampDialogLayer/ChampPanel/Margin/VBox"]
 layout_mode = 2
 theme_override_colors/font_color = Color(1.0, 0.78, 0.15, 1.0)
 theme_override_font_sizes/font_size = 32
 text = "CHAMP"
 horizontal_alignment = 1
 
-[node name="ChampSubtitle" type="Label" parent="ChampDialogLayer/ChampPanel/Margin/VBox"]
+[node name="ChampSubtitle" type="Label" parent="Card/ChampDialogLayer/ChampPanel/Margin/VBox"]
 layout_mode = 2
 theme_override_colors/font_color = Color(0.6, 0.6, 0.6, 1)
 theme_override_font_sizes/font_size = 12
 text = "Recruitment Agency"
 horizontal_alignment = 1
 
-[node name="ChampDivider" type="HSeparator" parent="ChampDialogLayer/ChampPanel/Margin/VBox"]
+[node name="ChampDivider" type="HSeparator" parent="Card/ChampDialogLayer/ChampPanel/Margin/VBox"]
 layout_mode = 2
 
-[node name="ChampDialogue" type="Label" parent="ChampDialogLayer/ChampPanel/Margin/VBox"]
+[node name="ChampDialogue" type="Label" parent="Card/ChampDialogLayer/ChampPanel/Margin/VBox"]
 layout_mode = 2
 theme_override_colors/font_color = Color(0.92, 0.92, 0.95, 1)
 theme_override_font_sizes/font_size = 13
@@ -216,24 +240,24 @@ horizontal_alignment = 1
 vertical_alignment = 1
 autowrap_mode = 3
 
-[node name="ChampDots" type="Label" parent="ChampDialogLayer/ChampPanel/Margin/VBox"]
+[node name="ChampDots" type="Label" parent="Card/ChampDialogLayer/ChampPanel/Margin/VBox"]
 layout_mode = 2
 theme_override_colors/font_color = Color(1.0, 0.78, 0.15, 1.0)
 theme_override_font_sizes/font_size = 18
 text = "..."
 horizontal_alignment = 1
 
-[node name="ContinueBtn" type="Button" parent="ChampDialogLayer/ChampPanel/Margin/VBox"]
+[node name="ContinueBtn" type="Button" parent="Card/ChampDialogLayer/ChampPanel/Margin/VBox"]
 layout_mode = 2
 visible = false
 theme_override_colors/font_color = Color(1.0, 0.78, 0.15, 1.0)
 theme_override_font_sizes/font_size = 14
 text = "CONTINUE"
 
-[node name="ChampTimer" type="Timer" parent="ChampDialogLayer"]
+[node name="ChampTimer" type="Timer" parent="Card/ChampDialogLayer"]
 wait_time = 2.0
 one_shot = true
 
-[connection signal="pressed" from="Header/HBox/BackButton" to="." method="_on_back_pressed"]
-[connection signal="pressed" from="ChampDialogLayer/ChampPanel/Margin/VBox/ContinueBtn" to="." method="_on_champ_continue_pressed"]
-[connection signal="timeout" from="ChampDialogLayer/ChampTimer" to="." method="_on_champ_timer_timeout"]
+[connection signal="pressed" from="Card/Header/HBox/BackButton" to="." method="_on_back_pressed"]
+[connection signal="pressed" from="Card/ChampDialogLayer/ChampPanel/Margin/VBox/ContinueBtn" to="." method="_on_champ_continue_pressed"]
+[connection signal="timeout" from="Card/ChampDialogLayer/ChampTimer" to="." method="_on_champ_timer_timeout"]

@@ -1,11 +1,15 @@
-extends Control
+extends CanvasLayer
 
-@onready var _count_label: Label         = $Header/HBox/CountLabel
-@onready var _card_list:   VBoxContainer = $Body/CardList
+signal screen_closed
+
+@onready var _count_label: Label         = $Card/Header/HBox/CountLabel
+@onready var _card_list:   VBoxContainer = $Card/Body/CardList
 
 var _gm: Node = null
 
 func _ready() -> void:
+	process_mode = Node.PROCESS_MODE_ALWAYS
+	$Dimmer.gui_input.connect(_on_dimmer_input)
 	await get_tree().process_frame
 	_gm = get_node_or_null("/root/GameManager")
 	if _gm == null:
@@ -84,7 +88,6 @@ func _make_card(emp: Employee) -> PanelContainer:
 	vbox.add_theme_constant_override("separation", 6)
 	margin.add_child(vbox)
 
-	# ── Name row ──
 	var name_row: HBoxContainer = HBoxContainer.new()
 	name_row.add_theme_constant_override("separation", 6)
 	vbox.add_child(name_row)
@@ -130,14 +133,12 @@ func _make_card(emp: Employee) -> PanelContainer:
 	role_badge.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
 	name_row.add_child(role_badge)
 
-	# ── Personality ──
 	var pers_label: Label = Label.new()
 	pers_label.text = _get_personality_str(emp)
 	pers_label.add_theme_color_override("font_color", Color(0.58, 0.58, 0.68, 1.0))
 	pers_label.add_theme_font_size_override("font_size", 11)
 	vbox.add_child(pers_label)
 
-	# ── Stats row ──
 	var stats_row: HBoxContainer = HBoxContainer.new()
 	stats_row.add_theme_constant_override("separation", 6)
 	vbox.add_child(stats_row)
@@ -160,7 +161,6 @@ func _make_card(emp: Employee) -> PanelContainer:
 
 	stats_row.add_child(_make_stat_bar(float(emp.motivation), Color(1.0, 0.75, 0.1, 1.0)))
 
-	# ── Stress bar ──
 	var stress_row: HBoxContainer = HBoxContainer.new()
 	stress_row.add_theme_constant_override("separation", 6)
 	vbox.add_child(stress_row)
@@ -208,7 +208,6 @@ func _make_card(emp: Employee) -> PanelContainer:
 	stress_val.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
 	stress_row.add_child(stress_val)
 
-	# ── Salary ──
 	var salary_label: Label = Label.new()
 	salary_label.text = "$%d / mo" % emp.monthly_salary
 	salary_label.add_theme_color_override("font_color", Color(0.55, 0.55, 0.65, 1.0))
@@ -261,8 +260,6 @@ func _get_personality_str(emp: Employee) -> String:
 			return template["personality_label"]
 	return _pers_str(emp.personality)
 
-# Employee.Role: DEVELOPER=0 DESIGNER=1 MARKETER=2 HR_SPECIALIST=3
-#                ACCOUNTANT=4 MANAGER=5 INTERN=6
 func _role_str(role: int) -> String:
 	match role:
 		0: return "DEV"
@@ -285,8 +282,6 @@ func _role_color(role: int) -> Color:
 		6: return Color(0.65, 0.65, 0.65, 1.0)
 	return Color.WHITE
 
-# Employee.Personality: NORMAL=0 WORKAHOLIC=1 LAZY=2 GOSSIP=3
-#                       PERFECTIONIST=4 TEAM_PLAYER=5 LONE_STAR=6
 func _pers_str(p: int) -> String:
 	match p:
 		0: return "Normal"
@@ -302,4 +297,11 @@ func _pers_str(p: int) -> String:
 #  INPUT HANDLER
 # ─────────────────────────────────────────
 func _on_back_pressed() -> void:
-	get_tree().change_scene_to_file("res://scenes/Main.tscn")
+	screen_closed.emit()
+	queue_free()
+
+func _on_dimmer_input(event: InputEvent) -> void:
+	if event is InputEventMouseButton:
+		var mb: InputEventMouseButton = event as InputEventMouseButton
+		if mb.pressed and mb.button_index == MOUSE_BUTTON_LEFT:
+			queue_free()
