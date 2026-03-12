@@ -1,4 +1,4 @@
-[gd_scene load_steps=3 format=3 uid="uid://b7dju0mjovits"]
+[gd_scene load_steps=4 format=3 uid="uid://b7dju0mjovits"]
 
 [ext_resource type="Script" uid="uid://byvf11epv1pfk" path="res://scripts/ui/HireScreen.gd" id="1_hirescript"]
 
@@ -26,6 +26,18 @@ corner_radius_top_right = 8
 corner_radius_bottom_right = 8
 corner_radius_bottom_left = 8
 
+[sub_resource type="StyleBoxFlat" id="SBFlat_art"]
+bg_color = Color(0.08, 0.08, 0.18, 1.0)
+border_width_left = 1
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 1
+border_color = Color(0.18, 0.42, 0.78, 0.4)
+corner_radius_top_left = 6
+corner_radius_top_right = 6
+corner_radius_bottom_right = 6
+corner_radius_bottom_left = 6
+
 [node name="HireScreen" type="CanvasLayer"]
 layer = 8
 script = ExtResource("1_hirescript")
@@ -49,8 +61,8 @@ anchor_top = 0.5
 anchor_bottom = 0.5
 offset_left = -175.0
 offset_right = 175.0
-offset_top = -320.0
-offset_bottom = 320.0
+offset_top = -260.0
+offset_bottom = 260.0
 grow_horizontal = 2
 grow_vertical = 2
 theme_override_styles/panel = SubResource("SBFlat_card")
@@ -172,6 +184,24 @@ size_flags_horizontal = 3
 text = ""
 theme_override_font_sizes/font_size = 13
 theme_override_colors/font_color = Color(1.0, 0.82, 0.2, 1.0)
+
+[node name="ArtworkPanel" type="Panel" parent="Card/VBox"]
+layout_mode = 2
+size_flags_horizontal = 3
+custom_minimum_size = Vector2(0, 80)
+theme_override_styles/panel = SubResource("SBFlat_art")
+
+[node name="ArtLabel" type="Label" parent="Card/VBox/ArtworkPanel"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+text = "[ ART ]"
+horizontal_alignment = 1
+vertical_alignment = 1
+modulate = Color(0.3, 0.3, 0.5, 1.0)
 
 [node name="ActionBtn" type="Button" parent="Card/VBox"]
 layout_mode = 2
