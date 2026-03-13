@@ -1,0 +1,125 @@
+[gd_scene load_steps=3 format=3 uid="uid://basemodal01"]
+
+[ext_resource type="Script" path="res://scripts/ui/BaseModal.gd" id="1_bm"]
+
+[sub_resource type="StyleBoxFlat" id="SBFlat_card"]
+bg_color = Color(0.047, 0.047, 0.11, 0.97)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(0.18, 0.42, 0.78, 1)
+corner_radius_top_left = 10
+corner_radius_top_right = 10
+corner_radius_bottom_right = 10
+corner_radius_bottom_left = 10
+
+[sub_resource type="StyleBoxFlat" id="SBFlat_artwork"]
+bg_color = Color(0.08, 0.08, 0.18, 1)
+border_width_left = 1
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 1
+border_color = Color(0.18, 0.42, 0.78, 0.4)
+corner_radius_top_left = 6
+corner_radius_top_right = 6
+corner_radius_bottom_right = 6
+corner_radius_bottom_left = 6
+
+[node name="BaseModal" type="CanvasLayer"]
+layer = 8
+script = ExtResource("1_bm")
+
+[node name="Dimmer" type="ColorRect" parent="."]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0, 0, 0, 0.55)
+mouse_filter = 0
+
+[node name="Card" type="Panel" parent="Dimmer"]
+layout_mode = 3
+anchors_preset = -1
+anchor_left = 0.5
+anchor_right = 0.5
+anchor_top = 0.5
+anchor_bottom = 0.5
+offset_left = -170.0
+offset_right = 170.0
+offset_top = -280.0
+offset_bottom = 280.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 0
+theme_override_styles/panel = SubResource("SBFlat_card")
+
+[node name="VBox" type="VBoxContainer" parent="Dimmer/Card"]
+layout_mode = 1
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/separation = 8
+
+[node name="TitleLabel" type="Label" parent="Dimmer/Card/VBox"]
+layout_mode = 2
+text = "TITLE"
+horizontal_alignment = 1
+
+[node name="HSeparator" type="HSeparator" parent="Dimmer/Card/VBox"]
+layout_mode = 2
+
+[node name="ArrowRow" type="HBoxContainer" parent="Dimmer/Card/VBox"]
+layout_mode = 2
+
+[node name="PrevBtn" type="Button" parent="Dimmer/Card/VBox/ArrowRow"]
+layout_mode = 2
+text = "<"
+
+[node name="ItemNameLabel" type="Label" parent="Dimmer/Card/VBox/ArrowRow"]
+layout_mode = 2
+size_flags_horizontal = 2
+text = ""
+
+[node name="NextBtn" type="Button" parent="Dimmer/Card/VBox/ArrowRow"]
+layout_mode = 2
+text = ">"
+
+[node name="PageLabel" type="Label" parent="Dimmer/Card/VBox"]
+layout_mode = 2
+text = "1 / 1"
+horizontal_alignment = 1
+
+[node name="ArtworkPanel" type="Panel" parent="Dimmer/Card/VBox"]
+layout_mode = 2
+custom_minimum_size = Vector2(0, 90)
+theme_override_styles/panel = SubResource("SBFlat_artwork")
+
+[node name="ArtLabel" type="Label" parent="Dimmer/Card/VBox/ArtworkPanel"]
+layout_mode = 1
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+text = "[ ART ]"
+horizontal_alignment = 1
+vertical_alignment = 1
+modulate = Color(0.3, 0.3, 0.5, 1)
+
+[node name="ContentArea" type="Panel" parent="Dimmer/Card/VBox"]
+layout_mode = 2
+custom_minimum_size = Vector2(0, 120)
+
+[node name="ActionBtn" type="Button" parent="Dimmer/Card/VBox"]
+layout_mode = 2
+text = "ACTION"
+
+[node name="HSeparator2" type="HSeparator" parent="Dimmer/Card/VBox"]
+layout_mode = 2
+
+[node name="CloseBtn" type="Button" parent="Dimmer/Card/VBox"]
+layout_mode = 2
+text = "CLOSE"
