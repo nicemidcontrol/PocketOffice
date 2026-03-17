@@ -1,39 +1,32 @@
-extends CanvasLayer
-
-signal screen_closed
+extends "res://scripts/ui/BaseModal.gd"
 
 # ─────────────────────────────────────────
 #  NODE REFS
 # ─────────────────────────────────────────
-@onready var _cp_label:     Label  = $Card/VBox/CpLabel
-@onready var _item_name:    Label  = $Card/VBox/ArrowRow/ItemNameLabel
-@onready var _page_label:   Label  = $Card/VBox/PageLabel
-@onready var _desc_label:   Label  = $Card/VBox/DetailCard/Margin/DetailVBox/DescLabel
-@onready var _req_label:    Label  = $Card/VBox/DetailCard/Margin/DetailVBox/ReqLabel
-@onready var _cost_label:   Label  = $Card/VBox/DetailCard/Margin/DetailVBox/CostLabel
-@onready var _reward_label: Label  = $Card/VBox/DetailCard/Margin/DetailVBox/RewardLabel
-@onready var _unlock_label: Label  = $Card/VBox/DetailCard/Margin/DetailVBox/UnlockLabel
-@onready var _reason_label: Label  = $Card/VBox/DetailCard/Margin/DetailVBox/ReasonLabel
-@onready var _research_btn: Button = $Card/VBox/ResearchBtn
-@onready var _close_btn:    Button = $Card/VBox/CloseRow/CloseBtn
-@onready var _notif_panel:  Panel  = $NotifLayer/NotifPanel
-@onready var _notif_label:  Label  = $NotifLayer/NotifPanel/Margin/VBox/NotifLabel
-@onready var _notif_timer:  Timer  = $NotifLayer/NotifPanel/NotifTimer
+@onready var _cp_label:     Label = $Dimmer/Card/VBox/CpLabel
+@onready var _desc_label:   Label = $Dimmer/Card/VBox/DetailCard/Margin/DetailVBox/DescLabel
+@onready var _req_label:    Label = $Dimmer/Card/VBox/DetailCard/Margin/DetailVBox/ReqLabel
+@onready var _cost_label:   Label = $Dimmer/Card/VBox/DetailCard/Margin/DetailVBox/CostLabel
+@onready var _reward_label: Label = $Dimmer/Card/VBox/DetailCard/Margin/DetailVBox/RewardLabel
+@onready var _unlock_label: Label = $Dimmer/Card/VBox/DetailCard/Margin/DetailVBox/UnlockLabel
+@onready var _reason_label: Label = $Dimmer/Card/VBox/DetailCard/Margin/DetailVBox/ReasonLabel
+@onready var _notif_panel:  Panel = $NotifLayer/NotifPanel
+@onready var _notif_label:  Label = $NotifLayer/NotifPanel/Margin/VBox/NotifLabel
+@onready var _notif_timer:  Timer = $NotifLayer/NotifPanel/NotifTimer
 
 # ─────────────────────────────────────────
 #  STATE
 # ─────────────────────────────────────────
-var _gm:           Node  = null
-var _dm:           Node  = null
-var _items:        Array = []
-var current_index: int   = 0
+var _gm:    Node  = null
+var _dm:    Node  = null
+var _items: Array = []
 
 # ─────────────────────────────────────────
 #  LIFECYCLE
 # ─────────────────────────────────────────
 func _ready() -> void:
-	process_mode = Node.PROCESS_MODE_ALWAYS
-	$Dimmer.gui_input.connect(_on_dimmer_input)
+	super._ready()
+	set_title("RESEARCH")
 	_gm = get_node_or_null("/root/GameManager")
 	_dm = get_node_or_null("/root/DonorManager")
 
@@ -45,49 +38,35 @@ func _ready() -> void:
 		_dm.donor_won.connect(_on_donor_won)
 		_items = _dm.donors
 
-	_refresh_display()
+	set_items_count(_items.size())
 
 # ─────────────────────────────────────────
-#  NAVIGATION
-# ─────────────────────────────────────────
-func _on_prev_pressed() -> void:
-	if _items.is_empty():
-		return
-	current_index = (current_index - 1 + _items.size()) % _items.size()
-	_refresh_display()
-
-func _on_next_pressed() -> void:
-	if _items.is_empty():
-		return
-	current_index = (current_index + 1) % _items.size()
-	_refresh_display()
-
-# ─────────────────────────────────────────
-#  DISPLAY
+#  DISPLAY (BaseModal override)
 # ─────────────────────────────────────────
 func _refresh_display() -> void:
 	if _items.is_empty() or _dm == null or _gm == null:
-		_item_name.text = "No items"
-		_page_label.text = "0 / 0"
-		_desc_label.text = ""
-		_req_label.text = ""
-		_cost_label.text = ""
-		_reward_label.text = ""
-		_unlock_label.visible = false
-		_reason_label.visible = false
-		_research_btn.text = "LOCKED"
-		_research_btn.disabled = true
+		_item_name_label.text   = "No items"
+		_page_label.text        = "0 / 0"
+		_desc_label.text        = ""
+		_req_label.text         = ""
+		_cost_label.text        = ""
+		_reward_label.text      = ""
+		_unlock_label.visible   = false
+		_reason_label.visible   = false
+		_action_btn.text        = "LOCKED"
+		_action_btn.disabled    = true
 		return
 
-	var item: Dictionary = _items[current_index]
-	var id: String = item.get("id", "")
+	super._refresh_display()
+
+	var item: Dictionary = _items[_current_index]
+	var id: String       = item.get("id", "")
 	var check: Dictionary = _dm.check_requirements(id, _gm)
 	var is_done: bool = _dm.won_donors.has(id)
 	var is_ok: bool   = bool(check.get("ok", false))
 
-	_item_name.text  = item.get("name", "")
-	_page_label.text = "%d / %d" % [current_index + 1, _items.size()]
-	_desc_label.text = item.get("description", "")
+	_item_name_label.text = item.get("name", "")
+	_desc_label.text      = item.get("description", "")
 
 	# Requirements
 	var rep: int       = int(_gm.company_data.get("reputation", 0))
@@ -126,7 +105,7 @@ func _refresh_display() -> void:
 			parts.append(str(h))
 		for p in proj_names:
 			parts.append(str(p))
-		_unlock_label.text = "Unlocks: " + ", ".join(parts)
+		_unlock_label.text    = "Unlocks: " + ", ".join(parts)
 		_unlock_label.visible = true
 	else:
 		_unlock_label.visible = false
@@ -134,24 +113,24 @@ func _refresh_display() -> void:
 	# Failure reasons
 	var reasons: Array = check.get("reasons", [])
 	if not is_done and reasons.size() > 0:
-		_reason_label.text = "\n".join(reasons)
+		_reason_label.text    = "\n".join(reasons)
 		_reason_label.visible = true
 	else:
 		_reason_label.visible = false
 
 	# Action button
 	if is_done:
-		_research_btn.text = "DONE"
-		_research_btn.disabled = true
-		_research_btn.add_theme_color_override("font_color", Color(0.5, 0.5, 0.5, 1.0))
+		_action_btn.text     = "DONE"
+		_action_btn.disabled = true
+		_action_btn.add_theme_color_override("font_color", Color(0.5, 0.5, 0.5, 1.0))
 	elif is_ok:
-		_research_btn.text = "RESEARCH"
-		_research_btn.disabled = false
-		_research_btn.add_theme_color_override("font_color", Color(0.3, 1.0, 0.4, 1.0))
+		_action_btn.text     = "RESEARCH"
+		_action_btn.disabled = false
+		_action_btn.add_theme_color_override("font_color", Color(0.3, 1.0, 0.4, 1.0))
 	else:
-		_research_btn.text = "LOCKED"
-		_research_btn.disabled = true
-		_research_btn.add_theme_color_override("font_color", Color(1.0, 0.35, 0.35, 1.0))
+		_action_btn.text     = "LOCKED"
+		_action_btn.disabled = true
+		_action_btn.add_theme_color_override("font_color", Color(1.0, 0.35, 0.35, 1.0))
 
 # ─────────────────────────────────────────
 #  ACTIONS
@@ -159,19 +138,9 @@ func _refresh_display() -> void:
 func _on_research_pressed() -> void:
 	if _items.is_empty() or _dm == null or _gm == null:
 		return
-	var item: Dictionary = _items[current_index]
+	var item: Dictionary = _items[_current_index]
 	var id: String = item.get("id", "")
 	var _result: bool = _dm.try_win_donor(id, _gm)
-
-func _on_close_pressed() -> void:
-	screen_closed.emit()
-	queue_free()
-
-func _on_dimmer_input(event: InputEvent) -> void:
-	if event is InputEventMouseButton:
-		var mb: InputEventMouseButton = event as InputEventMouseButton
-		if mb.pressed and mb.button_index == MOUSE_BUTTON_LEFT:
-			queue_free()
 
 # ─────────────────────────────────────────
 #  SIGNAL HANDLERS
@@ -181,7 +150,7 @@ func _on_cp_changed(new_val: int) -> void:
 	_refresh_display()
 
 func _on_donor_won(donor_name_str: String, monthly: int) -> void:
-	_notif_label.text = "%s secured!\n+$%d/mo funding" % [donor_name_str, monthly]
+	_notif_label.text    = "%s secured!\n+$%d/mo funding" % [donor_name_str, monthly]
 	_notif_panel.visible = true
 	_notif_timer.start()
 	_refresh_display()
