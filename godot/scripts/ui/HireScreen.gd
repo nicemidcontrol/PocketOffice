@@ -1,6 +1,4 @@
-extends CanvasLayer
-
-signal screen_closed
+extends "res://scripts/ui/BaseModal.gd"
 
 # ─────────────────────────────────────────
 #  PHASES
@@ -38,17 +36,13 @@ const CHAMP_HERO_LINE: String = "Even I'm surprised by this one. Truly special. 
 # ─────────────────────────────────────────
 #  NODE REFS
 # ─────────────────────────────────────────
-@onready var _title_label:  Label         = $Card/VBox/TitleLabel
-@onready var _cash_label:   Label         = $Card/VBox/CashLabel
-@onready var _arrow_row:    HBoxContainer = $Card/VBox/ArrowRow
-@onready var _item_name:    Label         = $Card/VBox/ArrowRow/ItemNameLabel
-@onready var _page_label:   Label         = $Card/VBox/PageLabel
-@onready var _desc_label:   Label         = $Card/VBox/DetailCard/Margin/DetailVBox/DescLabel
-@onready var _badge_label:  Label         = $Card/VBox/DetailCard/Margin/DetailVBox/BadgeLabel
-@onready var _stats_label:  Label         = $Card/VBox/DetailCard/Margin/DetailVBox/StatsLabel
-@onready var _cost_label:   Label         = $Card/VBox/DetailCard/Margin/DetailVBox/CostLabel
-@onready var _action_btn:   Button        = $Card/VBox/ActionBtn
-@onready var _status_label: Label         = $Card/VBox/StatusLabel
+@onready var _cash_label:   Label         = $Dimmer/Card/VBox/CashLabel
+@onready var _arrow_row:    HBoxContainer = $Dimmer/Card/VBox/ArrowRow
+@onready var _desc_label:   Label         = $Dimmer/Card/VBox/DetailCard/Margin/DetailVBox/DescLabel
+@onready var _badge_label:  Label         = $Dimmer/Card/VBox/DetailCard/Margin/DetailVBox/BadgeLabel
+@onready var _stats_label:  Label         = $Dimmer/Card/VBox/DetailCard/Margin/DetailVBox/StatsLabel
+@onready var _cost_label:   Label         = $Dimmer/Card/VBox/DetailCard/Margin/DetailVBox/CostLabel
+@onready var _status_label: Label         = $Dimmer/Card/VBox/StatusLabel
 @onready var _champ_timer:  Timer         = $ChampTimer
 
 # ─────────────────────────────────────────
@@ -57,8 +51,6 @@ const CHAMP_HERO_LINE: String = "Even I'm surprised by this one. Truly special. 
 var _gm:            Node     = null
 var _em:            GDScript = null
 var _phase:         int      = PHASE_ADS
-var _ad_index:      int      = 0
-var _cand_index:    int      = 0
 var _current_cands: Array    = []
 var _hero_templates:Array    = []
 var _selected_tier: int      = 0
@@ -68,8 +60,8 @@ var _hired_emps:    Array    = []
 #  LIFECYCLE
 # ─────────────────────────────────────────
 func _ready() -> void:
-	process_mode = Node.PROCESS_MODE_ALWAYS
-	$Dimmer.gui_input.connect(_on_dimmer_input)
+	super._ready()
+	set_title("RECRUIT")
 	_em = load("res://EmployeeManager.gd") as GDScript
 	_gm = get_node_or_null("/root/GameManager")
 	if _gm != null:
@@ -84,72 +76,54 @@ func _ready() -> void:
 func _show_phase(phase: int) -> void:
 	_phase = phase
 	_status_label.text = ""
+	_current_index = 0
 	match phase:
 		PHASE_ADS:
-			_title_label.text      = "RECRUIT"
-			_arrow_row.visible     = true
-			_page_label.visible    = true
-			_action_btn.visible    = true
-			_refresh_ad_display()
-		PHASE_CHAMP:
-			_title_label.text      = "CHAMP'S AGENCY"
-			_arrow_row.visible     = false
-			_page_label.visible    = false
-			_action_btn.visible    = false
-			var rng: RandomNumberGenerator = RandomNumberGenerator.new()
-			rng.randomize()
-			var line: String = CHAMP_HERO_LINE if not _hero_templates.is_empty() else CHAMP_LINES[rng.randi_range(0, CHAMP_LINES.size() - 1)]
-			_item_name.text   = ""
-			_desc_label.text  = line
-			_badge_label.text = "CHAMP"
-			_stats_label.text = "..."
-			_cost_label.text  = ""
-			_champ_timer.start()
-		PHASE_CANDS:
-			_title_label.text   = "TIER %s CANDIDATES" % TIER_NAMES[_selected_tier]
+			set_title("RECRUIT")
 			_arrow_row.visible  = true
 			_page_label.visible = true
 			_action_btn.visible = true
-			_cand_index         = 0
-			_refresh_cand_display()
-
-# ─────────────────────────────────────────
-#  NAVIGATION
-# ─────────────────────────────────────────
-func _on_prev_pressed() -> void:
-	match _phase:
-		PHASE_ADS:
-			_ad_index = (_ad_index - 1 + AD_DATA.size()) % AD_DATA.size()
-			_refresh_ad_display()
+			set_items_count(AD_DATA.size())
+		PHASE_CHAMP:
+			set_title("CHAMP'S AGENCY")
+			_arrow_row.visible  = false
+			_page_label.visible = false
+			_action_btn.visible = false
+			var rng: RandomNumberGenerator = RandomNumberGenerator.new()
+			rng.randomize()
+			var line: String = CHAMP_HERO_LINE if not _hero_templates.is_empty() else CHAMP_LINES[rng.randi_range(0, CHAMP_LINES.size() - 1)]
+			_item_name_label.text = ""
+			_desc_label.text      = line
+			_badge_label.text     = "CHAMP"
+			_stats_label.text     = "..."
+			_cost_label.text      = ""
+			_champ_timer.start()
 		PHASE_CANDS:
-			if not _current_cands.is_empty():
-				_cand_index = (_cand_index - 1 + _current_cands.size()) % _current_cands.size()
-				_refresh_cand_display()
+			set_title("TIER %s CANDIDATES" % TIER_NAMES[_selected_tier])
+			_arrow_row.visible  = true
+			_page_label.visible = true
+			_action_btn.visible = true
+			set_items_count(_current_cands.size())
 
-func _on_next_pressed() -> void:
+# ─────────────────────────────────────────
+#  DISPLAY (BaseModal override)
+# ─────────────────────────────────────────
+func _refresh_display() -> void:
+	super._refresh_display()
 	match _phase:
-		PHASE_ADS:
-			_ad_index = (_ad_index + 1) % AD_DATA.size()
-			_refresh_ad_display()
-		PHASE_CANDS:
-			if not _current_cands.is_empty():
-				_cand_index = (_cand_index + 1) % _current_cands.size()
-				_refresh_cand_display()
+		PHASE_ADS:   _refresh_ad_display()
+		PHASE_CANDS: _refresh_cand_display()
 
-# ─────────────────────────────────────────
-#  DISPLAY
-# ─────────────────────────────────────────
 func _refresh_ad_display() -> void:
-	var ad: Dictionary   = AD_DATA[_ad_index]
+	var ad: Dictionary   = AD_DATA[_current_index]
 	var cash: int        = 0
 	if _gm != null:
 		cash = _gm.economy.current_cash
 	var can_afford: bool = cash >= int(ad.get("cost", 0))
 	var tier: int        = int(ad.get("tier", 0))
 	var is_champ: bool   = tier == 5
-	_item_name.text  = ad.get("name", "")
-	_page_label.text = "%d / %d" % [_ad_index + 1, AD_DATA.size()]
-	_desc_label.text = ad.get("desc", "")
+	_item_name_label.text = ad.get("name", "")
+	_desc_label.text      = ad.get("desc", "")
 	if is_champ:
 		_badge_label.text = "TIER %s  GUARANTEED S-TIER" % TIER_NAMES[tier]
 	else:
@@ -166,20 +140,18 @@ func _refresh_ad_display() -> void:
 
 func _refresh_cand_display() -> void:
 	if _current_cands.is_empty():
-		_item_name.text   = "No candidates"
-		_page_label.text  = "0 / 0"
-		_desc_label.text  = ""
-		_badge_label.text = ""
-		_stats_label.text = ""
-		_cost_label.text  = ""
-		_action_btn.disabled = true
+		_item_name_label.text = "No candidates"
+		_desc_label.text      = ""
+		_badge_label.text     = ""
+		_stats_label.text     = ""
+		_cost_label.text      = ""
+		_action_btn.disabled  = true
 		return
-	var emp: Object    = _current_cands[_cand_index]
+	var emp: Object    = _current_cands[_current_index]
 	var is_hero: bool  = _is_hero_candidate(emp)
 	var is_hired: bool = _hired_emps.has(emp)
-	_item_name.text  = emp.full_name()
-	_page_label.text = "%d / %d" % [_cand_index + 1, _current_cands.size()]
-	_desc_label.text = _pers_str(int(emp.personality))
+	_item_name_label.text = emp.full_name()
+	_desc_label.text      = _pers_str(int(emp.personality))
 	var badges: Array[String] = [_role_str(int(emp.role))]
 	if is_hero:
 		badges.append("HERO")
@@ -211,7 +183,7 @@ func _on_action_pressed() -> void:
 func _do_select_ad() -> void:
 	if _gm == null:
 		return
-	var ad: Dictionary = AD_DATA[_ad_index]
+	var ad: Dictionary = AD_DATA[_current_index]
 	var cost: int      = int(ad.get("cost", 0))
 	if not _gm.economy.spend(cost, "Recruitment Ad"):
 		_status_label.text = "Not enough cash!"
@@ -235,23 +207,13 @@ func _do_select_ad() -> void:
 func _do_hire() -> void:
 	if _gm == null or _current_cands.is_empty():
 		return
-	var emp: Object = _current_cands[_cand_index]
+	var emp: Object = _current_cands[_current_index]
 	if _hired_emps.has(emp):
 		return
 	_gm.employees.hire(emp)
 	_gm.broadcast("%s joined the team!" % emp.full_name())
 	_hired_emps.append(emp)
 	_refresh_cand_display()
-
-func _on_close_pressed() -> void:
-	screen_closed.emit()
-	queue_free()
-
-func _on_dimmer_input(event: InputEvent) -> void:
-	if event is InputEventMouseButton:
-		var mb: InputEventMouseButton = event as InputEventMouseButton
-		if mb.pressed and mb.button_index == MOUSE_BUTTON_LEFT:
-			queue_free()
 
 # ─────────────────────────────────────────
 #  SIGNAL HANDLERS

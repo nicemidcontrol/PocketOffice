@@ -93,7 +93,7 @@ grow_vertical = 2
 color = Color(0.0, 0.0, 0.0, 0.55)
 mouse_filter = 0
 
-[node name="Card" type="Panel" parent="."]
+[node name="Card" type="Panel" parent="Dimmer"]
 layout_mode = 3
 anchors_preset = 8
 anchor_left = 0.5
@@ -109,7 +109,7 @@ grow_vertical = 2
 theme_override_styles/panel = SubResource("SBFlat_card")
 mouse_filter = 0
 
-[node name="VBox" type="VBoxContainer" parent="Card"]
+[node name="VBox" type="VBoxContainer" parent="Dimmer/Card"]
 layout_mode = 1
 anchor_right = 1.0
 anchor_bottom = 1.0
@@ -121,12 +121,17 @@ grow_horizontal = 2
 grow_vertical = 2
 theme_override_constants/separation = 6
 
-[node name="TabBar" type="HBoxContainer" parent="Card/VBox"]
+[node name="TitleLabel" type="Label" parent="Dimmer/Card/VBox"]
+layout_mode = 2
+visible = false
+text = ""
+
+[node name="TabBar" type="HBoxContainer" parent="Dimmer/Card/VBox"]
 layout_mode = 2
 size_flags_horizontal = 3
 theme_override_constants/separation = 0
 
-[node name="TrainTab" type="Button" parent="Card/VBox/TabBar"]
+[node name="TrainTab" type="Button" parent="Dimmer/Card/VBox/TabBar"]
 layout_mode = 2
 size_flags_horizontal = 3
 custom_minimum_size = Vector2(0, 36)
@@ -137,7 +142,7 @@ theme_override_styles/hover = SubResource("SBFlat_tab")
 theme_override_styles/pressed = SubResource("SBFlat_tab")
 text = "TRAIN"
 
-[node name="ComboTab" type="Button" parent="Card/VBox/TabBar"]
+[node name="ComboTab" type="Button" parent="Dimmer/Card/VBox/TabBar"]
 layout_mode = 2
 size_flags_horizontal = 3
 custom_minimum_size = Vector2(0, 36)
@@ -148,25 +153,25 @@ theme_override_styles/hover = SubResource("SBFlat_tab")
 theme_override_styles/pressed = SubResource("SBFlat_tab")
 text = "COMBOS"
 
-[node name="SlotArea" type="HBoxContainer" parent="Card/VBox"]
+[node name="SlotArea" type="HBoxContainer" parent="Dimmer/Card/VBox"]
 layout_mode = 2
 size_flags_horizontal = 3
 alignment = 1
 theme_override_constants/separation = 8
 
-[node name="ArrowRow" type="HBoxContainer" parent="Card/VBox"]
+[node name="ArrowRow" type="HBoxContainer" parent="Dimmer/Card/VBox"]
 layout_mode = 2
 size_flags_horizontal = 3
 custom_minimum_size = Vector2(0, 36)
 theme_override_constants/separation = 4
 
-[node name="PrevBtn" type="Button" parent="Card/VBox/ArrowRow"]
+[node name="PrevBtn" type="Button" parent="Dimmer/Card/VBox/ArrowRow"]
 layout_mode = 2
 custom_minimum_size = Vector2(40, 0)
 theme_override_font_sizes/font_size = 18
 text = "<"
 
-[node name="TrainingLabel" type="Label" parent="Card/VBox/ArrowRow"]
+[node name="ItemNameLabel" type="Label" parent="Dimmer/Card/VBox/ArrowRow"]
 layout_mode = 2
 size_flags_horizontal = 3
 theme_override_colors/font_color = Color(0.72, 0.72, 0.82, 1)
@@ -175,37 +180,24 @@ text = "Trainings"
 horizontal_alignment = 1
 vertical_alignment = 1
 
-[node name="NextBtn" type="Button" parent="Card/VBox/ArrowRow"]
+[node name="NextBtn" type="Button" parent="Dimmer/Card/VBox/ArrowRow"]
 layout_mode = 2
 custom_minimum_size = Vector2(40, 0)
 theme_override_font_sizes/font_size = 18
 text = ">"
 
-[node name="ArtworkPanel" type="Panel" parent="Card/VBox"]
+[node name="PageLabel" type="Label" parent="Dimmer/Card/VBox"]
 layout_mode = 2
-size_flags_horizontal = 3
-custom_minimum_size = Vector2(0, 80)
-theme_override_styles/panel = SubResource("SBFlat_art")
+visible = false
+text = ""
 
-[node name="ArtLabel" type="Label" parent="Card/VBox/ArtworkPanel"]
-layout_mode = 1
-anchors_preset = 15
-anchor_right = 1.0
-anchor_bottom = 1.0
-grow_horizontal = 2
-grow_vertical = 2
-text = "[ ART ]"
-horizontal_alignment = 1
-vertical_alignment = 1
-modulate = Color(0.3, 0.3, 0.5, 1.0)
-
-[node name="TrainingCard" type="Panel" parent="Card/VBox"]
+[node name="TrainingCard" type="Panel" parent="Dimmer/Card/VBox"]
 layout_mode = 2
 size_flags_horizontal = 3
 custom_minimum_size = Vector2(0, 90)
 theme_override_styles/panel = SubResource("SBFlat_inner")
 
-[node name="VBox" type="VBoxContainer" parent="Card/VBox/TrainingCard"]
+[node name="VBox" type="VBoxContainer" parent="Dimmer/Card/VBox/TrainingCard"]
 layout_mode = 1
 anchor_right = 1.0
 anchor_bottom = 1.0
@@ -217,28 +209,28 @@ grow_horizontal = 2
 grow_vertical = 2
 theme_override_constants/separation = 3
 
-[node name="TrainingNameLabel" type="Label" parent="Card/VBox/TrainingCard/VBox"]
+[node name="TrainingNameLabel" type="Label" parent="Dimmer/Card/VBox/TrainingCard/VBox"]
 layout_mode = 2
 theme_override_colors/font_color = Color(0.92, 0.92, 0.95, 1)
 theme_override_font_sizes/font_size = 14
 text = "---"
 horizontal_alignment = 1
 
-[node name="TrainingTierCpLabel" type="Label" parent="Card/VBox/TrainingCard/VBox"]
+[node name="TrainingTierCpLabel" type="Label" parent="Dimmer/Card/VBox/TrainingCard/VBox"]
 layout_mode = 2
 theme_override_colors/font_color = Color(1.0, 0.82, 0.1, 1)
 theme_override_font_sizes/font_size = 11
 text = ""
 horizontal_alignment = 1
 
-[node name="TrainingStatsLabel" type="Label" parent="Card/VBox/TrainingCard/VBox"]
+[node name="TrainingStatsLabel" type="Label" parent="Dimmer/Card/VBox/TrainingCard/VBox"]
 layout_mode = 2
 theme_override_colors/font_color = Color(0.72, 0.72, 0.78, 1)
 theme_override_font_sizes/font_size = 11
 text = ""
 horizontal_alignment = 1
 
-[node name="TrainingBonusLabel" type="Label" parent="Card/VBox/TrainingCard/VBox"]
+[node name="TrainingBonusLabel" type="Label" parent="Dimmer/Card/VBox/TrainingCard/VBox"]
 layout_mode = 2
 theme_override_colors/font_color = Color(0.2, 0.85, 0.94, 1)
 theme_override_font_sizes/font_size = 10
@@ -246,7 +238,7 @@ text = ""
 horizontal_alignment = 1
 visible = false
 
-[node name="ComboHintLabel" type="Label" parent="Card/VBox"]
+[node name="ComboHintLabel" type="Label" parent="Dimmer/Card/VBox"]
 layout_mode = 2
 size_flags_horizontal = 3
 theme_override_colors/font_color = Color(1, 0.82, 0.1, 1)
@@ -254,7 +246,7 @@ theme_override_font_sizes/font_size = 11
 text = ""
 horizontal_alignment = 1
 
-[node name="CostLabel" type="Label" parent="Card/VBox"]
+[node name="CostLabel" type="Label" parent="Dimmer/Card/VBox"]
 layout_mode = 2
 size_flags_horizontal = 3
 theme_override_colors/font_color = Color(0.72, 0.72, 0.78, 1)
@@ -262,7 +254,7 @@ theme_override_font_sizes/font_size = 11
 text = "Cost: 0 CP"
 horizontal_alignment = 1
 
-[node name="RunBtn" type="Button" parent="Card/VBox"]
+[node name="RunBtn" type="Button" parent="Dimmer/Card/VBox"]
 layout_mode = 2
 size_flags_horizontal = 3
 custom_minimum_size = Vector2(0, 44)
@@ -274,7 +266,7 @@ theme_override_styles/pressed = SubResource("SBFlat_run")
 text = "START TRAINING"
 disabled = true
 
-[node name="ErrorLabel" type="Label" parent="Card/VBox"]
+[node name="ErrorLabel" type="Label" parent="Dimmer/Card/VBox"]
 layout_mode = 2
 size_flags_horizontal = 3
 text = ""
@@ -284,12 +276,12 @@ visible = false
 theme_override_font_sizes/font_size = 11
 theme_override_colors/font_color = Color(1.0, 0.4, 0.4, 1.0)
 
-[node name="BottomRow" type="HBoxContainer" parent="Card/VBox"]
+[node name="BottomRow" type="HBoxContainer" parent="Dimmer/Card/VBox"]
 layout_mode = 2
 size_flags_horizontal = 3
 theme_override_constants/separation = 8
 
-[node name="BackBtn" type="Button" parent="Card/VBox/BottomRow"]
+[node name="BackBtn" type="Button" parent="Dimmer/Card/VBox/BottomRow"]
 layout_mode = 2
 size_flags_horizontal = 3
 custom_minimum_size = Vector2(0, 40)
@@ -300,11 +292,11 @@ theme_override_styles/hover = SubResource("SBFlat_btm_btn")
 theme_override_styles/pressed = SubResource("SBFlat_btm_btn")
 text = "BACK"
 
-[node name="HSpacer" type="Control" parent="Card/VBox/BottomRow"]
+[node name="HSpacer" type="Control" parent="Dimmer/Card/VBox/BottomRow"]
 layout_mode = 2
 custom_minimum_size = Vector2(12, 0)
 
-[node name="CancelBtn" type="Button" parent="Card/VBox/BottomRow"]
+[node name="CancelBtn" type="Button" parent="Dimmer/Card/VBox/BottomRow"]
 layout_mode = 2
 size_flags_horizontal = 3
 custom_minimum_size = Vector2(0, 40)
@@ -315,16 +307,26 @@ theme_override_styles/hover = SubResource("SBFlat_btm_btn")
 theme_override_styles/pressed = SubResource("SBFlat_btm_btn")
 text = "CANCEL"
 
-[node name="ComboScroll" type="ScrollContainer" parent="Card/VBox"]
+[node name="ComboScroll" type="ScrollContainer" parent="Dimmer/Card/VBox"]
 layout_mode = 2
 size_flags_vertical = 3
 horizontal_scroll_mode = 0
 visible = false
 
-[node name="ComboList" type="VBoxContainer" parent="Card/VBox/ComboScroll"]
+[node name="ComboList" type="VBoxContainer" parent="Dimmer/Card/VBox/ComboScroll"]
 layout_mode = 2
 size_flags_horizontal = 3
 theme_override_constants/separation = 8
+
+[node name="ActionBtn" type="Button" parent="Dimmer/Card/VBox"]
+layout_mode = 2
+visible = false
+text = ""
+
+[node name="CloseBtn" type="Button" parent="Dimmer/Card/VBox"]
+layout_mode = 2
+visible = false
+text = "CLOSE"
 
 [node name="ResultPanel" type="Panel" parent="."]
 layout_mode = 3
