@@ -1,6 +1,4 @@
-extends CanvasLayer
-
-signal screen_closed
+extends "res://scripts/ui/BaseModal.gd"
 
 # ─────────────────────────────────────────
 #  TABS
@@ -11,18 +9,15 @@ const TAB_AVAIL:  int = 1
 # ─────────────────────────────────────────
 #  NODE REFS
 # ─────────────────────────────────────────
-@onready var _cash_label:   Label         = $Card/VBox/CashLabel
-@onready var _item_name:    Label         = $Card/VBox/ArrowRow/ItemNameLabel
-@onready var _page_label:   Label         = $Card/VBox/PageLabel
-@onready var _active_tab:   Button        = $Card/VBox/TabRow/ActiveTab
-@onready var _avail_tab:    Button        = $Card/VBox/TabRow/AvailTab
-@onready var _role_label:   Label         = $Card/VBox/DetailCard/Margin/DetailVBox/RoleLabel
-@onready var _info_label:   Label         = $Card/VBox/DetailCard/Margin/DetailVBox/InfoLabel
-@onready var _reward_label: Label         = $Card/VBox/DetailCard/Margin/DetailVBox/RewardLabel
-@onready var _team_label:   Label         = $Card/VBox/DetailCard/Margin/DetailVBox/TeamLabel
-@onready var _ot_list:      VBoxContainer = $Card/VBox/DetailCard/Margin/DetailVBox/OtList
-@onready var _action_btn:   Button        = $Card/VBox/ActionBtn
-@onready var _status_label: Label         = $Card/VBox/StatusLabel
+@onready var _cash_label:   Label         = $Dimmer/Card/VBox/CashLabel
+@onready var _active_tab:   Button        = $Dimmer/Card/VBox/TabRow/ActiveTab
+@onready var _avail_tab:    Button        = $Dimmer/Card/VBox/TabRow/AvailTab
+@onready var _role_label:   Label         = $Dimmer/Card/VBox/DetailCard/Margin/DetailVBox/RoleLabel
+@onready var _info_label:   Label         = $Dimmer/Card/VBox/DetailCard/Margin/DetailVBox/InfoLabel
+@onready var _reward_label: Label         = $Dimmer/Card/VBox/DetailCard/Margin/DetailVBox/RewardLabel
+@onready var _team_label:   Label         = $Dimmer/Card/VBox/DetailCard/Margin/DetailVBox/TeamLabel
+@onready var _ot_list:      VBoxContainer = $Dimmer/Card/VBox/DetailCard/Margin/DetailVBox/OtList
+@onready var _status_label: Label         = $Dimmer/Card/VBox/StatusLabel
 @onready var _assign_panel: Panel         = $AssignPanel
 @onready var _assign_title: Label         = $AssignPanel/AssignMargin/AssignVBox/AssignTitle
 @onready var _assign_list:  VBoxContainer = $AssignPanel/AssignMargin/AssignVBox/AssignScroll/AssignList
@@ -30,18 +25,17 @@ const TAB_AVAIL:  int = 1
 # ─────────────────────────────────────────
 #  STATE
 # ─────────────────────────────────────────
-var _gm:            Node  = null
-var _tab:           int   = TAB_ACTIVE
-var _projects:      Array = []
-var current_index:  int   = 0
-var _selected_pid:  int   = -1
+var _gm:           Node  = null
+var _tab:          int   = TAB_ACTIVE
+var _projects:     Array = []
+var _selected_pid: int   = -1
 
 # ─────────────────────────────────────────
 #  LIFECYCLE
 # ─────────────────────────────────────────
 func _ready() -> void:
-	process_mode = Node.PROCESS_MODE_ALWAYS
-	$Dimmer.gui_input.connect(_on_dimmer_input)
+	super._ready()
+	set_title("PROJECTS")
 	_gm = get_node_or_null("/root/GameManager")
 	if _gm != null:
 		_gm.economy.cash_changed.connect(_on_cash_changed)
@@ -55,7 +49,7 @@ func _ready() -> void:
 # ─────────────────────────────────────────
 func _on_active_tab() -> void:
 	_tab = TAB_ACTIVE
-	current_index = 0
+	_current_index = 0
 	_status_label.text = ""
 	_active_tab.add_theme_color_override("font_color", Color(0.22, 0.9, 0.42, 1.0))
 	_avail_tab.add_theme_color_override("font_color",  Color(0.6, 0.7, 0.9, 1.0))
@@ -63,7 +57,7 @@ func _on_active_tab() -> void:
 
 func _on_avail_tab() -> void:
 	_tab = TAB_AVAIL
-	current_index = 0
+	_current_index = 0
 	_status_label.text = ""
 	_active_tab.add_theme_color_override("font_color", Color(0.6, 0.7, 0.9, 1.0))
 	_avail_tab.add_theme_color_override("font_color",  Color(0.2, 0.85, 0.94, 1.0))
@@ -76,55 +70,39 @@ func _reload_projects() -> void:
 		_projects = _gm.projects.get_active_projects()
 	else:
 		_projects = _gm.projects.get_available_projects()
-	if not _projects.is_empty() and current_index >= _projects.size():
-		current_index = _projects.size() - 1
-	_refresh_display()
+	if not _projects.is_empty() and _current_index >= _projects.size():
+		_current_index = _projects.size() - 1
+	set_items_count(_projects.size())
 
 # ─────────────────────────────────────────
-#  NAVIGATION
-# ─────────────────────────────────────────
-func _on_prev_pressed() -> void:
-	if _projects.is_empty():
-		return
-	current_index = (current_index - 1 + _projects.size()) % _projects.size()
-	_status_label.text = ""
-	_refresh_display()
-
-func _on_next_pressed() -> void:
-	if _projects.is_empty():
-		return
-	current_index = (current_index + 1) % _projects.size()
-	_status_label.text = ""
-	_refresh_display()
-
-# ─────────────────────────────────────────
-#  DISPLAY
+#  DISPLAY (BaseModal override)
 # ─────────────────────────────────────────
 func _refresh_display() -> void:
+	_status_label.text = ""
 	for child in _ot_list.get_children():
 		child.queue_free()
 
 	if _projects.is_empty():
-		_item_name.text     = "None"
-		_page_label.text    = "0 / 0"
-		_role_label.text    = ""
-		_info_label.text    = "No projects in this category."
-		_reward_label.text  = ""
-		_team_label.text    = ""
-		_action_btn.visible = false
+		_item_name_label.text = "None"
+		_page_label.text      = "0 / 0"
+		_role_label.text      = ""
+		_info_label.text      = "No projects in this category."
+		_reward_label.text    = ""
+		_team_label.text      = ""
+		_action_btn.visible   = false
 		return
 
+	super._refresh_display()
 	_action_btn.visible = true
-	var proj: Dictionary = _projects[current_index]
+	var proj: Dictionary = _projects[_current_index]
 	var role: int        = int(proj.get("required_role", 0))
 
-	_item_name.text    = proj.get("name", "Project")
-	_page_label.text   = "%d / %d" % [current_index + 1, _projects.size()]
-	_role_label.text   = _role_name(role)
-	_reward_label.text = "$%d  +%d CP" % [int(proj.get("reward_cash", 0)), int(proj.get("reward_corp_points", 0))]
+	_item_name_label.text = proj.get("name", "Project")
+	_role_label.text      = _role_name(role)
+	_reward_label.text    = "$%d  +%d CP" % [int(proj.get("reward_cash", 0)), int(proj.get("reward_corp_points", 0))]
 
 	if _tab == TAB_ACTIVE:
-		var progress: float  = float(proj.get("progress", 0.0))
+		var progress: float = float(proj.get("progress", 0.0))
 		_info_label.text = "%d%% complete" % int(progress * 100.0)
 		var ids: Array = proj.get("assigned_employee_ids", [])
 		if ids.is_empty():
@@ -183,7 +161,7 @@ func _build_ot_list(proj: Dictionary) -> void:
 func _on_action_pressed() -> void:
 	if _projects.is_empty() or _gm == null:
 		return
-	var proj: Dictionary = _projects[current_index]
+	var proj: Dictionary = _projects[_current_index]
 	var pid: int         = int(proj.get("id", -1))
 	if _tab == TAB_ACTIVE:
 		_open_assign(pid, proj.get("name", "Project"))
@@ -239,16 +217,6 @@ func _cycle_ot(emp_id: String) -> void:
 			emp.ot_level = (int(emp.ot_level) + 1) % 4
 			_refresh_display()
 			return
-
-func _on_close_pressed() -> void:
-	screen_closed.emit()
-	queue_free()
-
-func _on_dimmer_input(event: InputEvent) -> void:
-	if event is InputEventMouseButton:
-		var mb: InputEventMouseButton = event as InputEventMouseButton
-		if mb.pressed and mb.button_index == MOUSE_BUTTON_LEFT:
-			queue_free()
 
 # ─────────────────────────────────────────
 #  SIGNAL HANDLERS
