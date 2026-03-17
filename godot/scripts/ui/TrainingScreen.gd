@@ -1,31 +1,28 @@
-extends CanvasLayer
+extends "res://scripts/ui/BaseModal.gd"
 
 signal training_done
 
 # -----------------------------------------
-#  NODE REFS
+#  NODE REFS (TrainingScreen-specific)
 # -----------------------------------------
-@onready var _tab_train:        Button          = $Card/VBox/TabBar/TrainTab
-@onready var _tab_combo:        Button          = $Card/VBox/TabBar/ComboTab
-@onready var _slot_hbox:        HBoxContainer   = $Card/VBox/SlotArea
-@onready var _prev_btn:         Button          = $Card/VBox/ArrowRow/PrevBtn
-@onready var _next_btn:         Button          = $Card/VBox/ArrowRow/NextBtn
-@onready var _training_label:   Label           = $Card/VBox/ArrowRow/TrainingLabel
-@onready var _training_name:    Label           = $Card/VBox/TrainingCard/VBox/TrainingNameLabel
-@onready var _training_tier_cp: Label           = $Card/VBox/TrainingCard/VBox/TrainingTierCpLabel
-@onready var _training_stats:   Label           = $Card/VBox/TrainingCard/VBox/TrainingStatsLabel
-@onready var _training_bonus:   Label           = $Card/VBox/TrainingCard/VBox/TrainingBonusLabel
-@onready var _combo_hint:       Label           = $Card/VBox/ComboHintLabel
-@onready var _cost_label:       Label           = $Card/VBox/CostLabel
-@onready var _run_btn:          Button          = $Card/VBox/RunBtn
-@onready var _back_btn:         Button          = $Card/VBox/BottomRow/BackBtn
-@onready var _cancel_btn:       Button          = $Card/VBox/BottomRow/CancelBtn
-@onready var _combo_scroll:     ScrollContainer = $Card/VBox/ComboScroll
-@onready var _combo_list:       VBoxContainer   = $Card/VBox/ComboScroll/ComboList
+@onready var _tab_train:        Button          = $Dimmer/Card/VBox/TabBar/TrainTab
+@onready var _tab_combo:        Button          = $Dimmer/Card/VBox/TabBar/ComboTab
+@onready var _slot_hbox:        HBoxContainer   = $Dimmer/Card/VBox/SlotArea
+@onready var _training_name:    Label           = $Dimmer/Card/VBox/TrainingCard/VBox/TrainingNameLabel
+@onready var _training_tier_cp: Label           = $Dimmer/Card/VBox/TrainingCard/VBox/TrainingTierCpLabel
+@onready var _training_stats:   Label           = $Dimmer/Card/VBox/TrainingCard/VBox/TrainingStatsLabel
+@onready var _training_bonus:   Label           = $Dimmer/Card/VBox/TrainingCard/VBox/TrainingBonusLabel
+@onready var _combo_hint:       Label           = $Dimmer/Card/VBox/ComboHintLabel
+@onready var _cost_label:       Label           = $Dimmer/Card/VBox/CostLabel
+@onready var _run_btn:          Button          = $Dimmer/Card/VBox/RunBtn
+@onready var _back_btn:         Button          = $Dimmer/Card/VBox/BottomRow/BackBtn
+@onready var _cancel_btn:       Button          = $Dimmer/Card/VBox/BottomRow/CancelBtn
+@onready var _combo_scroll:     ScrollContainer = $Dimmer/Card/VBox/ComboScroll
+@onready var _combo_list:       VBoxContainer   = $Dimmer/Card/VBox/ComboScroll/ComboList
 @onready var _result_panel:     Panel           = $ResultPanel
 @onready var _result_label:     Label           = $ResultPanel/Margin/ResultLabel
 @onready var _result_close:     Button          = $ResultPanel/CloseBtn
-@onready var _error_label:      Label           = $Card/VBox/ErrorLabel
+@onready var _error_label:      Label           = $Dimmer/Card/VBox/ErrorLabel
 @onready var _error_timer:      Timer           = $ErrorTimer
 
 # -----------------------------------------
@@ -47,15 +44,14 @@ var _picker_panel: Panel = null
 var _active_slot: int = -1
 
 # Arrow navigation
-var _training_index: int = 0
 var _available_trainings: Array = []
 
 # -----------------------------------------
 #  LIFECYCLE
 # -----------------------------------------
 func _ready() -> void:
-	process_mode = Node.PROCESS_MODE_ALWAYS
-	$Dimmer.gui_input.connect(_on_dimmer_input)
+	super._ready()
+	set_title("TRAIN")
 	await get_tree().process_frame
 	_gm = get_node_or_null("/root/GameManager")
 	_em = get_node_or_null("/root/EmployeeManager")
@@ -70,8 +66,6 @@ func _ready() -> void:
 	_tab_train.pressed.connect(_show_train_tab)
 	_tab_combo.pressed.connect(_show_combo_tab)
 	_run_btn.pressed.connect(_on_run_training)
-	_prev_btn.pressed.connect(_on_prev_training)
-	_next_btn.pressed.connect(_on_next_training)
 	_result_close.pressed.connect(func() -> void: _result_panel.visible = false)
 	_result_panel.visible = false
 	_error_label.visible = false
@@ -83,69 +77,55 @@ func _ready() -> void:
 #  TAB SWITCHING
 # -----------------------------------------
 func _show_train_tab() -> void:
-	$Card/VBox/SlotArea.visible      = true
-	$Card/VBox/ArrowRow.visible      = true
-	$Card/VBox/TrainingCard.visible  = true
-	$Card/VBox/ComboHintLabel.visible = true
-	$Card/VBox/CostLabel.visible     = true
-	$Card/VBox/RunBtn.visible        = true
-	$Card/VBox/ComboScroll.visible   = false
+	_slot_hbox.visible                            = true
+	$Dimmer/Card/VBox/ArrowRow.visible            = true
+	$Dimmer/Card/VBox/TrainingCard.visible        = true
+	_combo_hint.visible                           = true
+	_cost_label.visible                           = true
+	_run_btn.visible                              = true
+	_combo_scroll.visible                         = false
 	_tab_train.add_theme_color_override("font_color", Color(1, 1, 1, 1))
 	_tab_combo.add_theme_color_override("font_color", Color(0.48, 0.48, 0.58, 1))
 	_load_available_trainings()
 	_refresh_training_card()
 
 func _show_combo_tab() -> void:
-	$Card/VBox/SlotArea.visible      = false
-	$Card/VBox/ArrowRow.visible      = false
-	$Card/VBox/TrainingCard.visible  = false
-	$Card/VBox/ComboHintLabel.visible = false
-	$Card/VBox/CostLabel.visible     = false
-	$Card/VBox/RunBtn.visible        = false
-	$Card/VBox/ComboScroll.visible   = true
+	_slot_hbox.visible                            = false
+	$Dimmer/Card/VBox/ArrowRow.visible            = false
+	$Dimmer/Card/VBox/TrainingCard.visible        = false
+	_combo_hint.visible                           = false
+	_cost_label.visible                           = false
+	_run_btn.visible                              = false
+	_combo_scroll.visible                         = true
 	_tab_train.add_theme_color_override("font_color", Color(0.48, 0.48, 0.58, 1))
 	_tab_combo.add_theme_color_override("font_color", Color(1, 1, 1, 1))
 	_build_combo_list()
 
 # -----------------------------------------
-#  ARROW NAVIGATION
+#  ARROW NAVIGATION (via BaseModal _on_prev/_on_next)
 # -----------------------------------------
+func _refresh_display() -> void:
+	_error_label.visible = false
+	if not _available_trainings.is_empty() and _current_index < _available_trainings.size():
+		_selected_training = _available_trainings[_current_index]
+	_refresh_training_card()
+	_refresh_run_btn()
+	_refresh_cost()
+
 func _load_available_trainings() -> void:
 	if _gm == null:
 		_available_trainings = []
 		_selected_training = {}
+		_total_items = 0
 		return
 	_available_trainings = _tm.get_available_trainings(_gm)
+	_total_items = _available_trainings.size()
 	if _available_trainings.is_empty():
 		_selected_training = {}
 		return
-	if _training_index >= _available_trainings.size():
-		_training_index = 0
-	_selected_training = _available_trainings[_training_index]
-
-func _on_prev_training() -> void:
-	_error_label.visible = false
-	if _available_trainings.is_empty():
-		return
-	_training_index -= 1
-	if _training_index < 0:
-		_training_index = _available_trainings.size() - 1
-	_selected_training = _available_trainings[_training_index]
-	_refresh_training_card()
-	_refresh_run_btn()
-	_refresh_cost()
-
-func _on_next_training() -> void:
-	_error_label.visible = false
-	if _available_trainings.is_empty():
-		return
-	_training_index += 1
-	if _training_index >= _available_trainings.size():
-		_training_index = 0
-	_selected_training = _available_trainings[_training_index]
-	_refresh_training_card()
-	_refresh_run_btn()
-	_refresh_cost()
+	if _current_index >= _available_trainings.size():
+		_current_index = 0
+	_selected_training = _available_trainings[_current_index]
 
 func _refresh_training_card() -> void:
 	if _available_trainings.is_empty():
@@ -154,7 +134,7 @@ func _refresh_training_card() -> void:
 		_training_stats.text = ""
 		_training_bonus.visible = false
 		return
-	var t: Dictionary = _available_trainings[_training_index]
+	var t: Dictionary = _available_trainings[_current_index]
 	var tier: int = t.get("tier", 1)
 	match tier:
 		1: _training_name.add_theme_color_override("font_color", Color(0.92, 0.92, 0.95, 1))
@@ -481,7 +461,7 @@ func _on_run_training() -> void:
 	_result_panel.visible = true
 	_selected_employees.clear()
 	_selected_training = {}
-	_training_index = 0
+	_current_index = 0
 	_load_available_trainings()
 	_refresh_training_card()
 	_refresh_slots()
@@ -504,9 +484,3 @@ func _on_back_pressed() -> void:
 
 func _on_cancel_pressed() -> void:
 	queue_free()
-
-func _on_dimmer_input(event: InputEvent) -> void:
-	if event is InputEventMouseButton:
-		var mb: InputEventMouseButton = event as InputEventMouseButton
-		if mb.pressed and mb.button_index == MOUSE_BUTTON_LEFT:
-			queue_free()
