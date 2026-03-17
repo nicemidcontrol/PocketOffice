@@ -1,4 +1,4 @@
-[gd_scene load_steps=7 format=3 uid="uid://btrainscreen01"]
+[gd_scene load_steps=8 format=3 uid="uid://btrainscreen01"]
 
 [ext_resource type="Script" path="res://scripts/ui/TrainingScreen.gd" id="1_tsscript"]
 
@@ -67,6 +67,18 @@ corner_radius_top_right = 8
 corner_radius_bottom_right = 8
 corner_radius_bottom_left = 8
 
+[sub_resource type="StyleBoxFlat" id="SBFlat_art"]
+bg_color = Color(0.08, 0.08, 0.18, 1.0)
+border_width_left = 1
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 1
+border_color = Color(0.18, 0.42, 0.78, 0.4)
+corner_radius_top_left = 6
+corner_radius_top_right = 6
+corner_radius_bottom_right = 6
+corner_radius_bottom_left = 6
+
 [node name="TrainingScreen" type="CanvasLayer"]
 layer = 8
 script = ExtResource("1_tsscript")
@@ -90,8 +102,8 @@ anchor_top = 0.5
 anchor_bottom = 0.5
 offset_left = -175.0
 offset_right = 175.0
-offset_top = -310.0
-offset_bottom = 310.0
+offset_top = -260.0
+offset_bottom = 260.0
 grow_horizontal = 2
 grow_vertical = 2
 theme_override_styles/panel = SubResource("SBFlat_card")

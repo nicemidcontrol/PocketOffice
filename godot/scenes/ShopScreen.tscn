@@ -1,4 +1,4 @@
-[gd_scene load_steps=4 format=3 uid="uid://shopscreen001po"]
+[gd_scene load_steps=5 format=3 uid="uid://shopscreen001po"]
 
 [ext_resource type="Script" path="res://scripts/ui/ShopScreen.gd" id="1_shopscript"]
 
@@ -38,6 +38,18 @@ corner_radius_top_right = 6
 corner_radius_bottom_right = 6
 corner_radius_bottom_left = 6
 
+[sub_resource type="StyleBoxFlat" id="SBFlat_art"]
+bg_color = Color(0.08, 0.08, 0.18, 1.0)
+border_width_left = 1
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 1
+border_color = Color(0.18, 0.42, 0.78, 0.4)
+corner_radius_top_left = 6
+corner_radius_top_right = 6
+corner_radius_bottom_right = 6
+corner_radius_bottom_left = 6
+
 [node name="ShopScreen" type="CanvasLayer"]
 layer = 8
 script = ExtResource("1_shopscript")
@@ -52,7 +64,7 @@ grow_vertical = 2
 color = Color(0.0, 0.0, 0.0, 0.55)
 mouse_filter = 0
 
-[node name="Card" type="Panel" parent="."]
+[node name="Card" type="Panel" parent="Dimmer"]
 layout_mode = 3
 anchors_preset = 8
 anchor_left = 0.5
@@ -61,14 +73,14 @@ anchor_top = 0.5
 anchor_bottom = 0.5
 offset_left = -175.0
 offset_right = 175.0
-offset_top = -320.0
-offset_bottom = 320.0
+offset_top = -260.0
+offset_bottom = 260.0
 grow_horizontal = 2
 grow_vertical = 2
 theme_override_styles/panel = SubResource("SBFlat_card")
 mouse_filter = 0
 
-[node name="VBox" type="VBoxContainer" parent="Card"]
+[node name="VBox" type="VBoxContainer" parent="Dimmer/Card"]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
@@ -81,15 +93,15 @@ grow_horizontal = 2
 grow_vertical = 2
 theme_override_constants/separation = 6
 
-[node name="TitleLabel" type="Label" parent="Card/VBox"]
+[node name="TitleLabel" type="Label" parent="Dimmer/Card/VBox"]
 layout_mode = 2
 size_flags_horizontal = 3
-text = "CHAMP'S CORNER STORE"
+text = "SHOP"
 horizontal_alignment = 1
 theme_override_font_sizes/font_size = 14
 theme_override_colors/font_color = Color(1.0, 0.82, 0.1, 1.0)
 
-[node name="ChampText" type="Label" parent="Card/VBox"]
+[node name="ChampText" type="Label" parent="Dimmer/Card/VBox"]
 layout_mode = 2
 size_flags_horizontal = 3
 text = ""
@@ -98,27 +110,27 @@ autowrap_mode = 3
 theme_override_font_sizes/font_size = 10
 theme_override_colors/font_color = Color(0.62, 0.62, 0.68, 1.0)
 
-[node name="Sep1" type="HSeparator" parent="Card/VBox"]
+[node name="Sep1" type="HSeparator" parent="Dimmer/Card/VBox"]
 layout_mode = 2
 size_flags_horizontal = 3
 
-[node name="ItemSectionLabel" type="Label" parent="Card/VBox"]
+[node name="ItemSectionLabel" type="Label" parent="Dimmer/Card/VBox"]
 layout_mode = 2
 text = "ITEM"
 theme_override_font_sizes/font_size = 9
 theme_override_colors/font_color = Color(0.50, 0.51, 0.62, 1.0)
 
-[node name="ItemArrowRow" type="HBoxContainer" parent="Card/VBox"]
+[node name="ArrowRow" type="HBoxContainer" parent="Dimmer/Card/VBox"]
 layout_mode = 2
 size_flags_horizontal = 3
 theme_override_constants/separation = 4
 
-[node name="ItemPrevBtn" type="Button" parent="Card/VBox/ItemArrowRow"]
+[node name="PrevBtn" type="Button" parent="Dimmer/Card/VBox/ArrowRow"]
 layout_mode = 2
 custom_minimum_size = Vector2(32, 36)
 text = "<"
 
-[node name="ItemNameLabel" type="Label" parent="Card/VBox/ItemArrowRow"]
+[node name="ItemNameLabel" type="Label" parent="Dimmer/Card/VBox/ArrowRow"]
 layout_mode = 2
 size_flags_horizontal = 3
 text = ""
@@ -127,12 +139,35 @@ vertical_alignment = 1
 theme_override_font_sizes/font_size = 14
 theme_override_colors/font_color = Color(0.95, 0.95, 0.98, 1.0)
 
-[node name="ItemNextBtn" type="Button" parent="Card/VBox/ItemArrowRow"]
+[node name="NextBtn" type="Button" parent="Dimmer/Card/VBox/ArrowRow"]
 layout_mode = 2
 custom_minimum_size = Vector2(32, 36)
 text = ">"
 
-[node name="ItemDescLabel" type="Label" parent="Card/VBox"]
+[node name="PageLabel" type="Label" parent="Dimmer/Card/VBox"]
+layout_mode = 2
+visible = false
+text = ""
+
+[node name="ArtworkPanel" type="Panel" parent="Dimmer/Card/VBox"]
+layout_mode = 2
+size_flags_horizontal = 3
+custom_minimum_size = Vector2(0, 80)
+theme_override_styles/panel = SubResource("SBFlat_art")
+
+[node name="ArtLabel" type="Label" parent="Dimmer/Card/VBox/ArtworkPanel"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+text = "[ ART ]"
+horizontal_alignment = 1
+vertical_alignment = 1
+modulate = Color(0.3, 0.3, 0.5, 1.0)
+
+[node name="ItemDescLabel" type="Label" parent="Dimmer/Card/VBox"]
 layout_mode = 2
 size_flags_horizontal = 3
 text = ""
@@ -141,7 +176,7 @@ autowrap_mode = 3
 theme_override_font_sizes/font_size = 10
 theme_override_colors/font_color = Color(0.55, 0.56, 0.67, 1.0)
 
-[node name="ItemCostLabel" type="Label" parent="Card/VBox"]
+[node name="ItemCostLabel" type="Label" parent="Dimmer/Card/VBox"]
 layout_mode = 2
 size_flags_horizontal = 3
 text = ""
@@ -149,7 +184,7 @@ horizontal_alignment = 1
 theme_override_font_sizes/font_size = 12
 theme_override_colors/font_color = Color(1.0, 0.82, 0.1, 1.0)
 
-[node name="ItemStatLabel" type="Label" parent="Card/VBox"]
+[node name="ItemStatLabel" type="Label" parent="Dimmer/Card/VBox"]
 layout_mode = 2
 size_flags_horizontal = 3
 text = ""
@@ -157,27 +192,27 @@ horizontal_alignment = 1
 theme_override_font_sizes/font_size = 12
 theme_override_colors/font_color = Color(0.3, 0.9, 1.0, 1.0)
 
-[node name="Sep2" type="HSeparator" parent="Card/VBox"]
+[node name="Sep2" type="HSeparator" parent="Dimmer/Card/VBox"]
 layout_mode = 2
 size_flags_horizontal = 3
 
-[node name="EmpSectionLabel" type="Label" parent="Card/VBox"]
+[node name="EmpSectionLabel" type="Label" parent="Dimmer/Card/VBox"]
 layout_mode = 2
 text = "EMPLOYEE"
 theme_override_font_sizes/font_size = 9
 theme_override_colors/font_color = Color(0.50, 0.51, 0.62, 1.0)
 
-[node name="EmpArrowRow" type="HBoxContainer" parent="Card/VBox"]
+[node name="EmpArrowRow" type="HBoxContainer" parent="Dimmer/Card/VBox"]
 layout_mode = 2
 size_flags_horizontal = 3
 theme_override_constants/separation = 4
 
-[node name="EmpPrevBtn" type="Button" parent="Card/VBox/EmpArrowRow"]
+[node name="EmpPrevBtn" type="Button" parent="Dimmer/Card/VBox/EmpArrowRow"]
 layout_mode = 2
 custom_minimum_size = Vector2(32, 36)
 text = "<"
 
-[node name="EmpNameLabel" type="Label" parent="Card/VBox/EmpArrowRow"]
+[node name="EmpNameLabel" type="Label" parent="Dimmer/Card/VBox/EmpArrowRow"]
 layout_mode = 2
 size_flags_horizontal = 3
 text = ""
@@ -186,12 +221,12 @@ vertical_alignment = 1
 theme_override_font_sizes/font_size = 13
 theme_override_colors/font_color = Color(0.95, 0.95, 0.98, 1.0)
 
-[node name="EmpNextBtn" type="Button" parent="Card/VBox/EmpArrowRow"]
+[node name="EmpNextBtn" type="Button" parent="Dimmer/Card/VBox/EmpArrowRow"]
 layout_mode = 2
 custom_minimum_size = Vector2(32, 36)
 text = ">"
 
-[node name="EmpStatsLabel" type="Label" parent="Card/VBox"]
+[node name="EmpStatsLabel" type="Label" parent="Dimmer/Card/VBox"]
 layout_mode = 2
 size_flags_horizontal = 3
 text = ""
@@ -199,7 +234,7 @@ horizontal_alignment = 1
 theme_override_font_sizes/font_size = 11
 theme_override_colors/font_color = Color(0.55, 0.56, 0.67, 1.0)
 
-[node name="FeedbackLabel" type="Label" parent="Card/VBox"]
+[node name="FeedbackLabel" type="Label" parent="Dimmer/Card/VBox"]
 layout_mode = 2
 size_flags_horizontal = 3
 text = ""
@@ -208,7 +243,7 @@ autowrap_mode = 3
 theme_override_font_sizes/font_size = 11
 theme_override_colors/font_color = Color(0.22, 0.9, 0.42, 1.0)
 
-[node name="BuyBtn" type="Button" parent="Card/VBox"]
+[node name="ActionBtn" type="Button" parent="Dimmer/Card/VBox"]
 layout_mode = 2
 size_flags_horizontal = 3
 custom_minimum_size = Vector2(0, 40)
@@ -219,35 +254,17 @@ theme_override_styles/normal = SubResource("SBFlat_buy")
 theme_override_styles/hover = SubResource("SBFlat_buy")
 theme_override_styles/pressed = SubResource("SBFlat_buy")
 
-[node name="Sep3" type="HSeparator" parent="Card/VBox"]
+[node name="Sep3" type="HSeparator" parent="Dimmer/Card/VBox"]
 layout_mode = 2
 size_flags_horizontal = 3
 
-[node name="CloseRow" type="HBoxContainer" parent="Card/VBox"]
+[node name="CloseBtn" type="Button" parent="Dimmer/Card/VBox"]
 layout_mode = 2
 size_flags_horizontal = 3
-
-[node name="HSpacer1" type="Control" parent="Card/VBox/CloseRow"]
-layout_mode = 2
-size_flags_horizontal = 3
-
-[node name="CloseBtn" type="Button" parent="Card/VBox/CloseRow"]
-layout_mode = 2
-custom_minimum_size = Vector2(120, 36)
+custom_minimum_size = Vector2(0, 36)
 text = "CLOSE"
 theme_override_font_sizes/font_size = 13
 theme_override_colors/font_color = Color(0.6, 0.7, 0.9, 1.0)
 theme_override_styles/normal = SubResource("SBFlat_close")
 theme_override_styles/hover = SubResource("SBFlat_close")
 theme_override_styles/pressed = SubResource("SBFlat_close")
-
-[node name="HSpacer2" type="Control" parent="Card/VBox/CloseRow"]
-layout_mode = 2
-size_flags_horizontal = 3
-
-[connection signal="pressed" from="Card/VBox/ItemArrowRow/ItemPrevBtn" to="." method="_on_item_prev_pressed"]
-[connection signal="pressed" from="Card/VBox/ItemArrowRow/ItemNextBtn" to="." method="_on_item_next_pressed"]
-[connection signal="pressed" from="Card/VBox/EmpArrowRow/EmpPrevBtn" to="." method="_on_emp_prev_pressed"]
-[connection signal="pressed" from="Card/VBox/EmpArrowRow/EmpNextBtn" to="." method="_on_emp_next_pressed"]
-[connection signal="pressed" from="Card/VBox/BuyBtn" to="." method="_on_buy_pressed"]
-[connection signal="pressed" from="Card/VBox/CloseRow/CloseBtn" to="." method="_on_close_pressed"]

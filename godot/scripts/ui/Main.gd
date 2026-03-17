@@ -25,6 +25,7 @@ func _ready() -> void:
 	_pause_menu.training_requested.connect(_on_training_requested)
 	_notif_panel.process_mode = Node.PROCESS_MODE_ALWAYS
 	_notif_dimmer.process_mode = Node.PROCESS_MODE_ALWAYS
+	_notif_close.process_mode = Node.PROCESS_MODE_ALWAYS
 	_notif_timer.timeout.connect(_on_notif_timer_timeout)
 	_notif_close.pressed.connect(_on_notif_close_pressed)
 	_notif_dimmer.gui_input.connect(_on_notif_dimmer_input)
@@ -166,6 +167,8 @@ func _on_notif_close_pressed() -> void:
 	_notif_panel.visible = false
 	_notif_dimmer.visible = false
 	_notif_timer.stop()
+	_notif_label.remove_theme_color_override("font_color")
+	_notif_panel.remove_theme_stylebox_override("panel")
 	get_tree().paused = false
 
 func _on_notif_dimmer_input(event: InputEvent) -> void:
@@ -191,6 +194,8 @@ func _on_employee_burnout(emp_name: String) -> void:
 	red_style.corner_radius_bottom_left  = 8
 	_notif_panel.add_theme_stylebox_override("panel", red_style)
 	_notif_label.add_theme_color_override("font_color", Color(1.0, 0.35, 0.35, 1.0))
+	_notif_panel.process_mode = Node.PROCESS_MODE_ALWAYS
+	_notif_close.process_mode = Node.PROCESS_MODE_ALWAYS
 	get_tree().paused = true
 	_notif_dimmer.visible = true
 	_notif_panel.visible = true

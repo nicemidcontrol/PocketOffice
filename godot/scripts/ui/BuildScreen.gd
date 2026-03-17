@@ -1,48 +1,36 @@
-extends CanvasLayer
-
-signal screen_closed
+extends "res://scripts/ui/BaseModal.gd"
 
 # ─────────────────────────────────────────
-#  NODE REFS
+#  NODE REFS (BuildScreen-specific)
 # ─────────────────────────────────────────
-@onready var _tab_facilities:  Button = $Card/VBox/TabRow/FacilitiesTab
-@onready var _tab_combos:      Button = $Card/VBox/TabRow/CombosTab
-@onready var _prev_btn:        Button = $Card/VBox/ArrowRow/PrevBtn
-@onready var _next_btn:        Button = $Card/VBox/ArrowRow/NextBtn
-@onready var _item_name_label: Label  = $Card/VBox/ArrowRow/ItemNameLabel
-@onready var _detail_name:     Label  = $Card/VBox/DetailCard/Margin/DetailVBox/DetailTopRow/DetailNameLabel
-@onready var _detail_badge:    Label  = $Card/VBox/DetailCard/Margin/DetailVBox/DetailTopRow/DetailBadgeLabel
-@onready var _detail_desc:     Label  = $Card/VBox/DetailCard/Margin/DetailVBox/DetailDescLabel
-@onready var _detail_stat:     Label  = $Card/VBox/DetailCard/Margin/DetailVBox/DetailStatLabel
-@onready var _detail_cost:     Label  = $Card/VBox/DetailCard/Margin/DetailVBox/DetailCostLabel
-@onready var _action_btn:      Button = $Card/VBox/ActionBtn
-@onready var _close_btn:       Button = $Card/VBox/CloseRow/CloseBtn
+@onready var _tab_facilities:  Button = $Dimmer/Card/VBox/TabRow/FacilitiesTab
+@onready var _tab_combos:      Button = $Dimmer/Card/VBox/TabRow/CombosTab
+@onready var _detail_name:     Label  = $Dimmer/Card/VBox/DetailCard/Margin/DetailVBox/DetailTopRow/DetailNameLabel
+@onready var _detail_badge:    Label  = $Dimmer/Card/VBox/DetailCard/Margin/DetailVBox/DetailTopRow/DetailBadgeLabel
+@onready var _detail_desc:     Label  = $Dimmer/Card/VBox/DetailCard/Margin/DetailVBox/DetailDescLabel
+@onready var _detail_stat:     Label  = $Dimmer/Card/VBox/DetailCard/Margin/DetailVBox/DetailStatLabel
+@onready var _detail_cost:     Label  = $Dimmer/Card/VBox/DetailCard/Margin/DetailVBox/DetailCostLabel
 
 # ─────────────────────────────────────────
 #  STATE
 # ─────────────────────────────────────────
-var _gm:              Node   = null
-var _fm:              Node   = null
-var _facility_index:  int    = 0
-var _combo_index:     int    = 0
-var _active_tab:      String = "facilities"
+var _gm:          Node   = null
+var _fm:          Node   = null
+var _active_tab:  String = "facilities"
 
 # ─────────────────────────────────────────
 #  LIFECYCLE
 # ─────────────────────────────────────────
 func _ready() -> void:
-	process_mode = Node.PROCESS_MODE_ALWAYS
-	$Dimmer.gui_input.connect(_on_dimmer_input)
+	super._ready()
+	set_title("BUILD")
 	_gm = get_node_or_null("/root/GameManager")
 	_fm = get_node_or_null("/root/FacilityManager")
 	if _fm != null:
 		_fm.facilities_updated.connect(_refresh)
 	_tab_facilities.pressed.connect(_on_facilities_tab_pressed)
 	_tab_combos.pressed.connect(_on_combos_tab_pressed)
-	_prev_btn.pressed.connect(_on_prev)
-	_next_btn.pressed.connect(_on_next)
 	_action_btn.pressed.connect(_on_action_btn_pressed)
-	_close_btn.pressed.connect(_on_close_pressed)
 	_show_facilities_tab()
 	_refresh()
 
@@ -51,6 +39,9 @@ func _ready() -> void:
 # ─────────────────────────────────────────
 func _show_facilities_tab() -> void:
 	_active_tab = "facilities"
+	_current_index = 0
+	if _fm != null:
+		_total_items = _fm.facilities.size()
 	_tab_facilities.add_theme_color_override("font_color", Color(1.0, 1.0, 1.0, 1.0))
 	_tab_combos.add_theme_color_override("font_color", Color(0.48, 0.48, 0.58, 1.0))
 	_action_btn.visible = true
@@ -58,40 +49,12 @@ func _show_facilities_tab() -> void:
 
 func _show_combos_tab() -> void:
 	_active_tab = "combos"
+	_current_index = 0
+	if _fm != null:
+		_total_items = _fm.get_combos().size()
 	_tab_combos.add_theme_color_override("font_color", Color(1.0, 1.0, 1.0, 1.0))
 	_tab_facilities.add_theme_color_override("font_color", Color(0.48, 0.48, 0.58, 1.0))
 	_action_btn.visible = false
-	_refresh_display()
-
-# ─────────────────────────────────────────
-#  ARROW NAVIGATION
-# ─────────────────────────────────────────
-func _on_prev() -> void:
-	if _fm == null:
-		return
-	if _active_tab == "facilities":
-		if _fm.facilities.is_empty():
-			return
-		_facility_index = (_facility_index - 1 + _fm.facilities.size()) % _fm.facilities.size()
-	else:
-		var combos: Array = _fm.get_combos()
-		if combos.is_empty():
-			return
-		_combo_index = (_combo_index - 1 + combos.size()) % combos.size()
-	_refresh_display()
-
-func _on_next() -> void:
-	if _fm == null:
-		return
-	if _active_tab == "facilities":
-		if _fm.facilities.is_empty():
-			return
-		_facility_index = (_facility_index + 1) % _fm.facilities.size()
-	else:
-		var combos: Array = _fm.get_combos()
-		if combos.is_empty():
-			return
-		_combo_index = (_combo_index + 1) % combos.size()
 	_refresh_display()
 
 # ─────────────────────────────────────────
@@ -103,7 +66,7 @@ func _refresh_display() -> void:
 	if _active_tab == "facilities":
 		if _fm.facilities.is_empty():
 			return
-		var f: Dictionary = _fm.facilities[_facility_index]
+		var f: Dictionary = _fm.facilities[_current_index]
 		_item_name_label.text = f.get("name", "")
 		_detail_name.text = f.get("name", "")
 		var tw: int = int(f.get("tile_w", 1))
@@ -118,7 +81,7 @@ func _refresh_display() -> void:
 		var combos: Array = _fm.get_combos()
 		if combos.is_empty():
 			return
-		var combo: Dictionary = combos[_combo_index]
+		var combo: Dictionary = combos[_current_index]
 		_item_name_label.text = combo.get("name", "")
 		_detail_name.text = combo.get("name", "")
 		var is_active: bool = _fm.active_combos.has(combo.get("id", ""))
@@ -206,18 +169,14 @@ func _on_action_btn_pressed() -> void:
 		return
 	if _fm.facilities.is_empty():
 		return
-	var f: Dictionary = _fm.facilities[_facility_index]
+	var f: Dictionary = _fm.facilities[_current_index]
 	if not bool(f.get("placed", false)):
 		_fm.place_facility(f.get("id", ""), _gm)
 
 func _refresh() -> void:
+	if _fm != null:
+		if _active_tab == "facilities":
+			_total_items = _fm.facilities.size()
+		else:
+			_total_items = _fm.get_combos().size()
 	_refresh_display()
-
-func _on_close_pressed() -> void:
-	queue_free()
-
-func _on_dimmer_input(event: InputEvent) -> void:
-	if event is InputEventMouseButton:
-		var mb: InputEventMouseButton = event as InputEventMouseButton
-		if mb.pressed and mb.button_index == MOUSE_BUTTON_LEFT:
-			queue_free()

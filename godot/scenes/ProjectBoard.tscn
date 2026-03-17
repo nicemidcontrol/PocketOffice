@@ -14,34 +14,41 @@ corner_radius_top_right = 10
 corner_radius_bottom_right = 10
 corner_radius_bottom_left = 10
 
-[sub_resource type="StyleBoxFlat" id="SBFlat_header"]
-bg_color = Color(0.047, 0.047, 0.11, 0.97)
-border_width_bottom = 2
-border_color = Color(0.18, 0.42, 0.78, 1.0)
-
-[sub_resource type="StyleBoxFlat" id="SBFlat_popup"]
-bg_color = Color(0.06, 0.06, 0.14, 0.98)
-border_width_left = 2
-border_width_top = 2
-border_width_right = 2
-border_width_bottom = 2
-border_color = Color(0.18, 0.42, 0.78, 1.0)
+[sub_resource type="StyleBoxFlat" id="SBFlat_detail"]
+bg_color = Color(0.06, 0.06, 0.15, 1.0)
+border_width_left = 1
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 1
+border_color = Color(0.18, 0.42, 0.78, 0.5)
 corner_radius_top_left = 8
 corner_radius_top_right = 8
 corner_radius_bottom_right = 8
 corner_radius_bottom_left = 8
 
-[sub_resource type="StyleBoxFlat" id="SBFlat_btn_back"]
+[sub_resource type="StyleBoxFlat" id="SBFlat_art"]
 bg_color = Color(0.08, 0.08, 0.18, 1.0)
 border_width_left = 1
 border_width_top = 1
 border_width_right = 1
 border_width_bottom = 1
-border_color = Color(0.18, 0.42, 0.78, 0.7)
-corner_radius_top_left = 4
-corner_radius_top_right = 4
-corner_radius_bottom_right = 4
-corner_radius_bottom_left = 4
+border_color = Color(0.18, 0.42, 0.78, 0.4)
+corner_radius_top_left = 6
+corner_radius_top_right = 6
+corner_radius_bottom_right = 6
+corner_radius_bottom_left = 6
+
+[sub_resource type="StyleBoxFlat" id="SBFlat_assign"]
+bg_color = Color(0.05, 0.05, 0.13, 0.98)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(0.18, 0.42, 0.78, 1.0)
+corner_radius_top_left = 10
+corner_radius_top_right = 10
+corner_radius_bottom_right = 10
+corner_radius_bottom_left = 10
 
 [node name="ProjectBoard" type="CanvasLayer"]
 layer = 8
@@ -55,6 +62,7 @@ anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
 color = Color(0.0, 0.0, 0.0, 0.55)
+mouse_filter = 0
 
 [node name="Card" type="Panel" parent="."]
 layout_mode = 3
@@ -63,151 +71,281 @@ anchor_left = 0.5
 anchor_right = 0.5
 anchor_top = 0.5
 anchor_bottom = 0.5
-offset_left = -185.0
-offset_right = 185.0
-offset_top = -320.0
-offset_bottom = 320.0
+offset_left = -175.0
+offset_right = 175.0
+offset_top = -260.0
+offset_bottom = 260.0
 grow_horizontal = 2
 grow_vertical = 2
 theme_override_styles/panel = SubResource("SBFlat_card")
+mouse_filter = 0
 
-[node name="Header" type="Panel" parent="Card"]
-anchors_preset = 10
-anchor_right = 1.0
-offset_bottom = 56.0
-grow_horizontal = 2
-theme_override_styles/panel = SubResource("SBFlat_header")
-
-[node name="HdrMargin" type="MarginContainer" parent="Card/Header"]
+[node name="VBox" type="VBoxContainer" parent="Card"]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
+offset_left = 10.0
+offset_top = 10.0
+offset_right = -10.0
+offset_bottom = -10.0
 grow_horizontal = 2
 grow_vertical = 2
-theme_override_constants/margin_left = 12
-theme_override_constants/margin_top = 8
-theme_override_constants/margin_right = 12
-theme_override_constants/margin_bottom = 8
+theme_override_constants/separation = 6
 
-[node name="HdrHBox" type="HBoxContainer" parent="Card/Header/HdrMargin"]
-layout_mode = 2
-theme_override_constants/separation = 8
-
-[node name="BackBtn" type="Button" parent="Card/Header/HdrMargin/HdrHBox"]
-layout_mode = 2
-custom_minimum_size = Vector2(72, 0)
-text = "< BACK"
-theme_override_colors/font_color = Color(0.92, 0.92, 0.95, 1.0)
-theme_override_font_sizes/font_size = 12
-theme_override_styles/normal = SubResource("SBFlat_btn_back")
-theme_override_styles/hover = SubResource("SBFlat_btn_back")
-theme_override_styles/pressed = SubResource("SBFlat_btn_back")
-
-[node name="TitleLabel" type="Label" parent="Card/Header/HdrMargin/HdrHBox"]
+[node name="TitleLabel" type="Label" parent="Card/VBox"]
 layout_mode = 2
 size_flags_horizontal = 3
 text = "PROJECTS"
 horizontal_alignment = 1
-theme_override_colors/font_color = Color(0.92, 0.92, 0.95, 1.0)
-theme_override_font_sizes/font_size = 16
+theme_override_font_sizes/font_size = 15
+theme_override_colors/font_color = Color(0.95, 0.95, 0.98, 1.0)
 
-[node name="CashLabel" type="Label" parent="Card/Header/HdrMargin/HdrHBox"]
+[node name="CashLabel" type="Label" parent="Card/VBox"]
 layout_mode = 2
-custom_minimum_size = Vector2(72, 0)
+size_flags_horizontal = 3
 text = "$0"
-horizontal_alignment = 2
-theme_override_colors/font_color = Color(0.22, 0.9, 0.42, 1.0)
+horizontal_alignment = 1
 theme_override_font_sizes/font_size = 13
-
-[node name="Body" type="ScrollContainer" parent="Card"]
-anchors_preset = 15
-anchor_right = 1.0
-anchor_bottom = 1.0
-offset_top = 56.0
-offset_bottom = -8.0
-grow_horizontal = 2
-grow_vertical = 2
-
-[node name="BodyMargin" type="MarginContainer" parent="Card/Body"]
-layout_mode = 2
-size_flags_horizontal = 3
-theme_override_constants/margin_left = 12
-theme_override_constants/margin_top = 10
-theme_override_constants/margin_right = 12
-theme_override_constants/margin_bottom = 10
-
-[node name="BodyVBox" type="VBoxContainer" parent="Card/Body/BodyMargin"]
-layout_mode = 2
-size_flags_horizontal = 3
-theme_override_constants/separation = 12
-
-[node name="ActiveHeader" type="Label" parent="Card/Body/BodyMargin/BodyVBox"]
-layout_mode = 2
-text = "ACTIVE PROJECTS"
 theme_override_colors/font_color = Color(0.22, 0.9, 0.42, 1.0)
-theme_override_font_sizes/font_size = 11
 
-[node name="ActiveList" type="VBoxContainer" parent="Card/Body/BodyMargin/BodyVBox"]
+[node name="Sep1" type="HSeparator" parent="Card/VBox"]
 layout_mode = 2
 size_flags_horizontal = 3
-theme_override_constants/separation = 8
 
-[node name="AvailHeader" type="Label" parent="Card/Body/BodyMargin/BodyVBox"]
-layout_mode = 2
-text = "AVAILABLE PROJECTS"
-theme_override_colors/font_color = Color(0.2, 0.85, 0.94, 1.0)
-theme_override_font_sizes/font_size = 11
-
-[node name="AvailList" type="VBoxContainer" parent="Card/Body/BodyMargin/BodyVBox"]
-layout_mode = 2
-size_flags_horizontal = 3
-theme_override_constants/separation = 8
-
-[node name="AssignPopup" type="Panel" parent="Card"]
-anchor_left = 0.05
-anchor_top = 0.1
-anchor_right = 0.95
-anchor_bottom = 0.9
-visible = false
-theme_override_styles/panel = SubResource("SBFlat_popup")
-
-[node name="PopupVBox" type="VBoxContainer" parent="Card/AssignPopup"]
-layout_mode = 1
-anchors_preset = 15
-anchor_right = 1.0
-anchor_bottom = 1.0
-offset_left = 16.0
-offset_top = 16.0
-offset_right = -16.0
-offset_bottom = -16.0
-theme_override_constants/separation = 12
-
-[node name="PopupTitle" type="Label" parent="Card/AssignPopup/PopupVBox"]
-layout_mode = 2
-text = "Assign Employee"
-theme_override_colors/font_color = Color(0.92, 0.92, 0.95, 1.0)
-theme_override_font_sizes/font_size = 14
-
-[node name="PopupScroll" type="ScrollContainer" parent="Card/AssignPopup/PopupVBox"]
-layout_mode = 2
-size_flags_horizontal = 3
-size_flags_vertical = 3
-custom_minimum_size = Vector2(0, 80)
-
-[node name="PopupList" type="VBoxContainer" parent="Card/AssignPopup/PopupVBox/PopupScroll"]
+[node name="TabRow" type="HBoxContainer" parent="Card/VBox"]
 layout_mode = 2
 size_flags_horizontal = 3
 theme_override_constants/separation = 4
 
-[node name="PopupClose" type="Button" parent="Card/AssignPopup/PopupVBox"]
+[node name="ActiveTab" type="Button" parent="Card/VBox/TabRow"]
 layout_mode = 2
-text = "CLOSE"
-theme_override_colors/font_color = Color(0.92, 0.92, 0.95, 1.0)
+size_flags_horizontal = 3
+text = "ACTIVE"
 theme_override_font_sizes/font_size = 12
-theme_override_styles/normal = SubResource("SBFlat_btn_back")
-theme_override_styles/hover = SubResource("SBFlat_btn_back")
-theme_override_styles/pressed = SubResource("SBFlat_btn_back")
+theme_override_colors/font_color = Color(0.22, 0.9, 0.42, 1.0)
 
-[connection signal="pressed" from="Card/Header/HdrMargin/HdrHBox/BackBtn" to="." method="_on_back_pressed"]
-[connection signal="pressed" from="Card/AssignPopup/PopupVBox/PopupClose" to="." method="_on_popup_close_pressed"]
+[node name="AvailTab" type="Button" parent="Card/VBox/TabRow"]
+layout_mode = 2
+size_flags_horizontal = 3
+text = "AVAILABLE"
+theme_override_font_sizes/font_size = 12
+theme_override_colors/font_color = Color(0.6, 0.7, 0.9, 1.0)
+
+[node name="Sep2" type="HSeparator" parent="Card/VBox"]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="ArrowRow" type="HBoxContainer" parent="Card/VBox"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/separation = 4
+
+[node name="PrevBtn" type="Button" parent="Card/VBox/ArrowRow"]
+layout_mode = 2
+custom_minimum_size = Vector2(36, 36)
+text = "<"
+
+[node name="ItemNameLabel" type="Label" parent="Card/VBox/ArrowRow"]
+layout_mode = 2
+size_flags_horizontal = 3
+text = ""
+horizontal_alignment = 1
+vertical_alignment = 1
+theme_override_font_sizes/font_size = 13
+theme_override_colors/font_color = Color(0.95, 0.95, 0.98, 1.0)
+
+[node name="NextBtn" type="Button" parent="Card/VBox/ArrowRow"]
+layout_mode = 2
+custom_minimum_size = Vector2(36, 36)
+text = ">"
+
+[node name="PageLabel" type="Label" parent="Card/VBox"]
+layout_mode = 2
+size_flags_horizontal = 3
+text = "0 / 0"
+horizontal_alignment = 1
+theme_override_font_sizes/font_size = 11
+theme_override_colors/font_color = Color(0.5, 0.5, 0.6, 1.0)
+
+[node name="ArtworkPanel" type="Panel" parent="Card/VBox"]
+layout_mode = 2
+size_flags_horizontal = 3
+custom_minimum_size = Vector2(0, 80)
+theme_override_styles/panel = SubResource("SBFlat_art")
+
+[node name="ArtLabel" type="Label" parent="Card/VBox/ArtworkPanel"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+text = "[ ART ]"
+horizontal_alignment = 1
+vertical_alignment = 1
+modulate = Color(0.3, 0.3, 0.5, 1.0)
+
+[node name="DetailCard" type="Panel" parent="Card/VBox"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+theme_override_styles/panel = SubResource("SBFlat_detail")
+
+[node name="Margin" type="MarginContainer" parent="Card/VBox/DetailCard"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/margin_left = 10
+theme_override_constants/margin_top = 10
+theme_override_constants/margin_right = 10
+theme_override_constants/margin_bottom = 10
+
+[node name="DetailVBox" type="VBoxContainer" parent="Card/VBox/DetailCard/Margin"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/separation = 5
+
+[node name="RoleLabel" type="Label" parent="Card/VBox/DetailCard/Margin/DetailVBox"]
+layout_mode = 2
+size_flags_horizontal = 3
+text = ""
+theme_override_font_sizes/font_size = 12
+theme_override_colors/font_color = Color(0.4, 0.8, 1.0, 1.0)
+
+[node name="InfoLabel" type="Label" parent="Card/VBox/DetailCard/Margin/DetailVBox"]
+layout_mode = 2
+size_flags_horizontal = 3
+text = ""
+theme_override_font_sizes/font_size = 12
+theme_override_colors/font_color = Color(0.75, 0.75, 0.85, 1.0)
+
+[node name="RewardLabel" type="Label" parent="Card/VBox/DetailCard/Margin/DetailVBox"]
+layout_mode = 2
+size_flags_horizontal = 3
+text = ""
+theme_override_font_sizes/font_size = 13
+theme_override_colors/font_color = Color(1.0, 0.82, 0.2, 1.0)
+
+[node name="TeamLabel" type="Label" parent="Card/VBox/DetailCard/Margin/DetailVBox"]
+layout_mode = 2
+size_flags_horizontal = 3
+text = ""
+autowrap_mode = 3
+theme_override_font_sizes/font_size = 11
+theme_override_colors/font_color = Color(0.22, 0.9, 0.42, 1.0)
+
+[node name="OtList" type="VBoxContainer" parent="Card/VBox/DetailCard/Margin/DetailVBox"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/separation = 3
+
+[node name="ActionBtn" type="Button" parent="Card/VBox"]
+layout_mode = 2
+size_flags_horizontal = 3
+custom_minimum_size = Vector2(0, 36)
+text = "ASSIGN"
+theme_override_font_sizes/font_size = 13
+theme_override_colors/font_color = Color(0.4, 0.8, 1.0, 1.0)
+
+[node name="StatusLabel" type="Label" parent="Card/VBox"]
+layout_mode = 2
+size_flags_horizontal = 3
+text = ""
+horizontal_alignment = 1
+theme_override_font_sizes/font_size = 11
+theme_override_colors/font_color = Color(0.3, 1.0, 0.4, 1.0)
+
+[node name="Sep3" type="HSeparator" parent="Card/VBox"]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="CloseRow" type="HBoxContainer" parent="Card/VBox"]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="HSpacer1" type="Control" parent="Card/VBox/CloseRow"]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="CloseBtn" type="Button" parent="Card/VBox/CloseRow"]
+layout_mode = 2
+custom_minimum_size = Vector2(120, 36)
+text = "CLOSE"
+theme_override_font_sizes/font_size = 13
+theme_override_colors/font_color = Color(0.6, 0.7, 0.9, 1.0)
+
+[node name="HSpacer2" type="Control" parent="Card/VBox/CloseRow"]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="AssignPanel" type="Panel" parent="."]
+layout_mode = 3
+anchors_preset = 8
+anchor_left = 0.5
+anchor_right = 0.5
+anchor_top = 0.5
+anchor_bottom = 0.5
+offset_left = -165.0
+offset_right = 165.0
+offset_top = -240.0
+offset_bottom = 240.0
+grow_horizontal = 2
+grow_vertical = 2
+visible = false
+theme_override_styles/panel = SubResource("SBFlat_assign")
+
+[node name="AssignMargin" type="MarginContainer" parent="AssignPanel"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/margin_left = 14
+theme_override_constants/margin_top = 14
+theme_override_constants/margin_right = 14
+theme_override_constants/margin_bottom = 14
+
+[node name="AssignVBox" type="VBoxContainer" parent="AssignPanel/AssignMargin"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/separation = 10
+
+[node name="AssignTitle" type="Label" parent="AssignPanel/AssignMargin/AssignVBox"]
+layout_mode = 2
+size_flags_horizontal = 3
+text = "Assign Employee"
+horizontal_alignment = 1
+theme_override_font_sizes/font_size = 14
+theme_override_colors/font_color = Color(0.95, 0.95, 0.98, 1.0)
+
+[node name="AssignScroll" type="ScrollContainer" parent="AssignPanel/AssignMargin/AssignVBox"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+horizontal_scroll_mode = 0
+
+[node name="AssignList" type="VBoxContainer" parent="AssignPanel/AssignMargin/AssignVBox/AssignScroll"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/separation = 4
+
+[node name="AssignClose" type="Button" parent="AssignPanel/AssignMargin/AssignVBox"]
+layout_mode = 2
+size_flags_horizontal = 3
+custom_minimum_size = Vector2(0, 34)
+text = "CANCEL"
+theme_override_font_sizes/font_size = 12
+theme_override_colors/font_color = Color(0.6, 0.7, 0.9, 1.0)
+
+[connection signal="pressed" from="Card/VBox/TabRow/ActiveTab" to="." method="_on_active_tab"]
+[connection signal="pressed" from="Card/VBox/TabRow/AvailTab" to="." method="_on_avail_tab"]
+[connection signal="pressed" from="Card/VBox/ArrowRow/PrevBtn" to="." method="_on_prev_pressed"]
+[connection signal="pressed" from="Card/VBox/ArrowRow/NextBtn" to="." method="_on_next_pressed"]
+[connection signal="pressed" from="Card/VBox/ActionBtn" to="." method="_on_action_pressed"]
+[connection signal="pressed" from="Card/VBox/CloseRow/CloseBtn" to="." method="_on_close_pressed"]
+[connection signal="pressed" from="AssignPanel/AssignMargin/AssignVBox/AssignClose" to="." method="_on_assign_close_pressed"]
