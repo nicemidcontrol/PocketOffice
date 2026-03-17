@@ -49,7 +49,7 @@ grow_vertical = 2
 color = Color(0.0, 0.0, 0.0, 0.55)
 mouse_filter = 0
 
-[node name="Card" type="Panel" parent="."]
+[node name="Card" type="Panel" parent="Dimmer"]
 layout_mode = 3
 anchors_preset = 8
 anchor_left = 0.5
@@ -65,24 +65,24 @@ grow_vertical = 2
 theme_override_styles/panel = SubResource("SBFlat_card")
 mouse_filter = 0
 
-[node name="Header" type="PanelContainer" parent="Card"]
+[node name="Header" type="PanelContainer" parent="Dimmer/Card"]
 layout_mode = 1
 anchor_right = 1.0
 offset_bottom = 56.0
 grow_horizontal = 2
 
-[node name="HBox" type="HBoxContainer" parent="Card/Header"]
+[node name="HBox" type="HBoxContainer" parent="Dimmer/Card/Header"]
 layout_mode = 2
 theme_override_constants/separation = 8
 
-[node name="BackBtn" type="Button" parent="Card/Header/HBox"]
+[node name="BackBtn" type="Button" parent="Dimmer/Card/Header/HBox"]
 layout_mode = 2
 custom_minimum_size = Vector2(72, 0)
 text = "< BACK"
 theme_override_colors/font_color = Color(0.6, 0.8, 1.0, 1.0)
 theme_override_font_sizes/font_size = 13
 
-[node name="TitleLabel" type="Label" parent="Card/Header/HBox"]
+[node name="TitleLabel" type="Label" parent="Dimmer/Card/Header/HBox"]
 layout_mode = 2
 size_flags_horizontal = 3
 text = "YEAR 1 EVALUATION"
@@ -90,11 +90,11 @@ horizontal_alignment = 1
 theme_override_colors/font_color = Color(1.0, 0.82, 0.2, 1.0)
 theme_override_font_sizes/font_size = 17
 
-[node name="Spacer" type="Control" parent="Card/Header/HBox"]
+[node name="Spacer" type="Control" parent="Dimmer/Card/Header/HBox"]
 layout_mode = 2
 custom_minimum_size = Vector2(72, 0)
 
-[node name="ArtworkPanel" type="Panel" parent="Card"]
+[node name="ArtworkPanel" type="Panel" parent="Dimmer/Card"]
 layout_mode = 1
 anchor_right = 1.0
 offset_top = 60.0
@@ -103,7 +103,7 @@ grow_horizontal = 2
 grow_vertical = 0
 theme_override_styles/panel = SubResource("SBFlat_art")
 
-[node name="ArtLabel" type="Label" parent="Card/ArtworkPanel"]
+[node name="ArtLabel" type="Label" parent="Dimmer/Card/ArtworkPanel"]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
@@ -115,7 +115,7 @@ horizontal_alignment = 1
 vertical_alignment = 1
 modulate = Color(0.3, 0.3, 0.5, 1.0)
 
-[node name="Body" type="ScrollContainer" parent="Card"]
+[node name="Body" type="ScrollContainer" parent="Dimmer/Card"]
 layout_mode = 1
 anchor_right = 1.0
 anchor_bottom = 1.0
@@ -124,7 +124,7 @@ offset_bottom = -64.0
 grow_horizontal = 2
 grow_vertical = 2
 
-[node name="BodyMargin" type="MarginContainer" parent="Card/Body"]
+[node name="BodyMargin" type="MarginContainer" parent="Dimmer/Card/Body"]
 layout_mode = 2
 size_flags_horizontal = 3
 theme_override_constants/margin_left = 16
@@ -132,12 +132,12 @@ theme_override_constants/margin_right = 16
 theme_override_constants/margin_top = 12
 theme_override_constants/margin_bottom = 12
 
-[node name="BodyVBox" type="VBoxContainer" parent="Card/Body/BodyMargin"]
+[node name="BodyVBox" type="VBoxContainer" parent="Dimmer/Card/Body/BodyMargin"]
 layout_mode = 2
 size_flags_horizontal = 3
 theme_override_constants/separation = 12
 
-[node name="FooterBar" type="PanelContainer" parent="Card"]
+[node name="FooterBar" type="PanelContainer" parent="Dimmer/Card"]
 layout_mode = 1
 anchor_top = 1.0
 anchor_right = 1.0
@@ -147,7 +147,7 @@ grow_horizontal = 2
 grow_vertical = 0
 theme_override_styles/panel = SubResource("SBFlat_footer")
 
-[node name="FooterBtn" type="Button" parent="Card/FooterBar"]
+[node name="FooterBtn" type="Button" parent="Dimmer/Card/FooterBar"]
 layout_mode = 2
 size_flags_horizontal = 3
 custom_minimum_size = Vector2(0, 44)
@@ -155,7 +155,7 @@ text = "CONTINUE"
 theme_override_colors/font_color = Color(1.0, 0.82, 0.2, 1.0)
 theme_override_font_sizes/font_size = 16
 
-[node name="WinLosePanel" type="Control" parent="Card"]
+[node name="WinLosePanel" type="Control" parent="Dimmer/Card"]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
@@ -164,7 +164,7 @@ grow_horizontal = 2
 grow_vertical = 2
 visible = false
 
-[node name="WinLoseBG" type="ColorRect" parent="Card/WinLosePanel"]
+[node name="WinLoseBG" type="ColorRect" parent="Dimmer/Card/WinLosePanel"]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
@@ -173,7 +173,7 @@ grow_horizontal = 2
 grow_vertical = 2
 color = Color(0.02, 0.02, 0.08, 0.96)
 
-[node name="WinLoseMargin" type="MarginContainer" parent="Card/WinLosePanel"]
+[node name="WinLoseMargin" type="MarginContainer" parent="Dimmer/Card/WinLosePanel"]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
@@ -185,22 +185,22 @@ theme_override_constants/margin_right = 24
 theme_override_constants/margin_top = 100
 theme_override_constants/margin_bottom = 40
 
-[node name="WinLoseScroll" type="ScrollContainer" parent="Card/WinLosePanel/WinLoseMargin"]
+[node name="WinLoseScroll" type="ScrollContainer" parent="Dimmer/Card/WinLosePanel/WinLoseMargin"]
 layout_mode = 2
 
-[node name="WinLoseVBox" type="VBoxContainer" parent="Card/WinLosePanel/WinLoseMargin/WinLoseScroll"]
+[node name="WinLoseVBox" type="VBoxContainer" parent="Dimmer/Card/WinLosePanel/WinLoseMargin/WinLoseScroll"]
 layout_mode = 2
 size_flags_horizontal = 3
 theme_override_constants/separation = 16
 
-[node name="WinLoseTitle" type="Label" parent="Card/WinLosePanel/WinLoseMargin/WinLoseScroll/WinLoseVBox"]
+[node name="WinLoseTitle" type="Label" parent="Dimmer/Card/WinLosePanel/WinLoseMargin/WinLoseScroll/WinLoseVBox"]
 layout_mode = 2
 text = "RESULTS"
 horizontal_alignment = 1
 theme_override_colors/font_color = Color(1.0, 0.84, 0.0, 1.0)
 theme_override_font_sizes/font_size = 28
 
-[node name="WinLoseSubtitle" type="Label" parent="Card/WinLosePanel/WinLoseMargin/WinLoseScroll/WinLoseVBox"]
+[node name="WinLoseSubtitle" type="Label" parent="Dimmer/Card/WinLosePanel/WinLoseMargin/WinLoseScroll/WinLoseVBox"]
 layout_mode = 2
 text = ""
 horizontal_alignment = 1
@@ -208,14 +208,14 @@ autowrap_mode = 3
 theme_override_colors/font_color = Color(0.75, 0.75, 0.75, 1.0)
 theme_override_font_sizes/font_size = 14
 
-[node name="WinLoseSep" type="HSeparator" parent="Card/WinLosePanel/WinLoseMargin/WinLoseScroll/WinLoseVBox"]
+[node name="WinLoseSep" type="HSeparator" parent="Dimmer/Card/WinLosePanel/WinLoseMargin/WinLoseScroll/WinLoseVBox"]
 layout_mode = 2
 
-[node name="FinalRankList" type="VBoxContainer" parent="Card/WinLosePanel/WinLoseMargin/WinLoseScroll/WinLoseVBox"]
+[node name="FinalRankList" type="VBoxContainer" parent="Dimmer/Card/WinLosePanel/WinLoseMargin/WinLoseScroll/WinLoseVBox"]
 layout_mode = 2
 theme_override_constants/separation = 8
 
-[node name="PlayAgainBtn" type="Button" parent="Card/WinLosePanel/WinLoseMargin/WinLoseScroll/WinLoseVBox"]
+[node name="PlayAgainBtn" type="Button" parent="Dimmer/Card/WinLosePanel/WinLoseMargin/WinLoseScroll/WinLoseVBox"]
 layout_mode = 2
 size_flags_horizontal = 3
 custom_minimum_size = Vector2(0, 44)
@@ -223,6 +223,41 @@ text = "BACK TO MENU"
 theme_override_colors/font_color = Color(0.3, 0.7, 1.0, 1.0)
 theme_override_font_sizes/font_size = 15
 
-[connection signal="pressed" from="Card/Header/HBox/BackBtn" to="." method="_on_back_pressed"]
-[connection signal="pressed" from="Card/FooterBar/FooterBtn" to="." method="_on_footer_btn_pressed"]
-[connection signal="pressed" from="Card/WinLosePanel/WinLoseMargin/WinLoseScroll/WinLoseVBox/PlayAgainBtn" to="." method="_on_play_again_pressed"]
+[node name="VBox" type="VBoxContainer" parent="Dimmer/Card"]
+layout_mode = 1
+visible = false
+
+[node name="TitleLabel" type="Label" parent="Dimmer/Card/VBox"]
+layout_mode = 2
+text = ""
+
+[node name="ArrowRow" type="HBoxContainer" parent="Dimmer/Card/VBox"]
+layout_mode = 2
+
+[node name="PrevBtn" type="Button" parent="Dimmer/Card/VBox/ArrowRow"]
+layout_mode = 2
+text = "<"
+
+[node name="ItemNameLabel" type="Label" parent="Dimmer/Card/VBox/ArrowRow"]
+layout_mode = 2
+text = ""
+
+[node name="NextBtn" type="Button" parent="Dimmer/Card/VBox/ArrowRow"]
+layout_mode = 2
+text = ">"
+
+[node name="PageLabel" type="Label" parent="Dimmer/Card/VBox"]
+layout_mode = 2
+text = ""
+
+[node name="ActionBtn" type="Button" parent="Dimmer/Card/VBox"]
+layout_mode = 2
+text = ""
+
+[node name="CloseBtn" type="Button" parent="Dimmer/Card/VBox"]
+layout_mode = 2
+text = ""
+
+[connection signal="pressed" from="Dimmer/Card/Header/HBox/BackBtn" to="." method="_on_back_pressed"]
+[connection signal="pressed" from="Dimmer/Card/FooterBar/FooterBtn" to="." method="_on_footer_btn_pressed"]
+[connection signal="pressed" from="Dimmer/Card/WinLosePanel/WinLoseMargin/WinLoseScroll/WinLoseVBox/PlayAgainBtn" to="." method="_on_play_again_pressed"]
