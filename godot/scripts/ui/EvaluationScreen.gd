@@ -1,16 +1,14 @@
-extends CanvasLayer
+extends "res://scripts/ui/BaseModal.gd"
 
-signal screen_closed
-
-@onready var _back_btn:    Button        = $Card/Header/HBox/BackBtn
-@onready var _title_lbl:   Label         = $Card/Header/HBox/TitleLabel
-@onready var _body_vbox:   VBoxContainer = $Card/Body/BodyMargin/BodyVBox
-@onready var _footer_btn:  Button        = $Card/FooterBar/FooterBtn
-@onready var _win_panel:   Control       = $Card/WinLosePanel
-@onready var _win_title:   Label         = $Card/WinLosePanel/WinLoseMargin/WinLoseScroll/WinLoseVBox/WinLoseTitle
-@onready var _win_sub:     Label         = $Card/WinLosePanel/WinLoseMargin/WinLoseScroll/WinLoseVBox/WinLoseSubtitle
-@onready var _final_ranks: VBoxContainer = $Card/WinLosePanel/WinLoseMargin/WinLoseScroll/WinLoseVBox/FinalRankList
-@onready var _play_again:  Button        = $Card/WinLosePanel/WinLoseMargin/WinLoseScroll/WinLoseVBox/PlayAgainBtn
+@onready var _screen_title: Label         = $Dimmer/Card/Header/HBox/TitleLabel
+@onready var _back_btn:     Button        = $Dimmer/Card/Header/HBox/BackBtn
+@onready var _body_vbox:    VBoxContainer = $Dimmer/Card/Body/BodyMargin/BodyVBox
+@onready var _footer_btn:   Button        = $Dimmer/Card/FooterBar/FooterBtn
+@onready var _win_panel:    Control       = $Dimmer/Card/WinLosePanel
+@onready var _win_title:    Label         = $Dimmer/Card/WinLosePanel/WinLoseMargin/WinLoseScroll/WinLoseVBox/WinLoseTitle
+@onready var _win_sub:      Label         = $Dimmer/Card/WinLosePanel/WinLoseMargin/WinLoseScroll/WinLoseVBox/WinLoseSubtitle
+@onready var _final_ranks:  VBoxContainer = $Dimmer/Card/WinLosePanel/WinLoseMargin/WinLoseScroll/WinLoseVBox/FinalRankList
+@onready var _play_again:   Button        = $Dimmer/Card/WinLosePanel/WinLoseMargin/WinLoseScroll/WinLoseVBox/PlayAgainBtn
 
 var _results:     Array = []
 var _game_year:   int   = 1
@@ -18,16 +16,16 @@ var _is_year_5:   bool  = false
 var _player_rank: int   = 1
 
 func _ready() -> void:
-	process_mode = Node.PROCESS_MODE_ALWAYS
-	$Dimmer.gui_input.connect(_on_dimmer_input)
+	super._ready()
+	set_title("EVALUATION")
 	var gm: Node = get_node_or_null("/root/GameManager")
 	if gm != null:
 		_results   = gm.last_evaluation_results
 		_game_year = gm.last_evaluation_year
 		_is_year_5 = _game_year >= 5
 
-	_title_lbl.text   = "YEAR %d EVALUATION" % _game_year
-	_back_btn.visible = not _is_year_5
+	_screen_title.text = "YEAR %d EVALUATION" % _game_year
+	_back_btn.visible  = not _is_year_5
 
 	if _results.is_empty():
 		_build_no_results()
@@ -176,7 +174,7 @@ func _make_rank_row(entry: Dictionary) -> PanelContainer:
 	var card: PanelContainer = PanelContainer.new()
 	var style: StyleBoxFlat  = StyleBoxFlat.new()
 	if is_player:
-		style.bg_color         = Color(0.05, 0.12, 0.28, 0.85)
+		style.bg_color          = Color(0.05, 0.12, 0.28, 0.85)
 		style.border_width_left = 3
 		style.border_color      = Color(0.3, 0.6, 1.0, 1.0)
 	else:
@@ -196,7 +194,7 @@ func _make_rank_row(entry: Dictionary) -> PanelContainer:
 	card.add_child(row)
 
 	var rank_lbl: Label = Label.new()
-	rank_lbl.text               = "[%d]" % rank
+	rank_lbl.text                = "[%d]" % rank
 	rank_lbl.custom_minimum_size = Vector2(32, 0)
 	rank_lbl.add_theme_font_size_override("font_size", 13)
 	if rank == 1:
@@ -206,9 +204,9 @@ func _make_rank_row(entry: Dictionary) -> PanelContainer:
 	row.add_child(rank_lbl)
 
 	var name_lbl: Label = Label.new()
-	name_lbl.text               = name_str
+	name_lbl.text                  = name_str
 	name_lbl.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	name_lbl.autowrap_mode      = TextServer.AUTOWRAP_WORD_SMART
+	name_lbl.autowrap_mode         = TextServer.AUTOWRAP_WORD_SMART
 	name_lbl.add_theme_font_size_override("font_size", 13)
 	if is_player:
 		name_lbl.add_theme_color_override("font_color", Color(0.4, 0.75, 1.0, 1.0))
@@ -240,7 +238,7 @@ func _build_feedback_section() -> void:
 	var revenue_score: float = float(player_entry.get("revenue_score", 0))
 	var rep_score:     float = float(player_entry.get("rep_score", 0))
 
-	var weakest: float  = minf(minf(donors_score, revenue_score), rep_score)
+	var weakest: float   = minf(minf(donors_score, revenue_score), rep_score)
 	var feedback: String = ""
 	if weakest == donors_score:
 		feedback = "Your donor pipeline needs work. Focus on Research to secure more donors and unlock new funding streams."
@@ -256,7 +254,7 @@ func _build_feedback_section() -> void:
 	_body_vbox.add_child(sec_lbl)
 
 	var feedback_lbl: Label = Label.new()
-	feedback_lbl.text         = feedback
+	feedback_lbl.text          = feedback
 	feedback_lbl.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	feedback_lbl.add_theme_color_override("font_color", Color(0.72, 0.72, 0.72, 1.0))
 	feedback_lbl.add_theme_font_size_override("font_size", 13)
@@ -347,9 +345,3 @@ func _on_footer_btn_pressed() -> void:
 
 func _on_play_again_pressed() -> void:
 	get_tree().change_scene_to_file("res://scenes/Main.tscn")
-
-func _on_dimmer_input(event: InputEvent) -> void:
-	if event is InputEventMouseButton:
-		var mb: InputEventMouseButton = event as InputEventMouseButton
-		if mb.pressed and mb.button_index == MOUSE_BUTTON_LEFT:
-			queue_free()
