@@ -8,22 +8,77 @@ signal projects_updated
 signal complication_triggered(project: Dictionary, complication: Dictionary)
 
 # ------------------------------------------
-#  TEMPLATES  (10 hardcoded project types)
+#  LOCAL AREA PROJECTS  (Economy Bible Tier 1)
 # ------------------------------------------
 # required_role int values match Employee.Role enum:
 #   0=DEVELOPER  1=DESIGNER  2=MARKETER  3=HR_SPECIALIST
 #   4=ACCOUNTANT  5=MANAGER  6=INTERN
-const _TEMPLATES: Array = [
-	{"name": "Website Redesign",    "description": "Rebuild the company website.",     "project_type": "tech",       "required_role": 0, "duration_ticks": 5, "reward_cash": 4500, "reward_corp_points": 30},
-	{"name": "Marketing Campaign",  "description": "Launch a new marketing campaign.", "project_type": "marketing",  "required_role": 2, "duration_ticks": 4, "reward_cash": 3800, "reward_corp_points": 23},
-	{"name": "Annual Report",       "description": "Prepare the annual financial report.", "project_type": "finance", "required_role": 4, "duration_ticks": 6, "reward_cash": 3000, "reward_corp_points": 38},
-	{"name": "System Upgrade",      "description": "Upgrade core IT infrastructure.",  "project_type": "tech",       "required_role": 0, "duration_ticks": 8, "reward_cash": 7500, "reward_corp_points": 53},
-	{"name": "Client Presentation", "description": "Present quarterly results to a key client.", "project_type": "marketing", "required_role": 2, "duration_ticks": 3, "reward_cash": 2300, "reward_corp_points": 15},
-	{"name": "Budget Planning",     "description": "Plan the next quarter budget.",    "project_type": "finance",    "required_role": 4, "duration_ticks": 5, "reward_cash": 3300, "reward_corp_points": 30},
-	{"name": "UI/UX Overhaul",      "description": "Redesign the core product interface.", "project_type": "design", "required_role": 1, "duration_ticks": 7, "reward_cash": 6000, "reward_corp_points": 45},
-	{"name": "Brand Identity",      "description": "Create updated brand guidelines.", "project_type": "design",     "required_role": 1, "duration_ticks": 4, "reward_cash": 4200, "reward_corp_points": 27},
-	{"name": "Operations Manual",   "description": "Write the office operations manual.", "project_type": "ops",    "required_role": 5, "duration_ticks": 6, "reward_cash": 5300, "reward_corp_points": 42},
-	{"name": "Intern Onboarding",   "description": "Onboard the new intern cohort.",   "project_type": "ops",       "required_role": 6, "duration_ticks": 2, "reward_cash": 1200, "reward_corp_points": 12},
+# duration_ticks maps to Economy Bible months: 3mo=3, 4mo=4, 5mo=5, 6mo=6
+const LOCAL_PROJECTS: Array = [
+	{
+		"name": "Farmer Training Workshop",
+		"description": "Run hands-on agricultural training sessions for local farmers.",
+		"project_type": "agriculture", "required_role": 3,
+		"primary_stat": "community", "secondary_stat": "planning",
+		"duration_ticks": 3,
+		"reward_cash": 1200, "reward_corp_points": 15, "reward_reputation": 5,
+	},
+	{
+		"name": "Soil Quality Assessment",
+		"description": "Conduct technical soil sampling and analysis across the region.",
+		"project_type": "agriculture", "required_role": 0,
+		"primary_stat": "technical", "secondary_stat": "procurement",
+		"duration_ticks": 4,
+		"reward_cash": 1800, "reward_corp_points": 20, "reward_reputation": 5,
+	},
+	{
+		"name": "Community Nutrition Survey",
+		"description": "Survey households to map nutrition gaps and food security status.",
+		"project_type": "agriculture", "required_role": 2,
+		"primary_stat": "community", "secondary_stat": "technical",
+		"duration_ticks": 4,
+		"reward_cash": 1500, "reward_corp_points": 15, "reward_reputation": 10,
+	},
+	{
+		"name": "Seed Distribution Program",
+		"description": "Procure and distribute improved seed varieties to smallholder farmers.",
+		"project_type": "agriculture", "required_role": 4,
+		"primary_stat": "procurement", "secondary_stat": "community",
+		"duration_ticks": 5,
+		"reward_cash": 2200, "reward_corp_points": 20, "reward_reputation": 5,
+	},
+	{
+		"name": "GIS Land Mapping",
+		"description": "Create detailed GIS maps of arable land and water access points.",
+		"project_type": "agriculture", "required_role": 0,
+		"primary_stat": "technical", "secondary_stat": "planning",
+		"duration_ticks": 5,
+		"reward_cash": 2500, "reward_corp_points": 25, "reward_reputation": 5,
+	},
+	{
+		"name": "Basic Agricultural Equipment Audit",
+		"description": "Audit the condition and distribution of farm equipment in the area.",
+		"project_type": "agriculture", "required_role": 4,
+		"primary_stat": "procurement", "secondary_stat": "technical",
+		"duration_ticks": 4,
+		"reward_cash": 2000, "reward_corp_points": 15, "reward_reputation": 3,
+	},
+	{
+		"name": "Crop Rotation Planning",
+		"description": "Develop seasonal crop rotation schedules to improve soil health.",
+		"project_type": "agriculture", "required_role": 0,
+		"primary_stat": "planning", "secondary_stat": "technical",
+		"duration_ticks": 5,
+		"reward_cash": 2000, "reward_corp_points": 30, "reward_reputation": 3,
+	},
+	{
+		"name": "Water Irrigation Planning",
+		"description": "Design efficient irrigation networks for local farmland.",
+		"project_type": "agriculture", "required_role": 0,
+		"primary_stat": "technical", "secondary_stat": "planning",
+		"duration_ticks": 6,
+		"reward_cash": 3000, "reward_corp_points": 25, "reward_reputation": 8,
+	},
 ]
 
 # ------------------------------------------
@@ -102,10 +157,10 @@ const _COMPLICATION_CHANCE: float = 0.2
 # ------------------------------------------
 #  STATE
 # ------------------------------------------
-var _available: Array    = []
-var _active: Array       = []
-var _pool_indices: Array = []
-var _next_id: int        = 0
+var _available: Array       = []
+var _active: Array          = []
+var _completed_names: Array = []
+var _next_id: int           = 0
 var _rng: RandomNumberGenerator = RandomNumberGenerator.new()
 
 # ------------------------------------------
@@ -114,7 +169,7 @@ var _rng: RandomNumberGenerator = RandomNumberGenerator.new()
 func initialize() -> void:
 	_available.clear()
 	_active.clear()
-	_pool_indices.clear()
+	_completed_names.clear()
 	_next_id = 0
 	_rng.randomize()
 	_generate_available(3)
@@ -259,11 +314,16 @@ func _complete_by_id(pid: int, gm: Node) -> void:
 			_active.remove_at(i)
 			proj["is_complete"] = true
 			proj["is_active"]   = false
+			_completed_names.append(proj.get("name", ""))
 			gm.economy.add_revenue(proj.get("reward_cash", 0), "Project: " + proj.get("name", "Project"))
 			gm.add_corp_points(proj.get("reward_corp_points", 0))
-			_available.append(_next_from_pool())
-			print("[Project] %s completed! +$%d +%d CP" % [
-				proj.get("name", "Project"), proj.get("reward_cash", 0), proj.get("reward_corp_points", 0)
+			gm.company_data["reputation"] = gm.company_data.get("reputation", 0) + proj.get("reward_reputation", 0)
+			var next: Dictionary = _next_from_pool()
+			if not next.is_empty():
+				_available.append(next)
+			print("[Project] %s completed! +$%d +%d CP +%d Rep" % [
+				proj.get("name", "Project"), proj.get("reward_cash", 0),
+				proj.get("reward_corp_points", 0), proj.get("reward_reputation", 0)
 			])
 			project_completed.emit(proj)
 			return
@@ -273,16 +333,26 @@ func _complete_by_id(pid: int, gm: Node) -> void:
 # ------------------------------------------
 func _generate_available(count: int) -> void:
 	for _i: int in range(count):
-		_available.append(_next_from_pool())
+		var proj: Dictionary = _next_from_pool()
+		if proj.is_empty():
+			break
+		_available.append(proj)
 	projects_updated.emit()
 
 func _next_from_pool() -> Dictionary:
-	if _pool_indices.is_empty():
-		for i: int in range(_TEMPLATES.size()):
-			_pool_indices.append(i)
-		_pool_indices.shuffle()
-	var idx: int = _pool_indices.pop_back()
-	var proj: Dictionary = _TEMPLATES[idx].duplicate()
+	var used_names: Array = _completed_names.duplicate()
+	for p in _available:
+		used_names.append(p.get("name", ""))
+	for p in _active:
+		used_names.append(p.get("name", ""))
+	var candidates: Array = []
+	for proj in LOCAL_PROJECTS:
+		if proj.get("name", "") not in used_names:
+			candidates.append(proj)
+	if candidates.is_empty():
+		return {}
+	candidates.shuffle()
+	var proj: Dictionary = candidates[0].duplicate()
 	proj["id"]                    = _next_id
 	proj["progress"]              = 0.0
 	proj["assigned_employee_ids"] = []
