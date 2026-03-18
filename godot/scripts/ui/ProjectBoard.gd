@@ -29,6 +29,7 @@ var _gm:           Node  = null
 var _tab:          int   = TAB_ACTIVE
 var _projects:     Array = []
 var _selected_pid: int   = -1
+var _desc_label:   Label = null
 
 # ─────────────────────────────────────────
 #  LIFECYCLE
@@ -41,6 +42,15 @@ func _ready() -> void:
 		_gm.economy.cash_changed.connect(_on_cash_changed)
 		_gm.projects.projects_updated.connect(_on_projects_updated)
 		_cash_label.text = "$%d" % _gm.economy.current_cash
+	# Description label — inserted into VBox directly after ArrowRow
+	_desc_label = Label.new()
+	_desc_label.add_theme_font_size_override("font_size", 11)
+	_desc_label.add_theme_color_override("font_color", Color(0.6, 0.6, 0.6))
+	_desc_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	var arrow_row: Node = _item_name_label.get_parent()
+	var vbox: Node = arrow_row.get_parent()
+	vbox.add_child(_desc_label)
+	vbox.move_child(_desc_label, arrow_row.get_index() + 1)
 	_assign_panel.visible = false
 	_on_active_tab()
 
@@ -85,6 +95,7 @@ func _refresh_display() -> void:
 	if _projects.is_empty():
 		_item_name_label.text = "None"
 		_page_label.text      = "0 / 0"
+		_desc_label.text      = ""
 		_role_label.text      = ""
 		_info_label.text      = "No projects in this category."
 		_reward_label.text    = ""
@@ -95,11 +106,15 @@ func _refresh_display() -> void:
 	super._refresh_display()
 	_action_btn.visible = true
 	var proj: Dictionary = _projects[_current_index]
-	var role: int        = int(proj.get("required_role", 0))
 
 	_item_name_label.text = proj.get("name", "Project")
-	_role_label.text      = _role_name(role)
-	_reward_label.text    = "$%d  +%d CP" % [int(proj.get("reward_cash", 0)), int(proj.get("reward_corp_points", 0))]
+	_desc_label.text      = proj.get("description", "")
+	_role_label.text      = ""
+	_reward_label.text    = "$%d  +%d CP  +%d Rep" % [
+		int(proj.get("reward_cash", 0)),
+		int(proj.get("reward_corp_points", 0)),
+		int(proj.get("reward_reputation", 0)),
+	]
 
 	if _tab == TAB_ACTIVE:
 		var progress: float = float(proj.get("progress", 0.0))
