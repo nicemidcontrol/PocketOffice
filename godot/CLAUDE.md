@@ -1,12 +1,3 @@
-Please run these commands first:
-git checkout main
-git pull origin main
-ls godot/*.md
-
-Then proceed with the merge task.
-Also, CLAUDE.md is missing from the repo. After the Bible merge, 
-please recreate godot/CLAUDE.md with this content:
-
 # CLAUDE.md — Read this before every task
 
 ## Codebase Rules
