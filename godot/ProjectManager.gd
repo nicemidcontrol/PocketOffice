@@ -10,76 +10,71 @@ signal complication_triggered(project: Dictionary, complication: Dictionary)
 # ------------------------------------------
 #  LOCAL AREA PROJECTS  (Economy Bible Tier 1)
 # ------------------------------------------
-# required_role int values match Employee.Role enum:
-#   0=DEVELOPER  1=DESIGNER  2=MARKETER  3=HR_SPECIALIST
-#   4=ACCOUNTANT  5=MANAGER  6=INTERN
-# duration_ticks maps to Economy Bible months: 3mo=3, 4mo=4, 5mo=5, 6mo=6
 const LOCAL_PROJECTS: Array = [
 	{
+		"name": "Office Setup & Filing",
+		"primary_stat": "management", "secondary_stat": "focus",
+		"reward_cash": 800, "reward_corp_points": 10, "reward_reputation": 5,
+		"duration_ticks": 2,
+	},
+	{
+		"name": "Staff Introduction Meeting",
+		"primary_stat": "charm", "secondary_stat": "communication",
+		"reward_cash": 600, "reward_corp_points": 8, "reward_reputation": 3,
+		"duration_ticks": 1,
+	},
+	{
 		"name": "Farmer Training Workshop",
-		"description": "Run hands-on agricultural training sessions for local farmers.",
-		"project_type": "agriculture", "required_role": 3,
-		"primary_stat": "community", "secondary_stat": "planning",
-		"duration_ticks": 3,
+		"primary_stat": "charm", "secondary_stat": "communication",
 		"reward_cash": 1200, "reward_corp_points": 15, "reward_reputation": 5,
+		"duration_ticks": 3,
 	},
 	{
 		"name": "Soil Quality Assessment",
-		"description": "Conduct technical soil sampling and analysis across the region.",
-		"project_type": "agriculture", "required_role": 0,
-		"primary_stat": "technical", "secondary_stat": "procurement",
-		"duration_ticks": 4,
+		"primary_stat": "technical", "secondary_stat": "focus",
 		"reward_cash": 1800, "reward_corp_points": 20, "reward_reputation": 5,
+		"duration_ticks": 4,
 	},
 	{
 		"name": "Community Nutrition Survey",
-		"description": "Survey households to map nutrition gaps and food security status.",
-		"project_type": "agriculture", "required_role": 2,
-		"primary_stat": "community", "secondary_stat": "technical",
-		"duration_ticks": 4,
+		"primary_stat": "charm", "secondary_stat": "focus",
 		"reward_cash": 1500, "reward_corp_points": 15, "reward_reputation": 10,
+		"duration_ticks": 4,
 	},
 	{
 		"name": "Seed Distribution Program",
-		"description": "Procure and distribute improved seed varieties to smallholder farmers.",
-		"project_type": "agriculture", "required_role": 4,
-		"primary_stat": "procurement", "secondary_stat": "community",
-		"duration_ticks": 5,
+		"primary_stat": "procurement", "secondary_stat": "logistics",
 		"reward_cash": 2200, "reward_corp_points": 20, "reward_reputation": 5,
+		"duration_ticks": 5,
 	},
 	{
 		"name": "GIS Land Mapping",
-		"description": "Create detailed GIS maps of arable land and water access points.",
-		"project_type": "agriculture", "required_role": 0,
-		"primary_stat": "technical", "secondary_stat": "planning",
-		"duration_ticks": 5,
+		"primary_stat": "technical", "secondary_stat": "precision",
 		"reward_cash": 2500, "reward_corp_points": 25, "reward_reputation": 5,
+		"duration_ticks": 5,
 	},
 	{
 		"name": "Basic Agricultural Equipment Audit",
-		"description": "Audit the condition and distribution of farm equipment in the area.",
-		"project_type": "agriculture", "required_role": 4,
 		"primary_stat": "procurement", "secondary_stat": "technical",
-		"duration_ticks": 4,
 		"reward_cash": 2000, "reward_corp_points": 15, "reward_reputation": 3,
+		"duration_ticks": 4,
 	},
 	{
 		"name": "Crop Rotation Planning",
-		"description": "Develop seasonal crop rotation schedules to improve soil health.",
-		"project_type": "agriculture", "required_role": 0,
-		"primary_stat": "planning", "secondary_stat": "technical",
-		"duration_ticks": 5,
+		"primary_stat": "technical", "secondary_stat": "communication",
 		"reward_cash": 2000, "reward_corp_points": 30, "reward_reputation": 3,
+		"duration_ticks": 5,
 	},
 	{
 		"name": "Water Irrigation Planning",
-		"description": "Design efficient irrigation networks for local farmland.",
-		"project_type": "agriculture", "required_role": 0,
-		"primary_stat": "technical", "secondary_stat": "planning",
-		"duration_ticks": 6,
+		"primary_stat": "technical", "secondary_stat": "management",
 		"reward_cash": 3000, "reward_corp_points": 25, "reward_reputation": 8,
+		"duration_ticks": 6,
 	},
 ]
+
+# First two entries above are starter projects — always available on new game.
+const _STARTER_NAMES: Array = ["Office Setup & Filing", "Staff Introduction Meeting"]
 
 # ------------------------------------------
 #  COMPLICATIONS
@@ -172,7 +167,11 @@ func initialize() -> void:
 	_completed_names.clear()
 	_next_id = 0
 	_rng.randomize()
-	_generate_available(3)
+	# Guarantee starters appear immediately on new game
+	for template in LOCAL_PROJECTS:
+		if template.get("name", "") in _STARTER_NAMES:
+			_available.append(_make_entry(template))
+	_generate_available(1)
 	_connect_clock()
 
 func _connect_clock() -> void:
@@ -339,20 +338,8 @@ func _generate_available(count: int) -> void:
 		_available.append(proj)
 	projects_updated.emit()
 
-func _next_from_pool() -> Dictionary:
-	var used_names: Array = _completed_names.duplicate()
-	for p in _available:
-		used_names.append(p.get("name", ""))
-	for p in _active:
-		used_names.append(p.get("name", ""))
-	var candidates: Array = []
-	for proj in LOCAL_PROJECTS:
-		if proj.get("name", "") not in used_names:
-			candidates.append(proj)
-	if candidates.is_empty():
-		return {}
-	candidates.shuffle()
-	var proj: Dictionary = candidates[0].duplicate()
+func _make_entry(template: Dictionary) -> Dictionary:
+	var proj: Dictionary = template.duplicate()
 	proj["id"]                    = _next_id
 	proj["progress"]              = 0.0
 	proj["assigned_employee_ids"] = []
@@ -362,6 +349,21 @@ func _next_from_pool() -> Dictionary:
 	proj["conflict_penalty"]      = false
 	_next_id += 1
 	return proj
+
+func _next_from_pool() -> Dictionary:
+	var used_names: Array = _completed_names.duplicate()
+	for p in _available:
+		used_names.append(p.get("name", ""))
+	for p in _active:
+		used_names.append(p.get("name", ""))
+	var candidates: Array = []
+	for template in LOCAL_PROJECTS:
+		if template.get("name", "") not in used_names:
+			candidates.append(template)
+	if candidates.is_empty():
+		return {}
+	candidates.shuffle()
+	return _make_entry(candidates[0])
 
 # ------------------------------------------
 #  COMPLICATIONS
@@ -453,7 +455,7 @@ func load_projects(data: Array) -> void:
 	_available.clear()
 	_active.clear()
 	for d in data:
-		if not d.has("required_role"):
+		if not d.has("name"):
 			continue
 		if d.get("is_active", false) and not d.get("is_complete", false):
 			_active.append(d)
