@@ -17,9 +17,10 @@ extends "res://scripts/ui/BaseModal.gd"
 # ─────────────────────────────────────────
 #  STATE
 # ─────────────────────────────────────────
-var _gm:    Node  = null
-var _dm:    Node  = null
-var _items: Array = []
+var _gm:       Node           = null
+var _dm:       Node           = null
+var _items:    Array          = []
+var _req_rich: RichTextLabel  = null
 
 # ─────────────────────────────────────────
 #  LIFECYCLE
@@ -40,6 +41,31 @@ func _ready() -> void:
 
 	set_items_count(_items.size())
 
+	# ── label styling ─────────────────────────────────────────────────
+	_desc_label.autowrap_mode     = TextServer.AUTOWRAP_WORD_SMART
+	_desc_label.max_lines_visible = 2
+	_desc_label.add_theme_font_size_override("font_size", 11)
+	_desc_label.add_theme_color_override("font_color", Color(0.7, 0.7, 0.7))
+
+	_unlock_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	_unlock_label.add_theme_font_size_override("font_size", 10)
+	_unlock_label.add_theme_color_override("font_color", Color(0.6, 0.6, 0.6))
+
+	# ── section spacing ───────────────────────────────────────────────
+	var detail_vbox: VBoxContainer = _desc_label.get_parent() as VBoxContainer
+	detail_vbox.add_theme_constant_override("separation", 8)
+
+	# ── replace ReqLabel with RichTextLabel for per-requirement colours
+	_req_rich = RichTextLabel.new()
+	_req_rich.bbcode_enabled           = true
+	_req_rich.fit_content              = true
+	_req_rich.scroll_active            = false
+	_req_rich.size_flags_horizontal    = Control.SIZE_FILL
+	_req_rich.add_theme_font_size_override("normal_font_size", 11)
+	detail_vbox.add_child(_req_rich)
+	detail_vbox.move_child(_req_rich, _req_label.get_index())
+	_req_label.hide()
+
 # ─────────────────────────────────────────
 #  DISPLAY (BaseModal override)
 # ─────────────────────────────────────────
@@ -48,7 +74,7 @@ func _refresh_display() -> void:
 		_item_name_label.text   = "No items"
 		_page_label.text        = "0 / 0"
 		_desc_label.text        = ""
-		_req_label.text         = ""
+		_req_rich.text          = ""
 		_cost_label.text        = ""
 		_reward_label.text      = ""
 		_unlock_label.visible   = false
@@ -68,7 +94,7 @@ func _refresh_display() -> void:
 	_item_name_label.text = item.get("name", "")
 	_desc_label.text      = item.get("description", "")
 
-	# Requirements
+	# Requirements — one per line, colour-coded per item
 	var rep: int       = int(_gm.company_data.get("reputation", 0))
 	var req_rep: int   = int(item.get("req_reputation", 0))
 	var rep_ok: bool   = rep >= req_rep or is_done
@@ -80,12 +106,20 @@ func _refresh_display() -> void:
 	var role_ok: bool    = true
 	if req_role != "":
 		role_ok = _dm._team_has_role(req_role, _gm) or is_done
-	var req_parts: Array[String] = []
-	req_parts.append("REP %d  %s" % [req_rep, "[OK]" if rep_ok else "[X]"])
-	req_parts.append("Yr %d  %s" % [req_year, "[OK]" if year_ok else "[X]"])
+	var c_green: String      = "#4de64d"
+	var c_red: String        = "#e64d4d"
+	var req_lines: Array[String] = []
+	req_lines.append("[color=%s]REP %d  %s[/color]" % [
+		c_green if rep_ok else c_red, req_rep, "[OK]" if rep_ok else "[X]"
+	])
+	req_lines.append("[color=%s]Year %d  %s[/color]" % [
+		c_green if year_ok else c_red, req_year, "[OK]" if year_ok else "[X]"
+	])
 	if req_role != "":
-		req_parts.append("%s  %s" % [req_role, "[OK]" if role_ok else "[X]"])
-	_req_label.text = "   ".join(req_parts)
+		req_lines.append("[color=%s]%s  %s[/color]" % [
+			c_green if role_ok else c_red, req_role, "[OK]" if role_ok else "[X]"
+		])
+	_req_rich.text = "\n".join(req_lines)
 
 	# Cost
 	var cp_cost: int = int(item.get("cp_cost", 0))
