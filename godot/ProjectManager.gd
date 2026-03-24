@@ -1,476 +1,684 @@
 extends Node
 
-# ------------------------------------------
+# ─────────────────────────────────────────
 #  SIGNALS
-# ------------------------------------------
+# ─────────────────────────────────────────
+signal task_completed(task: Dictionary)
 signal project_completed(project: Dictionary)
 signal projects_updated
+
+# Legacy signal kept for external callers
 signal complication_triggered(project: Dictionary, complication: Dictionary)
 
-# ------------------------------------------
-#  LOCAL AREA PROJECTS  (Economy Bible Tier 1)
-# ------------------------------------------
-const LOCAL_PROJECTS: Array = [
-	{
-		"name": "Office Setup & Filing",
-		"description": "Someone has to organize 300 unlabeled folders. Congratulations, it's you.",
-		"primary_stat": "management", "secondary_stat": "focus",
-		"reward_cash": 800, "reward_corp_points": 10, "reward_reputation": 5,
-		"duration_ticks": 2,
-	},
-	{
-		"name": "Staff Introduction Meeting",
-		"description": "Break the ice with your new team. Try not to mispronounce anyone's name.",
-		"primary_stat": "charm", "secondary_stat": "communication",
-		"reward_cash": 600, "reward_corp_points": 8, "reward_reputation": 3,
-		"duration_ticks": 1,
-	},
-	{
-		"name": "Farmer Training Workshop",
-		"description": "Teach local farmers modern techniques. They'll teach you that your shoes are wrong for the field.",
-		"primary_stat": "charm", "secondary_stat": "communication",
-		"reward_cash": 1200, "reward_corp_points": 15, "reward_reputation": 5,
-		"duration_ticks": 3,
-	},
-	{
-		"name": "Soil Quality Assessment",
-		"description": "Dig holes. Stare at dirt. Write a 40-page report about it. Science!",
-		"primary_stat": "technical", "secondary_stat": "focus",
-		"reward_cash": 1800, "reward_corp_points": 20, "reward_reputation": 5,
-		"duration_ticks": 4,
-	},
-	{
-		"name": "Community Nutrition Survey",
-		"description": "Ask 500 families what they eat. Spoiler: not enough.",
-		"primary_stat": "charm", "secondary_stat": "focus",
-		"reward_cash": 1500, "reward_corp_points": 15, "reward_reputation": 10,
-		"duration_ticks": 4,
-	},
-	{
-		"name": "Seed Distribution Program",
-		"description": "Deliver seeds to remote villages. GPS says 2 hours. Locals say 'maybe tomorrow.'",
-		"primary_stat": "procurement", "secondary_stat": "logistics",
-		"reward_cash": 2200, "reward_corp_points": 20, "reward_reputation": 5,
-		"duration_ticks": 5,
-	},
-	{
-		"name": "GIS Land Mapping",
-		"description": "Map every hectare with satellite precision. The satellite, however, is on its own schedule.",
-		"primary_stat": "technical", "secondary_stat": "precision",
-		"reward_cash": 2500, "reward_corp_points": 25, "reward_reputation": 5,
-		"duration_ticks": 5,
-	},
-	{
-		"name": "Basic Agricultural Equipment Audit",
-		"description": "Count tractors. Most are 'decorative' at this point.",
-		"primary_stat": "procurement", "secondary_stat": "technical",
-		"reward_cash": 2000, "reward_corp_points": 15, "reward_reputation": 3,
-		"duration_ticks": 4,
-	},
-	{
-		"name": "Crop Rotation Planning",
-		"description": "Convince farmers that planting the same thing 47 years in a row might not be optimal.",
-		"primary_stat": "technical", "secondary_stat": "communication",
-		"reward_cash": 2000, "reward_corp_points": 30, "reward_reputation": 3,
-		"duration_ticks": 5,
-	},
-	{
-		"name": "Water Irrigation Planning",
-		"description": "Design a water system for 3 villages. Budget: enough for 1.5 villages. Good luck.",
-		"primary_stat": "technical", "secondary_stat": "management",
-		"reward_cash": 3000, "reward_corp_points": 25, "reward_reputation": 8,
-		"duration_ticks": 6,
-	},
-]
+# ─────────────────────────────────────────
+#  CONSTANTS
+# ─────────────────────────────────────────
+const PROJECT_COMPLETION_THRESHOLD: float = 0.70
+const MAX_EMPLOYEES_PER_TASK: int = 3
+const TASK_PROGRESS_PER_TICK: float = 0.12
+const TASK_PROGRESS_CAP_PER_TICK: float = 0.15
+const DECAY_RATE_PER_MONTH: float = 0.02
+const IDLE_MONTHS_BEFORE_DECAY: int = 3
 
-# First two entries above are starter projects — always available on new game.
-const _STARTER_NAMES: Array = ["Office Setup & Filing", "Staff Introduction Meeting"]
+# Maps donor display names to internal ids used in unlock_donor_id
+const _DONOR_NAME_MAP: Dictionary = {
+	"Local NGO Partner": "local_ngo",
+	"Government Agency": "gov_agency",
+}
 
-# ------------------------------------------
-#  COMPLICATIONS
-# ------------------------------------------
-const _COMPLICATIONS: Array = [
-	{
-		"id": "scope_creep",
-		"label": "Scope Creep",
-		"description": "Requirements expanded mid-project. Progress slows by 25%.",
-		"effect_type": "slow",
-		"effect_value": 0.75,
-		"fix_options": [
-			{"label": "Renegotiate Scope (15 CP)", "cost_type": "cp", "cost_value": 15},
-			{"label": "Extend Deadline (accept slow)", "cost_type": "none", "cost_value": 0}
-		]
-	},
-	{
-		"id": "key_emp_sick",
-		"label": "Key Employee Sick",
-		"description": "A key team member is out sick. Output drops significantly.",
-		"effect_type": "slow",
-		"effect_value": 0.5,
-		"fix_options": [
-			{"label": "Hire Temp Cover ($400)", "cost_type": "cash", "cost_value": 400},
-			{"label": "Reassign Staff", "cost_type": "reassign", "cost_value": 0}
-		]
-	},
-	{
-		"id": "tool_failure",
-		"label": "Tool Failure",
-		"description": "Critical software/hardware failed. Project paused until resolved.",
-		"effect_type": "pause",
-		"effect_value": 0.0,
-		"fix_options": [
-			{"label": "Emergency IT Fix ($250)", "cost_type": "cash", "cost_value": 250},
-			{"label": "Use Backup Tools (slow, free)", "cost_type": "none", "cost_value": 0}
-		]
-	},
-	{
-		"id": "budget_overrun",
-		"label": "Budget Overrun",
-		"description": "Unexpected costs exceeded budget. Reward reduced by $500.",
-		"effect_type": "reward_cut",
-		"effect_value": 500.0,
-		"fix_options": [
-			{"label": "Absorb Cost ($500)", "cost_type": "cash", "cost_value": 500},
-			{"label": "Accept Reduced Reward", "cost_type": "none", "cost_value": 0}
-		]
-	},
-	{
-		"id": "miscommunication",
-		"label": "Miscommunication",
-		"description": "Team misalignment caused rework. Progress set back 20%.",
-		"effect_type": "regress",
-		"effect_value": -0.2,
-		"fix_options": [
-			{"label": "Team Workshop (10 CP)", "cost_type": "cp", "cost_value": 10}
-		]
-	},
-	{
-		"id": "stakeholder_change",
-		"label": "Stakeholder Change",
-		"description": "Key stakeholder changed priorities. Completion bonus halved.",
-		"effect_type": "reward_cut",
-		"effect_value": 0.5,
-		"fix_options": [
-			{"label": "PR Push (20 CP)", "cost_type": "cp", "cost_value": 20},
-			{"label": "Accept Half Reward", "cost_type": "none", "cost_value": 0}
-		]
-	},
-]
-
-const _COMPLICATION_CHANCE: float = 0.2
-
-# ------------------------------------------
+# ─────────────────────────────────────────
 #  STATE
-# ------------------------------------------
-var _available: Array       = []
-var _active: Array          = []
-var _completed_names: Array = []
-var _next_id: int           = 0
-var _rng: RandomNumberGenerator = RandomNumberGenerator.new()
+# ─────────────────────────────────────────
+var _area: Dictionary = {}
+var _unlocked_donor_ids: Array[String] = []
 
-# ------------------------------------------
+# ─────────────────────────────────────────
 #  INIT
-# ------------------------------------------
+# ─────────────────────────────────────────
 func initialize() -> void:
-	_available.clear()
-	_active.clear()
-	_completed_names.clear()
-	_next_id = 0
-	_rng.randomize()
-	# Guarantee starters appear immediately on new game
-	for template in LOCAL_PROJECTS:
-		if template.get("name", "") in _STARTER_NAMES:
-			_available.append(_make_entry(template))
-	_generate_available(1)
-	_connect_clock()
+	_unlocked_donor_ids.clear()
+	_area = _build_area()
+	_connect_signals()
+	projects_updated.emit()
 
-func _connect_clock() -> void:
+# ─────────────────────────────────────────
+#  AREA / PROJECT / TASK DATA
+# ─────────────────────────────────────────
+func _build_area() -> Dictionary:
+	return {
+		"id":       "local",
+		"name":     "Ban Nong Khao",
+		"projects": [
+			_build_project_1(),
+			_build_project_2(),
+			_build_project_3(),
+		]
+	}
+
+func _build_project_1() -> Dictionary:
+	return {
+		"id":                  "local_p1",
+		"name":                "Who Needs What?",
+		"subtitle":            "Community Needs Assessment",
+		"description":         "Your first real assignment. Walk into a village you have never been to, ask 200 strangers what they need, and pretend you are not terrified. Welcome to NGO life.",
+		"unlock_type":         "free",
+		"unlock_donor_id":     "",
+		"reward_cash":         2000,
+		"reward_cp":           25,
+		"reward_rep":          10,
+		"status":              "available",
+		"idle_months":         0,
+		"completion_percent":  0.0,
+		"_had_work_this_month": false,
+		"tasks": [
+			{
+				"id": "local_p1_t1", "name": "Knock Knock, Anyone Home?",
+				"subtitle": "Door-to-Door Survey",
+				"description": "Knock on 200 doors. 50 will open. 10 will offer you water. 3 will try to sell you chickens.",
+				"primary_stat": "charm", "secondary_stat": "communication",
+				"duration": 2, "reward_cash": 400, "reward_cp": 5,
+				"requires": [],
+				"status": "available", "progress": 0.0, "assigned_employee_ids": [],
+			},
+			{
+				"id": "local_p1_t2", "name": "The Chief Remembers Everything",
+				"subtitle": "Village Leader Interview",
+				"description": "Meet the village chief. He has been chief for 40 years and remembers when the last road was built. It was not.",
+				"primary_stat": "charm", "secondary_stat": "management",
+				"duration": 1, "reward_cash": 300, "reward_cp": 5,
+				"requires": [],
+				"status": "available", "progress": 0.0, "assigned_employee_ids": [],
+			},
+			{
+				"id": "local_p1_t3", "name": "Crayon To Excel Pipeline",
+				"subtitle": "Data Entry & Analysis",
+				"description": "Turn 200 handwritten surveys into a spreadsheet. Half are in pencil. Some are in crayon.",
+				"primary_stat": "focus", "secondary_stat": "technical",
+				"duration": 2, "reward_cash": 400, "reward_cp": 5,
+				"requires": ["local_p1_t1"],
+				"status": "blocked", "progress": 0.0, "assigned_employee_ids": [],
+			},
+			{
+				"id": "local_p1_t4", "name": "20 Pages Nobody Will Read",
+				"subtitle": "Needs Assessment Report",
+				"description": "Summarize everything into a 20-page report that your donor will skim in 3 minutes.",
+				"primary_stat": "communication", "secondary_stat": "focus",
+				"duration": 2, "reward_cash": 500, "reward_cp": 8,
+				"requires": ["local_p1_t3"],
+				"status": "blocked", "progress": 0.0, "assigned_employee_ids": [],
+			},
+		],
+	}
+
+func _build_project_2() -> Dictionary:
+	return {
+		"id":                  "local_p2",
+		"name":                "Dirt Don't Lie",
+		"subtitle":            "Soil & Crop Restoration",
+		"description":         "The soil has not been tested since ever. Farmers have been planting the same rice for three generations and wondering why yields drop every year. Time to play dirt detective.",
+		"unlock_type":         "donor",
+		"unlock_donor_id":     "local_ngo",
+		"reward_cash":         4500,
+		"reward_cp":           40,
+		"reward_rep":          15,
+		"status":              "locked",
+		"idle_months":         0,
+		"completion_percent":  0.0,
+		"_had_work_this_month": false,
+		"tasks": [
+			{
+				"id": "local_p2_t1", "name": "Professional Hole Digger",
+				"subtitle": "Soil Sample Collection",
+				"description": "Dig 50 holes across the village. Bag the dirt. Label each one. Try not to dig up anyone's ancestor.",
+				"primary_stat": "technical", "secondary_stat": "precision",
+				"duration": 2, "reward_cash": 500, "reward_cp": 5,
+				"requires": [],
+				"status": "available", "progress": 0.0, "assigned_employee_ids": [],
+			},
+			{
+				"id": "local_p2_t2", "name": "Still Waiting On The Lab",
+				"subtitle": "Lab Analysis Coordination",
+				"description": "Send soil to the city lab. The lab says results take 2 weeks. It has been 2 months. Follow up. Again.",
+				"primary_stat": "procurement", "secondary_stat": "communication",
+				"duration": 3, "reward_cash": 600, "reward_cp": 8,
+				"requires": ["local_p2_t1"],
+				"status": "blocked", "progress": 0.0, "assigned_employee_ids": [],
+			},
+			{
+				"id": "local_p2_t3", "name": "Teaching Grandpa New Tricks",
+				"subtitle": "Farmer Training Workshop",
+				"description": "Teach crop rotation to farmers who have been farming since before you were born. Bring humility.",
+				"primary_stat": "charm", "secondary_stat": "communication",
+				"duration": 2, "reward_cash": 500, "reward_cp": 8,
+				"requires": ["local_p2_t2"],
+				"status": "blocked", "progress": 0.0, "assigned_employee_ids": [],
+			},
+			{
+				"id": "local_p2_t4", "name": "Seeds Are Not Snacks",
+				"subtitle": "Seed Selection & Distribution",
+				"description": "Source quality seeds. Distribute to 80 families. Explain that these are for planting, not eating. Twice.",
+				"primary_stat": "procurement", "secondary_stat": "logistics",
+				"duration": 3, "reward_cash": 700, "reward_cp": 10,
+				"requires": ["local_p2_t2"],
+				"status": "blocked", "progress": 0.0, "assigned_employee_ids": [],
+			},
+			{
+				"id": "local_p2_t5", "name": "Goat-Proof Monitoring",
+				"subtitle": "Crop Monitoring Setup",
+				"description": "Install monitoring points across 30 hectares. The goats will eat 4 of them. Budget for 5.",
+				"primary_stat": "technical", "secondary_stat": "management",
+				"duration": 2, "reward_cash": 600, "reward_cp": 8,
+				"requires": ["local_p2_t2"],
+				"status": "blocked", "progress": 0.0, "assigned_employee_ids": [],
+			},
+		],
+	}
+
+func _build_project_3() -> Dictionary:
+	return {
+		"id":                  "local_p3",
+		"name":                "Water Finds a Way",
+		"subtitle":            "Village Water & Irrigation",
+		"description":         "Three villages, one river, zero infrastructure. The water is technically there. Getting it to the rice fields requires an engineering degree and a miracle.",
+		"unlock_type":         "donor",
+		"unlock_donor_id":     "gov_agency",
+		"reward_cash":         8000,
+		"reward_cp":           60,
+		"reward_rep":          25,
+		"status":              "locked",
+		"idle_months":         0,
+		"completion_percent":  0.0,
+		"_had_work_this_month": false,
+		"tasks": [
+			{
+				"id": "local_p3_t1", "name": "Is That a River or a Myth?",
+				"subtitle": "Water Source Survey",
+				"description": "Find every water source within 20km. Map them. Discover that 3 are seasonal and 1 is a myth.",
+				"primary_stat": "technical", "secondary_stat": "precision",
+				"duration": 2, "reward_cash": 600, "reward_cp": 8,
+				"requires": [],
+				"status": "available", "progress": 0.0, "assigned_employee_ids": [],
+			},
+			{
+				"id": "local_p3_t2", "name": "The Intern Labels Everything Wrong",
+				"subtitle": "GIS Land Mapping",
+				"description": "Map every hectare with satellite data. The satellite is accurate. Your intern's labeling is not.",
+				"primary_stat": "technical", "secondary_stat": "focus",
+				"duration": 3, "reward_cash": 800, "reward_cp": 10,
+				"requires": [],
+				"status": "available", "progress": 0.0, "assigned_employee_ids": [],
+			},
+			{
+				"id": "local_p3_t3", "name": "Someone Brought a Lawyer",
+				"subtitle": "Community Consultation",
+				"description": "Hold 5 village meetings to discuss water rights. Meeting 1: productive. Meeting 5: someone brought a lawyer.",
+				"primary_stat": "charm", "secondary_stat": "management",
+				"duration": 2, "reward_cash": 500, "reward_cp": 8,
+				"requires": [],
+				"status": "available", "progress": 0.0, "assigned_employee_ids": [],
+			},
+			{
+				"id": "local_p3_t4", "name": "Village 3 Will Still Complain",
+				"subtitle": "Irrigation Design Blueprint",
+				"description": "Design canals that serve 3 villages equally. Village 3 will still complain they got less.",
+				"primary_stat": "technical", "secondary_stat": "management",
+				"duration": 3, "reward_cash": 900, "reward_cp": 12,
+				"requires": ["local_p3_t1", "local_p3_t2"],
+				"status": "blocked", "progress": 0.0, "assigned_employee_ids": [],
+			},
+			{
+				"id": "local_p3_t5", "name": "The Excavator Is Late. Again.",
+				"subtitle": "Procurement & Materials",
+				"description": "Order 2km of PVC pipe, 500 cement bags, and 1 excavator rental. The excavator arrives 3 weeks late. Classic.",
+				"primary_stat": "procurement", "secondary_stat": "logistics",
+				"duration": 3, "reward_cash": 800, "reward_cp": 8,
+				"requires": ["local_p3_t4"],
+				"status": "blocked", "progress": 0.0, "assigned_employee_ids": [],
+			},
+			{
+				"id": "local_p3_t6", "name": "Noodle Stand Supervisor",
+				"subtitle": "Construction Supervision",
+				"description": "Supervise 40 workers building canals in 38-degree heat. Motivation tool: cold water and loud music.",
+				"primary_stat": "management", "secondary_stat": "technical",
+				"duration": 4, "reward_cash": 1200, "reward_cp": 12,
+				"requires": ["local_p3_t4", "local_p3_t5"],
+				"status": "blocked", "progress": 0.0, "assigned_employee_ids": [],
+			},
+			{
+				"id": "local_p3_t7", "name": "Pray, Then Turn It On",
+				"subtitle": "System Testing & Handover",
+				"description": "Turn on the water. Pray. Fix the 3 leaks. Turn it on again. Celebrate when rice fields actually flood.",
+				"primary_stat": "technical", "secondary_stat": "communication",
+				"duration": 2, "reward_cash": 800, "reward_cp": 10,
+				"requires": ["local_p3_t6"],
+				"status": "blocked", "progress": 0.0, "assigned_employee_ids": [],
+			},
+		],
+	}
+
+# ─────────────────────────────────────────
+#  SIGNAL CONNECTIONS
+# ─────────────────────────────────────────
+func _connect_signals() -> void:
 	var cm: Node = get_node_or_null("/root/ClockManager")
-	if cm == null:
-		return
-	if not cm.work_day_started.is_connected(_on_work_day_started):
-		cm.work_day_started.connect(_on_work_day_started)
+	if cm != null:
+		if not cm.work_day_started.is_connected(_on_work_day_started):
+			cm.work_day_started.connect(_on_work_day_started)
+		if not cm.month_changed.is_connected(_on_month_changed):
+			cm.month_changed.connect(_on_month_changed)
+	var dm: Node = get_node_or_null("/root/DonorManager")
+	if dm != null:
+		if not dm.donor_won.is_connected(_on_donor_won):
+			dm.donor_won.connect(_on_donor_won)
 
-# ------------------------------------------
-#  PUBLIC API
-# ------------------------------------------
-func accept_project(pid: int) -> bool:
-	for i: int in range(_available.size()):
-		if _available[i].get("id", -1) == pid:
-			var proj: Dictionary = _available[i]
-			_available.remove_at(i)
-			proj["is_active"] = true
-			_active.append(proj)
-			projects_updated.emit()
-			if _available.is_empty():
-				_generate_available(3)
-			return true
+# ─────────────────────────────────────────
+#  PUBLIC API — NEW
+# ─────────────────────────────────────────
+func get_current_area() -> Dictionary:
+	return _area
+
+func get_projects() -> Array:
+	return _area.get("projects", [])
+
+func get_tasks_for_project(project_id: String) -> Array:
+	for proj in get_projects():
+		if proj.get("id", "") == project_id:
+			return proj.get("tasks", [])
+	return []
+
+func assign_employee_to_task(task_id: String, employee_id: String) -> bool:
+	var task: Dictionary = _find_task(task_id)
+	if task.is_empty():
+		return false
+	var cur_status: String = task.get("status", "")
+	if cur_status == "blocked" or cur_status == "completed":
+		return false
+	var ids: Array = task.get("assigned_employee_ids", [])
+	if ids.size() >= MAX_EMPLOYEES_PER_TASK:
+		return false
+	if employee_id in ids:
+		return false
+	ids.append(employee_id)
+	task["assigned_employee_ids"] = ids
+	task["status"] = "in_progress"
+	var gm: Node = get_node_or_null("/root/GameManager")
+	if gm != null:
+		for emp in gm.employees.get_hired_employees():
+			if str(emp.id) == employee_id:
+				emp.is_assigned_to_project = true
+				emp.current_project_id = task_id
+				break
+	var proj: Dictionary = _find_project_for_task(task_id)
+	_update_project_status(proj)
+	projects_updated.emit()
+	return true
+
+func unassign_employee_from_task(task_id: String, employee_id: String) -> bool:
+	var task: Dictionary = _find_task(task_id)
+	if task.is_empty():
+		return false
+	var ids: Array = task.get("assigned_employee_ids", [])
+	if employee_id not in ids:
+		return false
+	ids.erase(employee_id)
+	task["assigned_employee_ids"] = ids
+	if ids.is_empty() and task.get("status", "") == "in_progress":
+		task["status"] = "available"
+	if not _is_employee_assigned_anywhere(employee_id):
+		var gm: Node = get_node_or_null("/root/GameManager")
+		if gm != null:
+			for emp in gm.employees.get_hired_employees():
+				if str(emp.id) == employee_id:
+					emp.is_assigned_to_project = false
+					emp.current_project_id = ""
+					break
+	var proj: Dictionary = _find_project_for_task(task_id)
+	_update_project_status(proj)
+	projects_updated.emit()
+	return true
+
+func unlock_project(project_id: String) -> void:
+	for proj in get_projects():
+		if proj.get("id", "") == project_id:
+			if proj.get("status", "") == "locked":
+				proj["status"] = "available"
+				_refresh_task_deps(proj)
+				projects_updated.emit()
+			return
+
+func is_project_unlocked(project_id: String) -> bool:
+	for proj in get_projects():
+		if proj.get("id", "") == project_id:
+			return proj.get("status", "") != "locked"
 	return false
 
-func assign_employee(project_id: int, employee_id: String, gm: Node) -> bool:
-	for proj in _active:
-		if proj.get("id", -1) == project_id:
-			var ids: Array = proj.get("assigned_employee_ids", [])
-			if employee_id not in ids:
-				ids.append(employee_id)
-				proj["assigned_employee_ids"] = ids
-				for emp in gm.employees.get_hired_employees():
-					if emp.id == employee_id:
-						emp.is_assigned_to_project = true
-						emp.current_project_id = str(project_id)
-						break
-			projects_updated.emit()
-			return true
-	return false
+# ─────────────────────────────────────────
+#  PUBLIC API — LEGACY (backward compat)
+# ─────────────────────────────────────────
+func get_active_projects() -> Array:
+	var result: Array = []
+	for proj in get_projects():
+		var s: String = proj.get("status", "")
+		if s == "in_progress":
+			result.append(proj)
+	return result
 
 func get_available_projects() -> Array:
-	return _available.duplicate()
+	var result: Array = []
+	for proj in get_projects():
+		var s: String = proj.get("status", "")
+		if s == "available" or s == "in_progress":
+			result.append(proj)
+	return result
 
-func get_active_projects() -> Array:
-	return _active.duplicate()
+func accept_project(project_id: Variant) -> bool:
+	var pid: String = str(project_id)
+	for proj in get_projects():
+		if proj.get("id", "") == pid:
+			if proj.get("status", "") == "available":
+				proj["status"] = "in_progress"
+				projects_updated.emit()
+				return true
+	return false
 
-# ------------------------------------------
-#  LEGACY STUBS (called by GameManager)
-# ------------------------------------------
+func assign_employee(project_id: Variant, employee_id: String, _gm: Node) -> bool:
+	# Legacy bridge: assigns to the first available/in_progress task in project
+	var pid: String = str(project_id)
+	for task in get_tasks_for_project(pid):
+		var s: String = task.get("status", "")
+		if s == "available" or s == "in_progress":
+			return assign_employee_to_task(task.get("id", ""), employee_id)
+	return false
+
+func remove_employee_from_all_projects(emp_id: String, _gm: Node) -> void:
+	for proj in get_projects():
+		for task in proj.get("tasks", []):
+			var ids: Array = task.get("assigned_employee_ids", [])
+			if emp_id in ids:
+				ids.erase(emp_id)
+				task["assigned_employee_ids"] = ids
+				if ids.is_empty() and task.get("status", "") == "in_progress":
+					task["status"] = "available"
+	var gm: Node = get_node_or_null("/root/GameManager")
+	if gm != null:
+		for emp in gm.employees.get_hired_employees():
+			if str(emp.id) == emp_id:
+				emp.is_assigned_to_project = false
+				emp.current_project_id = ""
+				break
+	projects_updated.emit()
+
+func set_project_flag(project_id: Variant, flag: String, value: Variant) -> void:
+	var pid: String = str(project_id)
+	for proj in get_projects():
+		if proj.get("id", "") == pid:
+			proj[flag] = value
+			return
+
 func tick_projects(_gm: Node) -> void:
-	pass
+	pass  # Ticking is handled by ClockManager signal
 
 func generate_new_projects(_count: int) -> void:
-	pass
+	pass  # No longer needed — project data is fixed
 
-# ------------------------------------------
-#  CLOCK TICK
-# ------------------------------------------
+# ─────────────────────────────────────────
+#  SAVE / LOAD
+# ─────────────────────────────────────────
+func to_save_array() -> Array:
+	var proj_states: Array = []
+	for proj in get_projects():
+		var task_states: Array = []
+		for task in proj.get("tasks", []):
+			task_states.append({
+				"id":                    task.get("id", ""),
+				"status":                task.get("status", "available"),
+				"progress":              task.get("progress", 0.0),
+				"assigned_employee_ids": task.get("assigned_employee_ids", []).duplicate(),
+			})
+		proj_states.append({
+			"id":                 proj.get("id", ""),
+			"status":             proj.get("status", "available"),
+			"idle_months":        proj.get("idle_months", 0),
+			"completion_percent": proj.get("completion_percent", 0.0),
+			"tasks":              task_states,
+		})
+	return [{
+		"_v":              2,
+		"unlocked_donors": _unlocked_donor_ids.duplicate(),
+		"projects":        proj_states,
+	}]
+
+func load_projects(data: Array) -> void:
+	_area = _build_area()
+	_connect_signals()
+	if data.is_empty():
+		projects_updated.emit()
+		return
+	var entry: Dictionary = data[0]
+	if entry.get("_v", 1) != 2:
+		# Old save format — start fresh with new data
+		projects_updated.emit()
+		return
+	_unlocked_donor_ids.clear()
+	for d in entry.get("unlocked_donors", []):
+		_unlocked_donor_ids.append(str(d))
+	var saved_projs: Array = entry.get("projects", [])
+	for saved_proj in saved_projs:
+		var pid: String = saved_proj.get("id", "")
+		for proj in get_projects():
+			if proj.get("id", "") != pid:
+				continue
+			proj["status"]             = saved_proj.get("status", "locked")
+			proj["idle_months"]        = int(saved_proj.get("idle_months", 0))
+			proj["completion_percent"] = float(saved_proj.get("completion_percent", 0.0))
+			var saved_tasks: Array = saved_proj.get("tasks", [])
+			for saved_task in saved_tasks:
+				var tid: String = saved_task.get("id", "")
+				for task in proj.get("tasks", []):
+					if task.get("id", "") != tid:
+						continue
+					task["status"]                = saved_task.get("status", "blocked")
+					task["progress"]              = float(saved_task.get("progress", 0.0))
+					task["assigned_employee_ids"] = saved_task.get("assigned_employee_ids", []).duplicate()
+	projects_updated.emit()
+
+# ─────────────────────────────────────────
+#  CLOCK TICK — work_day_started
+# ─────────────────────────────────────────
 func _on_work_day_started() -> void:
 	var gm: Node = get_node_or_null("/root/GameManager")
 	if gm == null:
 		return
-	var bulletin_mgr: Node = get_node_or_null("/root/CHAMPBulletinManager")
-	var to_complete: Array = []
-	for proj in _active:
-		# Skip paused projects (complication or conflict penalty handled below)
-		var comp: Dictionary = proj.get("active_complication", {})
-		var comp_effect: String = comp.get("effect_type", "")
-		if comp_effect == "pause":
+	var any_changed: bool = false
+	for proj in get_projects():
+		var proj_status: String = proj.get("status", "")
+		if proj_status == "locked" or proj_status == "completed":
 			continue
-		var base: float        = 1.0 / float(proj.get("duration_ticks", 1))
-		var role_mult: float   = 1.5 if _has_role_match(proj, gm) else 1.0
-		var ot_mult: float     = _get_ot_multiplier(proj, gm)
-		var daily: float       = base * role_mult * ot_mult
-		var fever_mult: float  = 2.0 if gm.is_fever_mode else 1.0
-		# Bulletin speed multiplier
-		var bulletin_mult: float = 1.0
-		if bulletin_mgr != null:
-			var ptype: String = proj.get("project_type", "")
-			bulletin_mult = bulletin_mgr.get_project_speed_multiplier(ptype)
-		# Complication slow multiplier
-		var comp_mult: float = 1.0
-		if comp_effect == "slow":
-			comp_mult = comp.get("effect_value", 1.0)
-		# Conflict penalty (set by InternalProblemManager)
-		var conflict_mult: float = 0.8 if proj.get("conflict_penalty", false) else 1.0
-		proj["progress"] = minf(1.0, proj.get("progress", 0.0) + daily * fever_mult * bulletin_mult * comp_mult * conflict_mult)
-		# Complication: apply one-shot regress if not yet applied
-		if comp_effect == "regress" and not comp.get("_applied", false):
-			proj["progress"] = maxf(0.0, proj.get("progress", 0.0) + comp.get("effect_value", 0.0))
-			comp["_applied"] = true
-		# Try rolling a complication (once per project, only if no active complication)
-		if comp.is_empty():
-			_try_roll_complication(proj, gm)
-		if proj["progress"] >= 1.0:
-			to_complete.append(proj.get("id", -1))
-	var any_completed: bool = not to_complete.is_empty()
-	for pid in to_complete:
-		_complete_by_id(pid, gm)
-	if any_completed:
+		var proj_had_work: bool = false
+		var tasks_newly_done: Array[String] = []
+		for task in proj.get("tasks", []):
+			if task.get("status", "") != "in_progress":
+				continue
+			var ids: Array = task.get("assigned_employee_ids", [])
+			if ids.is_empty():
+				continue
+			proj_had_work = true
+			any_changed = true
+			var tick_delta: float = 0.0
+			for emp in gm.employees.get_hired_employees():
+				if str(emp.id) not in ids:
+					continue
+				var contrib: float = (float(emp.skill) / 100.0) * TASK_PROGRESS_PER_TICK
+				contrib = minf(contrib, TASK_PROGRESS_CAP_PER_TICK)
+				tick_delta += contrib
+			task["progress"] = minf(1.0, task.get("progress", 0.0) + tick_delta)
+			if task.get("progress", 0.0) >= 1.0:
+				tasks_newly_done.append(task.get("id", ""))
+		if proj_had_work:
+			proj["_had_work_this_month"] = true
+		for task_id in tasks_newly_done:
+			_complete_task(task_id, proj, gm)
+			any_changed = true
+		_update_project_completion(proj, gm)
+	if any_changed:
 		projects_updated.emit()
 
-func _get_ot_multiplier(proj: Dictionary, gm: Node) -> float:
-	var ids: Array = proj.get("assigned_employee_ids", [])
-	if ids.is_empty():
-		return 1.0
-	var total_mult: float = 0.0
-	var count: int = 0
-	for emp in gm.employees.get_hired_employees():
-		if emp.id not in ids:
+# ─────────────────────────────────────────
+#  CLOCK TICK — month_changed
+# ─────────────────────────────────────────
+func _on_month_changed(_month: int, _year: int) -> void:
+	var any_changed: bool = false
+	for proj in get_projects():
+		var proj_status: String = proj.get("status", "")
+		if proj_status == "locked" or proj_status == "completed":
+			proj["_had_work_this_month"] = false
 			continue
-		count += 1
-		if emp.is_burned_out:
-			total_mult += 0.2
-		else:
-			match emp.ot_level:
-				1: total_mult += 1.3
-				2: total_mult += 1.5
-				3: total_mult += 1.7
-				_: total_mult += 1.0
-	if count == 0:
-		return 1.0
-	return total_mult / float(count)
+		if not proj.get("_had_work_this_month", false):
+			var idle: int = int(proj.get("idle_months", 0)) + 1
+			proj["idle_months"] = idle
+			if idle >= IDLE_MONTHS_BEFORE_DECAY:
+				_apply_decay(proj)
+				any_changed = true
+		proj["_had_work_this_month"] = false
+	if any_changed:
+		projects_updated.emit()
 
-func _has_role_match(proj: Dictionary, gm: Node) -> bool:
-	var ids: Array = proj.get("assigned_employee_ids", [])
-	if ids.is_empty():
-		return false
-	for emp in gm.employees.get_hired_employees():
-		if emp.id in ids and emp.role == proj.get("required_role", 0):
-			return true
-	return false
-
-func _complete_by_id(pid: int, gm: Node) -> void:
-	for i: int in range(_active.size()):
-		if _active[i].get("id", -1) == pid:
-			var proj: Dictionary = _active[i]
-			_active.remove_at(i)
-			proj["is_complete"] = true
-			proj["is_active"]   = false
-			_completed_names.append(proj.get("name", ""))
-			gm.economy.add_revenue(proj.get("reward_cash", 0), "Project: " + proj.get("name", "Project"))
-			gm.add_corp_points(proj.get("reward_corp_points", 0))
-			gm.company_data["reputation"] = gm.company_data.get("reputation", 0) + proj.get("reward_reputation", 0)
-			var next: Dictionary = _next_from_pool()
-			if not next.is_empty():
-				_available.append(next)
-			print("[Project] %s completed! +$%d +%d CP +%d Rep" % [
-				proj.get("name", "Project"), proj.get("reward_cash", 0),
-				proj.get("reward_corp_points", 0), proj.get("reward_reputation", 0)
-			])
-			project_completed.emit(proj)
-			return
-
-# ------------------------------------------
-#  GENERATION HELPERS
-# ------------------------------------------
-func _generate_available(count: int) -> void:
-	for _i: int in range(count):
-		var proj: Dictionary = _next_from_pool()
-		if proj.is_empty():
-			break
-		_available.append(proj)
-	projects_updated.emit()
-
-func _make_entry(template: Dictionary) -> Dictionary:
-	var proj: Dictionary = template.duplicate()
-	proj["id"]                    = _next_id
-	proj["progress"]              = 0.0
-	proj["assigned_employee_ids"] = []
-	proj["is_active"]             = false
-	proj["is_complete"]           = false
-	proj["active_complication"]   = {}
-	proj["conflict_penalty"]      = false
-	_next_id += 1
-	return proj
-
-func _next_from_pool() -> Dictionary:
-	var used_names: Array = _completed_names.duplicate()
-	for p in _available:
-		used_names.append(p.get("name", ""))
-	for p in _active:
-		used_names.append(p.get("name", ""))
-	var candidates: Array = []
-	for template in LOCAL_PROJECTS:
-		if template.get("name", "") not in used_names:
-			candidates.append(template)
-	if candidates.is_empty():
-		return {}
-	candidates.shuffle()
-	return _make_entry(candidates[0])
-
-# ------------------------------------------
-#  COMPLICATIONS
-# ------------------------------------------
-func _try_roll_complication(proj: Dictionary, gm: Node) -> void:
-	if _rng.randf() > _COMPLICATION_CHANCE:
+# ─────────────────────────────────────────
+#  DONOR SIGNAL
+# ─────────────────────────────────────────
+func _on_donor_won(donor_name: String, _monthly: int) -> void:
+	var donor_id: String = _DONOR_NAME_MAP.get(donor_name, "")
+	if donor_id == "" or donor_id in _unlocked_donor_ids:
 		return
-	var chosen: Dictionary = _COMPLICATIONS[_rng.randi() % _COMPLICATIONS.size()].duplicate(true)
-	_apply_complication(proj, chosen, gm)
+	_unlocked_donor_ids.append(donor_id)
+	for proj in get_projects():
+		if proj.get("unlock_donor_id", "") == donor_id:
+			unlock_project(proj.get("id", ""))
 
-func _apply_complication(proj: Dictionary, comp: Dictionary, gm: Node) -> void:
-	var etype: String = comp.get("effect_type", "")
-	if etype == "reward_cut":
-		var cut: float = comp.get("effect_value", 0.0)
-		# If effect_value is between 0 and 1, treat as multiplier; else as flat cut
-		if cut <= 1.0 and cut > 0.0:
-			proj["reward_cash"] = int(proj.get("reward_cash", 0) * cut)
-		else:
-			proj["reward_cash"] = maxi(0, proj.get("reward_cash", 0) - int(cut))
-		# Reward cuts resolve immediately
-		comp["_applied"] = true
-	proj["active_complication"] = comp
-	print("[ProjectManager] Complication triggered on %s: %s" % [proj.get("name", "Project"), comp.get("label", "")])
-	complication_triggered.emit(proj, comp)
-	projects_updated.emit()
+# ─────────────────────────────────────────
+#  TASK COMPLETION
+# ─────────────────────────────────────────
+func _complete_task(task_id: String, proj: Dictionary, gm: Node) -> void:
+	var task: Dictionary = _find_task(task_id)
+	if task.is_empty():
+		return
+	task["status"]   = "completed"
+	task["progress"] = 1.0
+	gm.economy.add_revenue(
+		task.get("reward_cash", 0),
+		"Task: " + task.get("name", "")
+	)
+	gm.add_corp_points(task.get("reward_cp", 0))
+	print("[ProjectManager] Task done: %s  +$%d +%d CP" % [
+		task.get("name", ""), task.get("reward_cash", 0), task.get("reward_cp", 0)
+	])
+	task_completed.emit(task)
+	_refresh_task_deps(proj)
 
-func resolve_complication(project_id: int, fix_idx: int, gm: Node) -> bool:
-	for proj in _active:
-		if proj.get("id", -1) != project_id:
+func _refresh_task_deps(proj: Dictionary) -> void:
+	if proj.get("status", "") == "locked":
+		return
+	for task in proj.get("tasks", []):
+		var cur: String = task.get("status", "")
+		if cur not in ["blocked", "available"]:
 			continue
-		var comp: Dictionary = proj.get("active_complication", {})
-		if comp.is_empty():
-			return false
-		var fixes: Array = comp.get("fix_options", [])
-		if fix_idx >= fixes.size():
-			return false
-		var fix: Dictionary = fixes[fix_idx]
-		var cost_type: String = fix.get("cost_type", "none")
-		var cost_val: int = int(fix.get("cost_value", 0))
-		match cost_type:
-			"cash":
-				gm.economy.spend(cost_val, "Project Complication Fix")
-			"cp":
-				if gm.corp_points < cost_val:
-					return false
-				gm.corp_points -= cost_val
-				gm.corp_points_changed.emit(gm.corp_points)
-			"reassign", "none":
-				pass
-		proj["active_complication"] = {}
+		var reqs: Array = task.get("requires", [])
+		if reqs.is_empty():
+			if cur == "blocked":
+				task["status"] = "available"
+			continue
+		var all_met: bool = true
+		for req_id in reqs:
+			var req_task: Dictionary = _find_task_in_proj(req_id, proj)
+			if req_task.get("status", "") != "completed":
+				all_met = false
+				break
+		if all_met and cur == "blocked":
+			task["status"] = "available"
+		elif not all_met and cur == "available":
+			task["status"] = "blocked"
+
+func _update_project_completion(proj: Dictionary, gm: Node) -> void:
+	if proj.get("status", "") == "completed":
+		return
+	var tasks: Array = proj.get("tasks", [])
+	if tasks.is_empty():
+		return
+	var done_count: int = 0
+	for task in tasks:
+		if task.get("status", "") == "completed":
+			done_count += 1
+	var pct: float = float(done_count) / float(tasks.size())
+	proj["completion_percent"] = pct
+	if pct >= PROJECT_COMPLETION_THRESHOLD:
+		proj["status"] = "completed"
+		gm.economy.add_revenue(
+			proj.get("reward_cash", 0),
+			"Project: " + proj.get("name", "")
+		)
+		gm.add_corp_points(proj.get("reward_cp", 0))
+		var rep: int = int(proj.get("reward_rep", 0))
+		gm.company_data["reputation"] = gm.company_data.get("reputation", 0) + rep
+		print("[ProjectManager] Project done: %s  +$%d +%d CP +%d REP" % [
+			proj.get("name", ""), proj.get("reward_cash", 0),
+			proj.get("reward_cp", 0), rep
+		])
+		project_completed.emit(proj)
 		projects_updated.emit()
-		return true
-	return false
 
-# ------------------------------------------
-#  PUBLIC HELPERS (used by InternalProblemManager)
-# ------------------------------------------
-func remove_employee_from_all_projects(emp_id: String, gm: Node) -> void:
-	for proj in _active:
-		var ids: Array = proj.get("assigned_employee_ids", [])
-		if emp_id in ids:
-			ids.erase(emp_id)
-			proj["assigned_employee_ids"] = ids
-	for emp in gm.employees.get_hired_employees():
-		if emp.id == emp_id:
-			emp.is_assigned_to_project = false
-			emp.current_project_id = ""
-			break
-	projects_updated.emit()
+func _update_project_status(proj: Dictionary) -> void:
+	if proj.is_empty():
+		return
+	var s: String = proj.get("status", "")
+	if s == "locked" or s == "completed":
+		return
+	for task in proj.get("tasks", []):
+		if task.get("status", "") == "in_progress":
+			proj["status"] = "in_progress"
+			return
+	if s == "in_progress":
+		proj["status"] = "available"
 
-func set_project_flag(project_id: int, flag: String, value: Variant) -> void:
-	for proj in _active:
-		if proj.get("id", -1) == project_id:
-			proj[flag] = value
+func _apply_decay(proj: Dictionary) -> void:
+	# Regress the last completed task to simulate month-over-month decay
+	var tasks: Array = proj.get("tasks", [])
+	for i: int in range(tasks.size() - 1, -1, -1):
+		var task: Dictionary = tasks[i]
+		if task.get("status", "") == "completed":
+			task["status"]   = "in_progress"
+			task["progress"] = maxf(0.0, 1.0 - DECAY_RATE_PER_MONTH)
+			_refresh_task_deps(proj)
+			print("[ProjectManager] Decay: %s task regressed in %s" % [
+				task.get("name", ""), proj.get("name", "")
+			])
 			return
 
-# ------------------------------------------
-#  SAVE / LOAD
-# ------------------------------------------
-func to_save_array() -> Array:
-	var out: Array = []
-	for p in _available:
-		out.append(p.duplicate())
-	for p in _active:
-		out.append(p.duplicate())
-	return out
+# ─────────────────────────────────────────
+#  LOOKUP HELPERS
+# ─────────────────────────────────────────
+func _find_task(task_id: String) -> Dictionary:
+	for proj in get_projects():
+		var result: Dictionary = _find_task_in_proj(task_id, proj)
+		if not result.is_empty():
+			return result
+	return {}
 
-func load_projects(data: Array) -> void:
-	_available.clear()
-	_active.clear()
-	for d in data:
-		if not d.has("name"):
-			continue
-		if d.get("is_active", false) and not d.get("is_complete", false):
-			_active.append(d)
-		elif not d.get("is_active", false) and not d.get("is_complete", false):
-			_available.append(d)
-	if _available.is_empty() and _active.is_empty():
-		_generate_available(3)
-	_connect_clock()
+func _find_task_in_proj(task_id: String, proj: Dictionary) -> Dictionary:
+	for task in proj.get("tasks", []):
+		if task.get("id", "") == task_id:
+			return task
+	return {}
+
+func _find_project_for_task(task_id: String) -> Dictionary:
+	for proj in get_projects():
+		for task in proj.get("tasks", []):
+			if task.get("id", "") == task_id:
+				return proj
+	return {}
+
+func _is_employee_assigned_anywhere(emp_id: String) -> bool:
+	for proj in get_projects():
+		for task in proj.get("tasks", []):
+			if emp_id in task.get("assigned_employee_ids", []):
+				return true
+	return false
