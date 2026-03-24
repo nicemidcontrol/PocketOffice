@@ -175,9 +175,9 @@ func _apply_rewards(donor: Dictionary, gm: Node) -> void:
 	for condition in conditions:
 		gm.employees.trigger_hero_unlock(condition)
 
-	var monthly: int   = int(donor["monthly_funding"])
-	var name: String   = donor["name"]
-	donor_won.emit(name, monthly)
+	var monthly: int      = int(donor["monthly_funding"])
+	var donor_name: String = donor["name"]
+	donor_won.emit(donor_name, monthly)
 
 # ─────────────────────────────────────────
 #  MONTHLY TOTAL
