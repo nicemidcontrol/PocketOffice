@@ -25,7 +25,7 @@ const _DONOR_LIST: Array = [
 	{
 		"id":               "local_ngo",
 		"name":             "Local NGO Partner",
-		"description":      "A small but reliable local partner. Good starting point.",
+		"description":      "A small NGO that actually answers emails. In this industry, that makes them exceptional.",
 		"cp_cost":          50,
 		"req_reputation":   20,
 		"req_year":         1,
@@ -39,7 +39,7 @@ const _DONOR_LIST: Array = [
 	{
 		"id":               "government_agency",
 		"name":             "Government Agency",
-		"description":      "Bureaucratic but well-funded. Requires management expertise.",
+		"description":      "They have the budget. They have the paperwork. Oh, the paperwork. So much paperwork.",
 		"cp_cost":          150,
 		"req_reputation":   50,
 		"req_year":         1,
@@ -53,7 +53,7 @@ const _DONOR_LIST: Array = [
 	{
 		"id":               "entertainment_corp",
 		"name":             "Entertainment Corporation",
-		"description":      "Creative and well-connected. Needs design talent.",
+		"description":      "They want to 'raise awareness' which means your logo on their concert banner. Hey, money is money.",
 		"cp_cost":          200,
 		"req_reputation":   60,
 		"req_year":         1,
@@ -67,7 +67,7 @@ const _DONOR_LIST: Array = [
 	{
 		"id":               "international_foundation",
 		"name":             "International Foundation",
-		"description":      "Prestigious global partner. Significant reputation required.",
+		"description":      "Old money, good intentions, and a 200-page grant application. Better start writing now.",
 		"cp_cost":          300,
 		"req_reputation":   80,
 		"req_year":         2,
@@ -81,7 +81,7 @@ const _DONOR_LIST: Array = [
 	{
 		"id":               "un_partner",
 		"name":             "UN Partner",
-		"description":      "The pinnacle of NGO achievement. Almost impossible to win.",
+		"description":      "The big leagues. Their approval process has an approval process. But the funding? Life-changing.",
 		"cp_cost":          500,
 		"req_reputation":   100,
 		"req_year":         3,
