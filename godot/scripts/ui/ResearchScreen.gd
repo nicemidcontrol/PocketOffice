@@ -39,9 +39,8 @@ func _ready() -> void:
 		_dm.donor_won.connect(_on_donor_won)
 		_items = _dm.donors
 
-	set_items_count(_items.size())
-
 	# ── label styling ─────────────────────────────────────────────────
+	# NOTE: must run before set_items_count() which triggers _refresh_display()
 	_desc_label.autowrap_mode     = TextServer.AUTOWRAP_WORD_SMART
 	_desc_label.max_lines_visible = 2
 	_desc_label.add_theme_font_size_override("font_size", 11)
@@ -66,10 +65,14 @@ func _ready() -> void:
 	detail_vbox.move_child(_req_rich, _req_label.get_index())
 	_req_label.hide()
 
+	set_items_count(_items.size())
+
 # ─────────────────────────────────────────
 #  DISPLAY (BaseModal override)
 # ─────────────────────────────────────────
 func _refresh_display() -> void:
+	if _req_rich == null:
+		return
 	if _items.is_empty() or _dm == null or _gm == null:
 		_item_name_label.text   = "No items"
 		_page_label.text        = "0 / 0"
