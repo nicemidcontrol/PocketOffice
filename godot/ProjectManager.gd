@@ -33,6 +33,14 @@ var _area: Dictionary = {}
 var _unlocked_donor_ids: Array[String] = []
 
 # ─────────────────────────────────────────
+#  LIFECYCLE
+# ─────────────────────────────────────────
+func _ready() -> void:
+	# Failsafe: connect signals in case initialize() is not called before
+	# ClockManager starts ticking (e.g. hot-reload or test scenes).
+	_connect_signals()
+
+# ─────────────────────────────────────────
 #  INIT
 # ─────────────────────────────────────────
 func initialize() -> void:
@@ -488,8 +496,18 @@ func load_projects(data: Array) -> void:
 func _on_work_day_started() -> void:
 	var gm: Node = get_node_or_null("/root/GameManager")
 	if gm == null:
+		print("[ProjectManager] _on_work_day_started — GameManager not found, skipping")
 		return
 	var any_changed: bool = false
+	var active_task_count: int = 0
+	for proj in get_projects():
+		var proj_status: String = proj.get("status", "")
+		if proj_status == "locked" or proj_status == "completed":
+			continue
+		for task in proj.get("tasks", []):
+			if task.get("status", "") == "in_progress":
+				active_task_count += 1
+	print("[ProjectManager] Tick — processing %d active tasks" % active_task_count)
 	for proj in get_projects():
 		var proj_status: String = proj.get("status", "")
 		if proj_status == "locked" or proj_status == "completed":
@@ -511,7 +529,14 @@ func _on_work_day_started() -> void:
 				var contrib: float = (float(emp.skill) / 100.0) * TASK_PROGRESS_PER_TICK
 				contrib = minf(contrib, TASK_PROGRESS_CAP_PER_TICK)
 				tick_delta += contrib
-			task["progress"] = minf(1.0, task.get("progress", 0.0) + tick_delta)
+				print("[ProjectManager]   emp %s (skill %d) contrib %.3f" % [
+					emp.id, emp.skill, contrib
+				])
+			var prev_prog: float = task.get("progress", 0.0)
+			task["progress"] = minf(1.0, prev_prog + tick_delta)
+			print("[ProjectManager]   task '%s' progress %.2f -> %.2f (delta %.3f)" % [
+				task.get("id", ""), prev_prog, task.get("progress", 0.0), tick_delta
+			])
 			if task.get("progress", 0.0) >= 1.0:
 				tasks_newly_done.append(task.get("id", ""))
 		if proj_had_work:
