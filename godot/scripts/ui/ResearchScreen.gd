@@ -131,7 +131,7 @@ func _refresh_display() -> void:
 	# Rewards
 	var monthly: int = int(item.get("monthly_funding", 0))
 	var one_cp: int  = int(item.get("one_time_cp", 0))
-	_reward_label.text = "+$%d/mo   +%d CP bonus" % [monthly, one_cp]
+	_reward_label.text = "+%s/mo   +%d CP bonus" % [_gm.format_cash(monthly), one_cp]
 
 	# Unlocks
 	var hero_names: Array = item.get("unlocks_hero_names", [])
@@ -187,7 +187,7 @@ func _on_cp_changed(new_val: int) -> void:
 	_refresh_display()
 
 func _on_donor_won(donor_name_str: String, monthly: int) -> void:
-	_notif_label.text    = "%s secured!\n+$%d/mo funding" % [donor_name_str, monthly]
+	_notif_label.text    = "%s secured!\n+%s/mo funding" % [donor_name_str, _gm.format_cash(monthly)]
 	_notif_panel.visible = true
 	_notif_timer.start()
 	_refresh_display()

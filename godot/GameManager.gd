@@ -362,6 +362,31 @@ func load_game() -> void:
 # ─────────────────────────────────────────
 #  CLOCK HANDLERS
 # ─────────────────────────────────────────
+# ─────────────────────────────────────────
+#  UTILITY
+# ─────────────────────────────────────────
+func format_cash(amount: int) -> String:
+	var negative: bool = amount < 0
+	var abs_val: int = abs(amount)
+	var prefix: String = "-" if negative else ""
+	if abs_val >= 10000000:
+		return "$%s%dM" % [prefix, abs_val / 1000000]
+	elif abs_val >= 1000000:
+		return "$%s%.1fM" % [prefix, abs_val / 1000000.0]
+	else:
+		var s: String = str(abs_val)
+		var result: String = ""
+		var count: int = 0
+		for i in range(s.length() - 1, -1, -1):
+			if count > 0 and count % 3 == 0:
+				result = "," + result
+			result = s[i] + result
+			count += 1
+		return "$%s%s" % [prefix, result]
+
+# ─────────────────────────────────────────
+#  CLOCK HANDLERS
+# ─────────────────────────────────────────
 func _on_clock_month_changed(_month: int, _year: int) -> void:
 	var total_salary: int = employees.get_total_monthly_salary()
 	economy.spend(total_salary, "Monthly Salaries")
