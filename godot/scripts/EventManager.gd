@@ -8,7 +8,10 @@ signal event_fired(event: Dictionary)
 # ------------------------------------------
 #  CONFIG
 # ------------------------------------------
-const _FIRE_CHANCE: float = 0.25
+const _FIRE_CHANCE_LOW:  float = 0.30   # months 6-12
+const _FIRE_CHANCE_MID:  float = 0.60   # months 13-24
+const _FIRE_CHANCE_FULL: float = 1.00   # months 25+
+const _MIN_MONTHS:       int   = 6      # no events before this
 
 # ------------------------------------------
 #  STATE
@@ -54,6 +57,7 @@ const _EVENTS: Array = [
 		"id": "fish_microwave",
 		"title": "Someone Left Fish in the Microwave",
 		"description": "The entire office smells. Productivity is suffering.",
+		"requires": "facility:microwave",
 		"choices": [
 			{
 				"text": "Send a passive-aggressive office email",
@@ -359,11 +363,74 @@ func _ready() -> void:
 func _on_work_day_started() -> void:
 	if _active:
 		return
-	if _rng.randf() >= _FIRE_CHANCE:
+	var gm: Node = get_node_or_null("/root/GameManager")
+	if gm == null:
 		return
-	var idx: int = _rng.randi_range(0, _EVENTS.size() - 1)
+
+	# 1. Month gate — no events before month 6
+	var total_months: int = _get_total_months(gm)
+	if total_months < _MIN_MONTHS:
+		return
+
+	# 2. Gradual ramp-up chance
+	var fire_chance: float = _get_fire_chance(total_months)
+	if _rng.randf() >= fire_chance:
+		return
+
+	# 3. Filter events by requires conditions, then pick one
+	var fm: Node = get_node_or_null("/root/FacilityManager")
+	var eligible: Array = []
+	for ev in _EVENTS:
+		if _check_requires(ev, gm, fm, total_months):
+			eligible.append(ev)
+	if eligible.is_empty():
+		return
+
 	_active = true
-	event_fired.emit(_EVENTS[idx])
+	event_fired.emit(eligible[_rng.randi_range(0, eligible.size() - 1)])
+
+# ------------------------------------------
+#  TIMING HELPERS
+# ------------------------------------------
+func _get_total_months(gm: Node) -> int:
+	var year: int  = gm.game_year
+	var month: int = gm.company_data.get("current_month", 1)
+	return (year - 1) * 12 + month
+
+func _get_fire_chance(total_months: int) -> float:
+	if total_months >= 25:
+		return _FIRE_CHANCE_FULL
+	elif total_months >= 13:
+		return _FIRE_CHANCE_MID
+	return _FIRE_CHANCE_LOW
+
+# ------------------------------------------
+#  CONDITION CHECK
+# ------------------------------------------
+# Parses the optional "requires" string on an event dict.
+# Formats: "facility:<id>"  |  "month_min:<n>"  |  "employees_min:<n>"
+func _check_requires(ev: Dictionary, gm: Node, fm: Node, total_months: int) -> bool:
+	var req: String = ev.get("requires", "")
+	if req == "":
+		return true
+	var parts: PackedStringArray = req.split(":")
+	if parts.size() < 2:
+		return true
+	var cond_type: String = parts[0]
+	var cond_val: String  = parts[1]
+	match cond_type:
+		"facility":
+			if fm == null:
+				return false
+			for f in fm.facilities:
+				if f.get("id", "") == cond_val and f.get("placed", false):
+					return true
+			return false
+		"month_min":
+			return total_months >= int(cond_val)
+		"employees_min":
+			return gm.employees.get_hired_employees().size() >= int(cond_val)
+	return true
 
 # ------------------------------------------
 #  RESOLVE  (called by EventPopup after player picks a choice)

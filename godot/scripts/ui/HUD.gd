@@ -48,7 +48,7 @@ func _refresh_all() -> void:
 	_update_date()
 
 func _update_cash(amount: int) -> void:
-	cash_label.text = "$" + _format_number(amount)
+	cash_label.text = _gm.format_cash(amount)
 
 func _update_reputation() -> void:
 	pass
@@ -70,13 +70,6 @@ func _update_season(month: int) -> void:
 	elif month >= 9 and month <= 11:
 		season = "AUTUMN"
 	season_label.text = season
-
-func _format_number(n: int) -> String:
-	if n >= 1_000_000:
-		return "%dM" % (n / 1_000_000)
-	if n >= 1_000:
-		return "%dK" % (n / 1_000)
-	return str(n)
 
 # ─────────────────────────────────────────
 #  SIGNAL HANDLERS

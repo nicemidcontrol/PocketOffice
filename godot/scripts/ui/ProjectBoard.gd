@@ -43,7 +43,7 @@ func _ready() -> void:
 	if _gm != null:
 		_gm.economy.cash_changed.connect(_on_cash_changed)
 		_gm.projects.projects_updated.connect(_on_projects_updated)
-		_cash_label.text = "$%d" % _gm.economy.current_cash
+		_cash_label.text = _gm.format_cash(_gm.economy.current_cash)
 
 	# Hide old TabRow — navigation is now handled by BackBtn at bottom
 	_tab_row.visible = false
@@ -159,8 +159,8 @@ func _refresh_projects_display() -> void:
 	_info_label.text = "%d/%d tasks done" % [done_tasks, total_tasks]
 
 	# Line 5: Reward
-	_reward_label.text = "$%s  +%d CP  +%d Rep" % [
-		_fmt_cash(int(proj.get("reward_cash", 0))),
+	_reward_label.text = "%s  +%d CP  +%d Rep" % [
+		_gm.format_cash(int(proj.get("reward_cash", 0))),
 		int(proj.get("reward_cp", 0)),
 		int(proj.get("reward_rep", 0)),
 	]
@@ -250,8 +250,8 @@ func _refresh_tasks_display() -> void:
 	_info_label.text = "%d ticks" % duration_ticks
 
 	# Line 6: Reward
-	_reward_label.text = "$%s  +%d CP" % [
-		_fmt_cash(int(task.get("reward_cash", 0))),
+	_reward_label.text = "%s  +%d CP" % [
+		_gm.format_cash(int(task.get("reward_cash", 0))),
 		int(task.get("reward_cp", 0)),
 	]
 
@@ -413,7 +413,7 @@ func _on_assign_employee(task_id: String, emp_id: String) -> void:
 #  SIGNAL HANDLERS
 # ─────────────────────────────────────────
 func _on_cash_changed(new_cash: int) -> void:
-	_cash_label.text = "$%d" % new_cash
+	_cash_label.text = _gm.format_cash(new_cash)
 
 func _on_projects_updated() -> void:
 	if _view_mode == MODE_PROJECTS:
@@ -441,11 +441,6 @@ func _progress_bar(pct: float, width: int) -> String:
 		else:
 			bar += "-"
 	return "[%s] %d%%" % [bar, int(pct * 100.0)]
-
-func _fmt_cash(amount: int) -> String:
-	if amount >= 1000:
-		return "%d,%03d" % [amount / 1000, amount % 1000]
-	return str(amount)
 
 func _role_name(role: int) -> String:
 	match role:
