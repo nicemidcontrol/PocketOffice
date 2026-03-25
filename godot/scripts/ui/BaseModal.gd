@@ -28,6 +28,11 @@ func _on_dimmer_input(event: InputEvent) -> void:
 			_on_close()
 
 func _on_close() -> void:
+	# Ensure PauseMenu is dismissed so player returns directly to the office.
+	# PauseMenu._close() hides its root and unpauses the tree.
+	var pause_menu: Node = get_node_or_null("/root/Main/PauseMenu")
+	if pause_menu != null:
+		pause_menu.call("_close")
 	emit_signal("screen_closed")
 	queue_free()
 
