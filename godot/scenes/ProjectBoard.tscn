@@ -251,6 +251,15 @@ text = "ASSIGN"
 theme_override_font_sizes/font_size = 13
 theme_override_colors/font_color = Color(0.4, 0.8, 1.0, 1.0)
 
+[node name="BackBtn" type="Button" parent="Dimmer/Card/VBox"]
+layout_mode = 2
+size_flags_horizontal = 3
+custom_minimum_size = Vector2(0, 36)
+visible = false
+text = "BACK"
+theme_override_font_sizes/font_size = 13
+theme_override_colors/font_color = Color(0.6, 0.7, 0.9, 1.0)
+
 [node name="StatusLabel" type="Label" parent="Dimmer/Card/VBox"]
 layout_mode = 2
 size_flags_horizontal = 3
@@ -334,4 +343,5 @@ theme_override_colors/font_color = Color(0.6, 0.7, 0.9, 1.0)
 [connection signal="pressed" from="Dimmer/Card/VBox/TabRow/ActiveTab" to="." method="_on_active_tab"]
 [connection signal="pressed" from="Dimmer/Card/VBox/TabRow/AvailTab" to="." method="_on_avail_tab"]
 [connection signal="pressed" from="Dimmer/Card/VBox/ActionBtn" to="." method="_on_action_pressed"]
+[connection signal="pressed" from="Dimmer/Card/VBox/BackBtn" to="." method="_on_back_pressed"]
 [connection signal="pressed" from="AssignPanel/AssignMargin/AssignVBox/AssignClose" to="." method="_on_assign_close_pressed"]
