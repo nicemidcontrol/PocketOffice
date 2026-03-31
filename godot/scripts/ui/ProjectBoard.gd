@@ -444,21 +444,18 @@ func _progress_bar(pct: float, width: int) -> String:
 
 func _role_name(role: int) -> String:
 	match role:
-		0: return "Developer"
-		1: return "Designer"
-		2: return "Marketer"
-		3: return "HR"
-		4: return "Accountant"
-		5: return "Manager"
-		6: return "Intern"
+		0: return "Operations"
+		1: return "Procurement"
+		2: return "Secretary"
+		3: return "Management"
+		4: return "Finance"
 	return "Unknown"
 
 func _role_color(role: int) -> Color:
 	match role:
-		0: return Color(0.22, 0.9,  0.42, 1.0)
-		1: return Color(0.94, 0.47, 0.20, 1.0)
-		2: return Color(0.20, 0.85, 0.94, 1.0)
-		3: return Color(0.90, 0.22, 0.42, 1.0)
-		4: return Color(1.00, 0.82, 0.10, 1.0)
-		5: return Color(0.78, 0.22, 0.90, 1.0)
+		0: return Color(0.22, 0.9,  0.42, 1.0)  # green  — OPS
+		1: return Color(0.94, 0.47, 0.20, 1.0)  # orange — PRO
+		2: return Color(0.20, 0.85, 0.94, 1.0)  # cyan   — SEC
+		3: return Color(0.78, 0.22, 0.90, 1.0)  # purple — MGT
+		4: return Color(1.00, 0.82, 0.10, 1.0)  # yellow — FIN
 	return Color(0.50, 0.51, 0.62, 1.0)

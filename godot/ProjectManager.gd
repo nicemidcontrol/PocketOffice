@@ -533,7 +533,7 @@ func _on_work_day_started() -> void:
 				if emp == null:
 					print("[PM] Employee %s not found!" % str(emp_id))
 					continue
-				var contribution: float = (float(emp.skill) / 100.0) * TASK_PROGRESS_PER_TICK
+				var contribution: float = (float(emp.technical) / 1000.0) * TASK_PROGRESS_PER_TICK
 				contribution = minf(contribution, TASK_PROGRESS_CAP_PER_TICK)
 				total_progress += contribution
 			task["progress"] = minf(1.0, task.get("progress", 0.0) + total_progress)

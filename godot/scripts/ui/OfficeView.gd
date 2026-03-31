@@ -124,26 +124,21 @@ func _on_employee_hired(_emp: Object) -> void:
 
 # ─── DISPLAY HELPERS ──────────────────────────────────────────────────────────
 
-# Employee.Role: DEVELOPER=0 DESIGNER=1 MARKETER=2 HR_SPECIALIST=3
-#               ACCOUNTANT=4 MANAGER=5 INTERN=6
+# Employee.Role: OPERATIONS=0 PROCUREMENT=1 SECRETARY=2 MANAGEMENT=3 FINANCE=4
 func _role_str(role: int) -> String:
 	match role:
-		0: return "DEV"
-		1: return "DES"
-		2: return "MKT"
-		3: return "HR"
-		4: return "ACC"
-		5: return "MGR"
-		6: return "INT"
+		0: return "OPS"
+		1: return "PRO"
+		2: return "SEC"
+		3: return "MGT"
+		4: return "FIN"
 	return "???"
 
 func _role_color(role: int) -> Color:
 	match role:
-		0: return Color(0.506, 0.780, 0.518, 1.0)  # #81C784 — DEV  green
-		1: return Color(0.310, 0.765, 0.969, 1.0)  # #4FC3F7 — DES  cyan
-		2: return Color(1.000, 0.718, 0.302, 1.0)  # #FFB74D — MKT  orange
-		3: return Color(0.400, 0.800, 1.000, 1.0)  # ~#66CCFF — HR  blue
-		4: return Color(0.502, 0.796, 0.769, 1.0)  # #80CBC4 — ACC teal
-		5: return Color(0.808, 0.576, 0.847, 1.0)  # #CE93D8 — MGR  purple
-		6: return Color(0.957, 0.561, 0.694, 1.0)  # #F48FB1 — INT  pink
+		0: return Color(0.506, 0.780, 0.518, 1.0)  # green   — OPS
+		1: return Color(1.000, 0.718, 0.302, 1.0)  # orange  — PRO
+		2: return Color(0.310, 0.765, 0.969, 1.0)  # cyan    — SEC
+		3: return Color(0.808, 0.576, 0.847, 1.0)  # purple  — MGT
+		4: return Color(0.502, 0.796, 0.769, 1.0)  # teal    — FIN
 	return Color.WHITE

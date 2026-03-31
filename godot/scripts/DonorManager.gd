@@ -9,13 +9,11 @@ signal donor_won(donor_name: String, monthly: int)
 #  ROLE CONSTANTS  (matches Employee.Role enum)
 # ─────────────────────────────────────────
 const _ROLE_INT: Dictionary = {
-	"DEV": 0,
-	"DES": 1,
-	"MKT": 2,
-	"HR":  3,
-	"ACC": 4,
-	"MGR": 5,
-	"INT": 6,
+	"OPS": 0,
+	"PRO": 1,
+	"SEC": 2,
+	"MGT": 3,
+	"FIN": 4,
 }
 
 # ─────────────────────────────────────────
@@ -43,7 +41,7 @@ const _DONOR_LIST: Array = [
 		"cp_cost":          150,
 		"req_reputation":   50,
 		"req_year":         1,
-		"req_role":         "MGR",
+		"req_role":         "MGT",
 		"monthly_funding":  5000,
 		"one_time_cp":      80,
 		"unlocks_hero_conditions": ["research_government", "donor_unlock"],
@@ -57,7 +55,7 @@ const _DONOR_LIST: Array = [
 		"cp_cost":          200,
 		"req_reputation":   60,
 		"req_year":         1,
-		"req_role":         "DES",
+		"req_role":         "SEC",
 		"monthly_funding":  4000,
 		"one_time_cp":      100,
 		"unlocks_hero_conditions": ["donor_entertainment"],

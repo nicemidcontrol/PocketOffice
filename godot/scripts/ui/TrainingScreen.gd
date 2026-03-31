@@ -373,7 +373,7 @@ func _open_picker(slot_idx: int) -> void:
 				already_in_slot = true
 				break
 		var emp_btn: Button = Button.new()
-		emp_btn.text = "%s  %s  Sk%d" % [emp.full_name(), emp.role_name(), emp.skill]
+		emp_btn.text = "%s  %s  T%d" % [emp.full_name(), emp.role_name(), emp.technical]
 		emp_btn.add_theme_font_size_override("font_size", 11)
 		emp_btn.disabled = already_in_slot
 		var emp_ref: Object = emp
@@ -445,11 +445,11 @@ func _on_run_training() -> void:
 		var double_key: String = ""
 		if _selected_training.get("double_stat", "") == "role_primary":
 			double_key = _tm._role_primary_stat(emp)
-		for sk in ["skill", "motivation", "teamwork", "creativity"]:
+		for sk in ["technical", "procurement", "focus", "communication", "management", "logistics", "precision", "charm", "morale"]:
 			if gained.has(sk):
 				var suffix: String = " (doubled!)" if sk == double_key and double_key != "" else ""
 				stat_parts.append("  %s +%d%s" % [_stat_short(sk), gained[sk], suffix])
-		for combo_key in ["combo_all", "combo_skill", "combo_mot", "combo_cre", "combo_exp", "combo_rep"]:
+		for combo_key in ["combo_technical", "combo_focus", "combo_logistics", "combo_morale", "combo_exp", "combo_rep"]:
 			if gained.has(combo_key):
 				stat_parts.append("  [combo] +%d" % gained[combo_key])
 		lines.append(emp_line + "\n" + "\n".join(stat_parts))
@@ -472,10 +472,15 @@ func _on_run_training() -> void:
 # -----------------------------------------
 func _stat_short(key: String) -> String:
 	match key:
-		"skill":      return "SKL"
-		"motivation": return "MOT"
-		"teamwork":   return "TWK"
-		"creativity": return "CRE"
+		"technical":     return "TEC"
+		"procurement":   return "PRO"
+		"focus":         return "FOC"
+		"communication": return "COM"
+		"management":    return "MGT"
+		"logistics":     return "LOG"
+		"precision":     return "PRE"
+		"charm":         return "CHM"
+		"morale":        return "MRL"
 	return key.to_upper().left(3)
 
 func _on_back_pressed() -> void:

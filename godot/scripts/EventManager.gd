@@ -455,11 +455,11 @@ func _apply_effect(effect: Dictionary, gm: Node) -> void:
 				gm.economy.spend(-v, "Event")
 		"motivation_all":
 			for emp in gm.employees.get_hired_employees():
-				emp.adjust_motivation(v)
+				emp.adjust_morale(v)
 		"motivation_employee":
 			var hired: Array = gm.employees.get_hired_employees()
 			if not hired.is_empty():
-				hired[_rng.randi_range(0, hired.size() - 1)].adjust_motivation(v)
+				hired[_rng.randi_range(0, hired.size() - 1)].adjust_morale(v)
 		"reputation":
 			var rep: int = gm.company_data.get("reputation", 0)
 			gm.company_data["reputation"] = clampi(rep + v, 0, 1000)
