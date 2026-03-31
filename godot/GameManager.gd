@@ -202,7 +202,7 @@ func _check_tier_upgrade() -> void:
 func _calculate_annual_score() -> int:
 	var rep_score      := minf(company_data["reputation"] / 10.0, 30.0)
 	var finance_score  := minf(economy.current_cash / 10000.0, 40.0)
-	var employee_score := minf(employees.average_motivation() / 100.0 * 30.0, 30.0)
+	var employee_score := minf(employees.average_morale() / 100.0 * 30.0, 30.0)
 	return roundi(rep_score + finance_score + employee_score)
 
 func _build_evaluation_results() -> Array:
@@ -265,7 +265,7 @@ func _check_fever_trigger() -> void:
 	var current_month: int = company_data.get("current_month", 1)
 	if current_month == _fever_cooldown_month:
 		return
-	var avg_mot: float = employees.average_motivation()
+	var avg_mot: float = employees.average_morale()
 	if avg_mot >= 100.0:
 		_start_fever_mode()
 

@@ -246,7 +246,7 @@ func _on_mot_tick(_tick: int) -> void:
 	var gm: Node = get_node_or_null("/root/GameManager")
 	if gm == null:
 		return
-	var avg: float = gm.employees.average_motivation()
+	var avg: float = gm.employees.average_morale()
 	_fever_bar.value = avg
 	_fever_label.visible = true
 	var fill_style: StyleBoxFlat = StyleBoxFlat.new()

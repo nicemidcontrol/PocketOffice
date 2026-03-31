@@ -172,13 +172,13 @@ func _on_work_day_started() -> void:
 func hired_count() -> int:
 	return _all_employees.filter(func(e): return e.is_hired).size()
 
-func average_motivation() -> float:
+func average_morale() -> float:
 	var hired := _all_employees.filter(func(e): return e.is_hired)
 	if hired.is_empty():
 		return 0.0
 	var total := 0
 	for e in hired:
-		total += e.motivation
+		total += e.morale
 	return float(total) / hired.size()
 
 func get_total_monthly_salary() -> int:
