@@ -18,21 +18,45 @@ const OT_CRUNCH: int = 3
 
 # ─────────────────────────────────────────
 #  HERO TEMPLATES  (id, role int, personality int)
-#  Role:        DEVELOPER=0 DESIGNER=1 MARKETER=2 HR_SPECIALIST=3
-#               ACCOUNTANT=4 MANAGER=5 INTERN=6
+#  Role:        OPERATIONS=0 PROCUREMENT=1 SECRETARY=2 MANAGEMENT=3 FINANCE=4
 #  Personality: NORMAL=0 WORKAHOLIC=1 LAZY=2 GOSSIP=3
 #               PERFECTIONIST=4 TEAM_PLAYER=5 LONE_STAR=6
 # ─────────────────────────────────────────
 const _HERO_TEMPLATES: Array = [
 	{
+		"id": "george_b",
+		"first_name": "George",
+		"last_name": "B.",
+		"role": 0,
+		"personality": 0,
+		"personality_label": "Normal",
+		"tier": "D",
+		"salary": 2200,
+		"description": "Your first field officer. Reliable, practical, and never complains about mud.",
+		"unlock_condition": "start",
+		"unlock_hint": "Starting employee"
+	},
+	{
+		"id": "erik_v",
+		"first_name": "Erik",
+		"last_name": "V.",
+		"role": 4,
+		"personality": 4,
+		"personality_label": "Perfectionist",
+		"tier": "D",
+		"salary": 2400,
+		"description": "Your first finance officer. Spreadsheets are his love language.",
+		"unlock_condition": "start",
+		"unlock_hint": "Starting employee"
+	},
+	{
 		"id": "thoksin_s",
 		"first_name": "Thoksin",
 		"last_name": "S.",
-		"role": 5,
+		"role": 3,
 		"personality": 3,
 		"personality_label": "Brown-noser",
-		"skill": 85,
-		"motivation": 80,
+		"tier": "A",
 		"salary": 8500,
 		"description": "Former executive with controversial methods but undeniable results.",
 		"unlock_condition": "research_government",
@@ -42,11 +66,10 @@ const _HERO_TEMPLATES: Array = [
 		"id": "prayui_c",
 		"first_name": "Prayui",
 		"last_name": "C.",
-		"role": 5,
+		"role": 3,
 		"personality": 4,
 		"personality_label": "Perfectionist",
-		"skill": 80,
-		"motivation": 75,
+		"tier": "A",
 		"salary": 9000,
 		"description": "Military-trained manager. Everything must be orderly. No exceptions.",
 		"unlock_condition": "special_event",
@@ -56,11 +79,10 @@ const _HERO_TEMPLATES: Array = [
 		"id": "peta_l",
 		"first_name": "Peta",
 		"last_name": "L.",
-		"role": 5,
+		"role": 3,
 		"personality": 5,
 		"personality_label": "Team Player",
-		"skill": 78,
-		"motivation": 90,
+		"tier": "B",
 		"salary": 7500,
 		"description": "Young progressive manager loved by the team but feared by old guard.",
 		"unlock_condition": "donor_unlock",
@@ -70,11 +92,10 @@ const _HERO_TEMPLATES: Array = [
 		"id": "burapol_k",
 		"first_name": "Burapol",
 		"last_name": "K.",
-		"role": 6,
+		"role": 0,
 		"personality": 1,
 		"personality_label": "Workaholic",
-		"skill": 90,
-		"motivation": 95,
+		"tier": "S",
 		"salary": 6000,
 		"description": "World-class discipline. Will outwork everyone. Literally everyone.",
 		"unlock_condition": "special_event",
@@ -84,11 +105,10 @@ const _HERO_TEMPLATES: Array = [
 		"id": "somrak_p",
 		"first_name": "Somrak",
 		"last_name": "P.",
-		"role": 5,
+		"role": 3,
 		"personality": 4,
 		"personality_label": "Perfectionist",
-		"skill": 88,
-		"motivation": 85,
+		"tier": "A",
 		"salary": 8000,
 		"description": "Olympic-level dedication. Trains the team like champions.",
 		"unlock_condition": "special_event",
@@ -98,11 +118,10 @@ const _HERO_TEMPLATES: Array = [
 		"id": "liza_m",
 		"first_name": "Liza",
 		"last_name": "M.",
-		"role": 1,
+		"role": 2,
 		"personality": 1,
 		"personality_label": "Workaholic",
-		"skill": 92,
-		"motivation": 88,
+		"tier": "S",
 		"salary": 9500,
 		"description": "Chart-topping creative. Her designs go viral every time.",
 		"unlock_condition": "donor_entertainment",
@@ -112,11 +131,10 @@ const _HERO_TEMPLATES: Array = [
 		"id": "derek_anan",
 		"first_name": "Derek Anan",
 		"last_name": "Boonphun",
-		"role": 5,
+		"role": 3,
 		"personality": 6,
 		"personality_label": "Legendary",
-		"skill": 100,
-		"motivation": 100,
+		"tier": "S",
 		"salary": 15000,
 		"description": "The one who built everything from nothing. A true legend. Some say he never sleeps.",
 		"unlock_condition": "ultimate",
@@ -272,20 +290,29 @@ func create_hero_employee(template: Dictionary) -> Employee:
 	emp.last_name = template["last_name"]
 	emp.role = int(template["role"])
 	emp.personality = int(template["personality"])
-	emp.skill = int(template["skill"])
-	emp.motivation = int(template["motivation"])
 	emp.monthly_salary = int(template["salary"])
-	emp.teamwork = 70
-	emp.creativity = 70
+	emp.morale = 50
 	emp.level = 1
 	emp.experience_points = 0
 	emp.is_hired = false
 	emp.is_burned_out = false
 	emp.ot_level = 0
 	emp.stress = 0
+	emp.ot_months_consecutive = 0
+	emp.low_morale_months = 0
+	emp.idle_months = 0
 	emp.current_project_id = ""
 	emp.is_assigned_to_project = false
+	emp.generate_stats(template.get("tier", "F"), emp.role)
+	emp._apply_personality_bonuses()
 	return emp
+
+# Hire George and Erik at the start of a new game.
+func hire_starting_team() -> void:
+	for template in _HERO_TEMPLATES:
+		if template.get("unlock_condition", "") == "start":
+			var emp: Employee = create_hero_employee(template)
+			hire(emp)
 
 # ─────────────────────────────────────────
 #  DAILY TICK  (called by GameManager)
@@ -297,10 +324,10 @@ func tick_motivation() -> void:
 		var was_burnout: bool = emp.is_burned_out
 		if emp.is_burned_out:
 			if emp.ot_level == 0:
-				emp.adjust_motivation(5)
+				emp.adjust_morale(5)
 				emp.stress = clampi(emp.stress - 5, 0, 100)
 			else:
-				emp.adjust_motivation(-5)
+				emp.adjust_morale(-5)
 				emp.stress = clampi(emp.stress + 5, 0, 100)
 		elif emp.ot_level > 0:
 			var mot_cost: int = 0
@@ -308,15 +335,15 @@ func tick_motivation() -> void:
 				OT_LIGHT:  mot_cost = 5
 				OT_HEAVY:  mot_cost = 15
 				OT_CRUNCH: mot_cost = 30
-			emp.adjust_motivation(-mot_cost)
+			emp.adjust_morale(-mot_cost)
 			emp.stress = clampi(emp.stress + emp.ot_level * 10, 0, 100)
 			if emp.stress >= 90:
-				emp.adjust_motivation(-20)
+				emp.adjust_morale(-20)
 		elif emp.personality == Employee.Personality.WORKAHOLIC:
-			emp.adjust_motivation(-1)
+			emp.adjust_morale(-1)
 			emp.stress = clampi(emp.stress - 5, 0, 100)
 		else:
-			emp.adjust_motivation(3)
+			emp.adjust_morale(3)
 			emp.stress = clampi(emp.stress - 10, 0, 100)
 		if emp.is_burned_out and not was_burnout:
 			employee_burnout.emit(emp.full_name())

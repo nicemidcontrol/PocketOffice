@@ -11,7 +11,7 @@ const _FACILITY_TEMPLATES: Array = [
 		"category": "break",
 		"tile_w": 1,
 		"tile_h": 1,
-		"stat_buff": {"motivation": 3},
+		"stat_buff": {"morale": 3},
 		"placed": false
 	},
 	{
@@ -44,7 +44,7 @@ const _FACILITY_TEMPLATES: Array = [
 		"category": "office",
 		"tile_w": 2,
 		"tile_h": 2,
-		"stat_buff": {"teamwork": 10, "project_speed": 10},
+		"stat_buff": {"management": 10, "project_speed": 10},
 		"placed": false
 	},
 	{
@@ -55,7 +55,7 @@ const _FACILITY_TEMPLATES: Array = [
 		"category": "break",
 		"tile_w": 1,
 		"tile_h": 2,
-		"stat_buff": {"motivation": 8},
+		"stat_buff": {"morale": 8},
 		"placed": false
 	},
 	{
@@ -88,7 +88,7 @@ const _FACILITY_TEMPLATES: Array = [
 		"category": "office",
 		"tile_w": 1,
 		"tile_h": 2,
-		"stat_buff": {"motivation": 5, "drama": -20},
+		"stat_buff": {"morale": 5, "drama": -20},
 		"placed": false
 	},
 	{
@@ -110,7 +110,7 @@ const _FACILITY_TEMPLATES: Array = [
 		"category": "break",
 		"tile_w": 4,
 		"tile_h": 4,
-		"stat_buff": {"motivation": 20},
+		"stat_buff": {"morale": 20},
 		"placed": false
 	}
 ]
@@ -121,7 +121,7 @@ const _COMBOS: Array = [
 		"name": "Gossip Hub",
 		"requires": ["break_room", "coffee_machine"],
 		"bonus_desc": "MOT +5, Charm +3",
-		"bonus": {"motivation": 5, "charm": 3}
+		"bonus": {"morale": 5, "charm": 3}
 	},
 	{
 		"id": "focus_zone",
@@ -149,7 +149,7 @@ const _COMBOS: Array = [
 		"name": "Wellness Center",
 		"requires": ["break_room", "rooftop_terrace"],
 		"bonus_desc": "MOT +10, Burnout Rate -25%",
-		"bonus": {"motivation": 10, "burnout_rate": -25}
+		"bonus": {"morale": 10, "burnout_rate": -25}
 	}
 ]
 

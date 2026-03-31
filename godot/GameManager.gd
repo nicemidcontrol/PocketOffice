@@ -129,6 +129,7 @@ func new_game(company_name: String) -> void:
 	projects.initialize()
 	events.initialize()
 	office.initialize()
+	employees.hire_starting_team()
 
 	broadcast("Welcome to %s! Let's build something great. 🚀" % company_name)
 
@@ -280,7 +281,7 @@ func _end_fever_mode() -> void:
 	is_fever_mode = false
 	_fever_timer = 0.0
 	for emp in employees.get_hired_employees():
-		emp.motivation = 50
+		emp.morale = 50
 	fever_mode_ended.emit()
 	broadcast("Fever Mode ended. Time to recharge.")
 

@@ -35,25 +35,25 @@ const _SHOP_ITEMS: Array = [
 		"id": "chocolate",
 		"name": "Chocolate",
 		"cp_cost": 50,
-		"stat": "motivation",
+		"stat": "morale",
 		"amount": 15,
-		"description": "A quick sugar boost. Raises Motivation."
+		"description": "A quick sugar boost. Raises Morale."
 	},
 	{
 		"id": "ergo_chair",
 		"name": "Ergonomic Chair",
 		"cp_cost": 100,
-		"stat": "skill",
-		"amount": 10,
-		"description": "Proper support. Raises Skill."
+		"stat": "technical",
+		"amount": 100,
+		"description": "Proper support. Raises Technical."
 	},
 	{
 		"id": "company_manual",
 		"name": "Company Manual",
 		"cp_cost": 150,
-		"stat": "skill_and_creativity",
-		"amount": 10,
-		"description": "Dense reading, real results. Raises Skill and Creativity."
+		"stat": "technical_and_focus",
+		"amount": 80,
+		"description": "Dense reading, real results. Raises Technical and Focus."
 	}
 ]
 
@@ -90,12 +90,12 @@ func _refresh_item_display() -> void:
 	_item_desc_lbl.text = item["description"]
 	_item_cost_lbl.text = "%d CP" % item["cp_cost"]
 	match item["stat"]:
-		"motivation":
-			_item_stat_lbl.text = "MOT +%d" % item["amount"]
-		"skill":
-			_item_stat_lbl.text = "SKL +%d" % item["amount"]
-		"skill_and_creativity":
-			_item_stat_lbl.text = "SKL +%d  CRE +%d" % [item["amount"], item["amount"]]
+		"morale":
+			_item_stat_lbl.text = "MRL +%d" % item["amount"]
+		"technical":
+			_item_stat_lbl.text = "TEC +%d" % item["amount"]
+		"technical_and_focus":
+			_item_stat_lbl.text = "TEC +%d  FOC +%d" % [item["amount"], item["amount"]]
 
 func _refresh_emp_display() -> void:
 	if _hired.is_empty():
@@ -104,7 +104,7 @@ func _refresh_emp_display() -> void:
 		return
 	var emp: Object = _hired[_emp_index]
 	_emp_name_lbl.text = emp.first_name + " " + emp.last_name
-	_emp_stats_lbl.text = "MOT:%d  SKL:%d  CRE:%d" % [emp.motivation, emp.skill, emp.creativity]
+	_emp_stats_lbl.text = "TEC:%d  FOC:%d  MGT:%d  MRL:%d" % [emp.technical, emp.focus, emp.management, emp.morale]
 
 # ------------------------------------------
 #  ARROW NAVIGATION (employee row only)
@@ -140,13 +140,13 @@ func _on_buy_pressed() -> void:
 	var emp: Object = _hired[_emp_index]
 	var amount: int = item["amount"]
 	match item["stat"]:
-		"motivation":
-			emp.motivation = mini(emp.motivation + amount, 100)
-		"skill":
-			emp.skill = mini(emp.skill + amount, 100)
-		"skill_and_creativity":
-			emp.skill      = mini(emp.skill + amount, 100)
-			emp.creativity = mini(emp.creativity + amount, 100)
+		"morale":
+			emp.morale = mini(emp.morale + amount, 100)
+		"technical":
+			emp.technical = mini(emp.technical + amount, 1000)
+		"technical_and_focus":
+			emp.technical = mini(emp.technical + amount, 1000)
+			emp.focus     = mini(emp.focus + amount, 1000)
 	_gm.corp_points -= cost
 	_gm.corp_points_changed.emit(_gm.corp_points)
 	_hired = _gm.employees.get_hired_employees()

@@ -243,7 +243,7 @@ func _apply_instant_effects() -> void:
 				b["_instant_applied"] = true
 			"morale_drop":
 				for emp in gm.employees.get_hired_employees():
-					emp.adjust_motivation(-int(b.get("effect_value", 0.0)))
+					emp.adjust_morale(-int(b.get("effect_value", 0.0)))
 				b["_instant_applied"] = true
 
 # ------------------------------------------

@@ -121,12 +121,12 @@ func _format_buff(buff: Dictionary) -> String:
 		var val: int = int(buff[key])
 		var sign: String = "+" if val >= 0 else ""
 		match key:
-			"motivation":
-				parts.append("MOT %s%d" % [sign, val])
+			"morale":
+				parts.append("Morale %s%d" % [sign, val])
 			"focus":
 				parts.append("Focus %s%d" % [sign, val])
-			"teamwork":
-				parts.append("Teamwork %s%d" % [sign, val])
+			"management":
+				parts.append("Mgmt %s%d" % [sign, val])
 			"project_speed":
 				parts.append("Project Speed %s%d%%" % [sign, val])
 			"tech_speed":

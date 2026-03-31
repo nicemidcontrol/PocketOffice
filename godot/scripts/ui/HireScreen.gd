@@ -158,7 +158,7 @@ func _refresh_cand_display() -> void:
 	if is_hired:
 		badges.append("HIRED")
 	_badge_label.text = "  ".join(badges)
-	_stats_label.text = "SKL %d   MOT %d" % [int(emp.skill), int(emp.motivation)]
+	_stats_label.text = "TEC %d   FOC %d   MGT %d" % [int(emp.technical), int(emp.focus), int(emp.management)]
 	_cost_label.text  = "$%d / mo" % int(emp.monthly_salary)
 	_action_btn.disabled = is_hired
 	if is_hired:
@@ -231,14 +231,12 @@ func _on_champ_timer_timeout() -> void:
 #  CANDIDATE GENERATION
 # ─────────────────────────────────────────
 func _generate_candidates(tier: int, count: int) -> Array:
-	var rng: RandomNumberGenerator = RandomNumberGenerator.new()
-	rng.randomize()
 	var result: Array = []
+	var tier_name: String = TIER_NAMES[tier]
 	for i: int in range(count):
-		var emp: Object = _em.generate_random_candidate()
-		emp.skill          = rng.randi_range(TIER_SKILL_MIN[tier], TIER_SKILL_MAX[tier])
-		emp.motivation     = rng.randi_range(TIER_MOT_MIN[tier],   TIER_MOT_MAX[tier])
-		emp.monthly_salary = (emp.skill + emp.motivation) / 2 * 30
+		var emp: Employee = _em.generate_random_candidate()
+		emp.generate_stats(tier_name, emp.role)
+		emp.monthly_salary = (emp.technical + emp.management + emp.precision) / 60 * 30
 		result.append(emp)
 	return result
 
@@ -253,13 +251,11 @@ func _is_hero_candidate(emp: Object) -> bool:
 # ─────────────────────────────────────────
 func _role_str(role: int) -> String:
 	match role:
-		0: return "DEV"
-		1: return "DES"
-		2: return "MKT"
-		3: return "HR"
-		4: return "ACC"
-		5: return "MGR"
-		6: return "INT"
+		0: return "OPS"
+		1: return "PRO"
+		2: return "SEC"
+		3: return "MGT"
+		4: return "FIN"
 	return "???"
 
 func _pers_str(p: int) -> String:

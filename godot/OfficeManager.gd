@@ -23,14 +23,14 @@ const BASE_RENT_PER_FLOOR := 1000
 
 # Room buff table: { productivity, morale, skill }
 const ROOM_BUFFS := {
-	RoomType.EMPTY:          { "productivity": 0,  "morale": 0,  "skill": 0  },
-	RoomType.DESK:           { "productivity": 5,  "morale": 0,  "skill": 0  },
-	RoomType.MEETING_ROOM:   { "productivity": 8,  "morale": 3,  "skill": 0  },
-	RoomType.BREAK_ROOM:     { "productivity": 0,  "morale": 15, "skill": 0  },
-	RoomType.SERVER_ROOM:    { "productivity": 12, "morale": 0,  "skill": 0  },
-	RoomType.TRAINING_ROOM:  { "productivity": 0,  "morale": 0,  "skill": 10 },
-	RoomType.HR_OFFICE:      { "productivity": 0,  "morale": 8,  "skill": 0  },
-	RoomType.EXECUTIVE_SUITE:{ "productivity": 5,  "morale": 5,  "skill": 0  },
+	RoomType.EMPTY:          { "productivity": 0,  "morale": 0,  "technical": 0  },
+	RoomType.DESK:           { "productivity": 5,  "morale": 0,  "technical": 0  },
+	RoomType.MEETING_ROOM:   { "productivity": 8,  "morale": 3,  "technical": 0  },
+	RoomType.BREAK_ROOM:     { "productivity": 0,  "morale": 15, "technical": 0  },
+	RoomType.SERVER_ROOM:    { "productivity": 12, "morale": 0,  "technical": 0  },
+	RoomType.TRAINING_ROOM:  { "productivity": 0,  "morale": 0,  "technical": 10 },
+	RoomType.HR_OFFICE:      { "productivity": 0,  "morale": 8,  "technical": 0  },
+	RoomType.EXECUTIVE_SUITE:{ "productivity": 5,  "morale": 5,  "technical": 0  },
 }
 
 # Room build costs
@@ -127,7 +127,7 @@ func get_total_buff(buff_key: String) -> int:
 
 func get_productivity_buff() -> int: return get_total_buff("productivity")
 func get_morale_buff()       -> int: return get_total_buff("morale")
-func get_skill_buff()        -> int: return get_total_buff("skill")
+func get_skill_buff()        -> int: return get_total_buff("technical")
 
 # ─────────────────────────────────────────
 #  SAVE / LOAD

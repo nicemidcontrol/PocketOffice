@@ -68,7 +68,7 @@ func _refresh_display() -> void:
 	_role_label.text = "  ".join(badges)
 
 	_pers_label.text  = _pers_str(int(emp.personality))
-	_stats_label.text = "SKL %d   MOT %d" % [int(emp.skill), int(emp.motivation)]
+	_stats_label.text = "TEC %d   FOC %d   MGT %d" % [int(emp.technical), int(emp.focus), int(emp.management)]
 
 	var stress_val: int = int(emp.stress)
 	_stress_label.text = "Stress: %d / 100" % stress_val
@@ -92,13 +92,11 @@ func _on_employee_burnout(_emp_name: String) -> void:
 # ─────────────────────────────────────────
 func _role_str(role: int) -> String:
 	match role:
-		0: return "DEV"
-		1: return "DES"
-		2: return "MKT"
-		3: return "HR"
-		4: return "ACC"
-		5: return "MGR"
-		6: return "INT"
+		0: return "OPS"
+		1: return "PRO"
+		2: return "SEC"
+		3: return "MGT"
+		4: return "FIN"
 	return "???"
 
 func _ot_str(level: int) -> String:

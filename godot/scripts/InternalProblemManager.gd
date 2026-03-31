@@ -45,7 +45,7 @@ func _check_burnout(gm: Node) -> void:
 			emp.ot_months_consecutive = 0
 		if emp.ot_months_consecutive >= 3 and not emp.is_burned_out:
 			emp.is_burned_out = true
-			emp.motivation = 0
+			emp.morale = 0
 			emp.ot_months_consecutive = 0
 			# Remove from all projects
 			if gm.projects != null:
@@ -108,7 +108,7 @@ func _check_team_conflict(gm: Node) -> void:
 func _check_resignation(gm: Node) -> void:
 	var to_fire: Array = []
 	for emp in gm.employees.get_hired_employees():
-		if emp.motivation <= 10:
+		if emp.morale <= 10:
 			emp.low_morale_months += 1
 		else:
 			emp.low_morale_months = 0
@@ -153,7 +153,7 @@ func _check_overcrowding(gm: Node) -> void:
 	if hired.size() <= 8:
 		return
 	for emp in hired:
-		emp.adjust_motivation(-5)
+		emp.adjust_morale(-5)
 	var key: String = "overcrowding"
 	if _has_warning(key):
 		var w: Dictionary = _get_warning(key)
@@ -179,7 +179,7 @@ func _check_idle_staff(gm: Node) -> void:
 		else:
 			emp.idle_months = 0
 		if emp.idle_months >= 2:
-			emp.adjust_motivation(-5)
+			emp.adjust_morale(-5)
 			var key: String = "idle_" + emp.id
 			if _has_warning(key):
 				var w: Dictionary = _get_warning(key)

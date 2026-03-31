@@ -143,6 +143,6 @@ func resolve_event(event_data: Dictionary, choice: Dictionary, gm: Node) -> void
 		OutcomeType.MOTIVATION_GAIN, OutcomeType.MOTIVATION_LOSS:
 			var delta := outcome_value if outcome_type == OutcomeType.MOTIVATION_GAIN else -outcome_value
 			for emp in gm.employees.get_hired_employees():
-				emp.adjust_motivation(delta / 3)
+				emp.adjust_morale(delta / 3)
 
 	gm.broadcast("[%s] %s" % [event_data["title"], choice["result"]])
