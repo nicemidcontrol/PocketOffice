@@ -36,9 +36,22 @@ var _unlocked_donor_ids: Array[String] = []
 #  LIFECYCLE
 # ─────────────────────────────────────────
 func _ready() -> void:
-	# Failsafe: connect signals in case initialize() is not called before
-	# ClockManager starts ticking (e.g. hot-reload or test scenes).
-	_connect_signals()
+	var clock: Node = get_node_or_null("/root/ClockManager")
+	if clock == null:
+		print("[PM] ERROR: ClockManager not found at /root/ClockManager")
+	elif not clock.has_signal("work_day_started"):
+		print("[PM] ERROR: ClockManager has no work_day_started signal")
+	else:
+		if not clock.work_day_started.is_connected(_on_work_day_started):
+			clock.work_day_started.connect(_on_work_day_started)
+			print("[PM] Connected to ClockManager.work_day_started")
+		else:
+			print("[PM] Already connected to ClockManager.work_day_started")
+		if not clock.month_changed.is_connected(_on_month_changed):
+			clock.month_changed.connect(_on_month_changed)
+	var dm: Node = get_node_or_null("/root/DonorManager")
+	if dm != null and not dm.donor_won.is_connected(_on_donor_won):
+		dm.donor_won.connect(_on_donor_won)
 
 # ─────────────────────────────────────────
 #  INIT
@@ -494,20 +507,12 @@ func load_projects(data: Array) -> void:
 #  CLOCK TICK — work_day_started
 # ─────────────────────────────────────────
 func _on_work_day_started() -> void:
+	print("[PM] === TICK FIRED ===")
 	var gm: Node = get_node_or_null("/root/GameManager")
 	if gm == null:
-		print("[ProjectManager] _on_work_day_started — GameManager not found, skipping")
+		print("[PM] ERROR: GameManager not found, skipping tick")
 		return
 	var any_changed: bool = false
-	var active_task_count: int = 0
-	for proj in get_projects():
-		var proj_status: String = proj.get("status", "")
-		if proj_status == "locked" or proj_status == "completed":
-			continue
-		for task in proj.get("tasks", []):
-			if task.get("status", "") == "in_progress":
-				active_task_count += 1
-	print("[ProjectManager] Tick — processing %d active tasks" % active_task_count)
 	for proj in get_projects():
 		var proj_status: String = proj.get("status", "")
 		if proj_status == "locked" or proj_status == "completed":
@@ -517,25 +522,23 @@ func _on_work_day_started() -> void:
 		for task in proj.get("tasks", []):
 			if task.get("status", "") != "in_progress":
 				continue
-			var ids: Array = task.get("assigned_employee_ids", [])
-			if ids.is_empty():
+			var emp_ids: Array = task.get("assigned_employee_ids", [])
+			if emp_ids.is_empty():
 				continue
 			proj_had_work = true
 			any_changed = true
-			var tick_delta: float = 0.0
-			for emp in gm.employees.get_hired_employees():
-				if str(emp.id) not in ids:
+			var total_progress: float = 0.0
+			for emp_id in emp_ids:
+				var emp: Employee = _get_employee(gm, emp_id)
+				if emp == null:
+					print("[PM] Employee %s not found!" % str(emp_id))
 					continue
-				var contrib: float = (float(emp.skill) / 100.0) * TASK_PROGRESS_PER_TICK
-				contrib = minf(contrib, TASK_PROGRESS_CAP_PER_TICK)
-				tick_delta += contrib
-				print("[ProjectManager]   emp %s (skill %d) contrib %.3f" % [
-					emp.id, emp.skill, contrib
-				])
-			var prev_prog: float = task.get("progress", 0.0)
-			task["progress"] = minf(1.0, prev_prog + tick_delta)
-			print("[ProjectManager]   task '%s' progress %.2f -> %.2f (delta %.3f)" % [
-				task.get("id", ""), prev_prog, task.get("progress", 0.0), tick_delta
+				var contribution: float = (float(emp.skill) / 100.0) * TASK_PROGRESS_PER_TICK
+				contribution = minf(contribution, TASK_PROGRESS_CAP_PER_TICK)
+				total_progress += contribution
+			task["progress"] = minf(1.0, task.get("progress", 0.0) + total_progress)
+			print("[PM] Task '%s' progress: %.1f%%" % [
+				task.get("name", ""), task.get("progress", 0.0) * 100.0
 			])
 			if task.get("progress", 0.0) >= 1.0:
 				tasks_newly_done.append(task.get("id", ""))
@@ -547,6 +550,11 @@ func _on_work_day_started() -> void:
 		_update_project_completion(proj, gm)
 	if any_changed:
 		projects_updated.emit()
+
+func _get_employee(gm: Node, emp_id: String) -> Employee:
+	if gm != null and gm.employees != null:
+		return gm.employees.get_employee_by_id(emp_id)
+	return null
 
 # ─────────────────────────────────────────
 #  CLOCK TICK — month_changed
