@@ -125,7 +125,7 @@ func new_game(company_name: String) -> void:
 		"discovered_training_combos":  [],
 		"discovered_facility_combos":  [],
 	}
-	economy.initialize(50000)
+	economy.initialize(10000)
 	projects.initialize()
 	events.initialize()
 	office.initialize()

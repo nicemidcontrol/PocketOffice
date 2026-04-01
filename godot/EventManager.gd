@@ -118,6 +118,12 @@ func _build_event_pool() -> void:
 # ─────────────────────────────────────────
 # Called every in-game day by GameManager
 func try_trigger_random_event() -> void:
+	var gm: Node = get_node_or_null("/root/GameManager")
+	if gm != null:
+		var total_months: int = (gm.game_year - 1) * 12 + gm.company_data.get("current_month", 1)
+		print("[Event] total_months=%d, skip=%s" % [total_months, str(total_months < 6)])
+		if total_months < 6:
+			return
 	for ev in _event_pool:
 		# Distribute trigger_chance across ~30 days per month
 		if _rng.randf() < ev["trigger_chance"] / 30.0:
