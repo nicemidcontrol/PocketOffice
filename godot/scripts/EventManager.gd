@@ -369,6 +369,7 @@ func _on_work_day_started() -> void:
 
 	# 1. Month gate — no events before month 6
 	var total_months: int = _get_total_months(gm)
+	print("[Event] total_months=%d, skip=%s" % [total_months, str(total_months < _MIN_MONTHS)])
 	if total_months < _MIN_MONTHS:
 		return
 
