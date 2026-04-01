@@ -514,53 +514,35 @@ func _on_work_day_started() -> void:
 		return
 	var projects: Array = get_projects()
 	print("[PM-DEBUG] Area has %d projects" % projects.size())
-	var any_changed: bool = false
 	for proj in projects:
 		var proj_status: String = proj.get("status", "")
 		if proj_status == "locked" or proj_status == "completed":
 			continue
 		var proj_tasks: Array = proj.get("tasks", [])
 		print("[PM-DEBUG] Project '%s' status=%s tasks=%d" % [proj.get("name", ""), proj_status, proj_tasks.size()])
+		# Track whether any task has assigned employees (for idle_months decay)
 		var proj_had_work: bool = false
-		var tasks_newly_done: Array[String] = []
 		for task in proj_tasks:
 			var task_status: String = task.get("status", "")
 			var emp_ids: Array = task.get("assigned_employee_ids", [])
 			print("[PM-DEBUG]   Task '%s' status=%s assigned=%d" % [task.get("name", ""), task_status, emp_ids.size()])
-			if task_status != "in_progress":
-				continue
-			if emp_ids.is_empty():
-				continue
-			proj_had_work = true
-			any_changed = true
-			var total_progress: float = 0.0
-			var primary_stat: String = task.get("primary_stat", "technical")
-			var secondary_stat: String = task.get("secondary_stat", "focus")
-			for emp_id in emp_ids:
-				var emp: Employee = _get_employee(gm, emp_id)
-				if emp == null:
-					print("[PM] Employee %s not found!" % str(emp_id))
-					continue
-				var primary_val: int = _get_stat(emp, primary_stat)
-				var secondary_val: int = _get_stat(emp, secondary_stat)
-				print("[PM-DEBUG]     emp=%s %s=%d %s=%d" % [str(emp_id), primary_stat, primary_val, secondary_stat, secondary_val])
-				var contribution: float = (primary_val / 1000.0) * 0.10 + (secondary_val / 1000.0) * 0.05
-				contribution = minf(contribution, 0.15)
-				total_progress += contribution
-			task["progress"] = minf(1.0, task.get("progress", 0.0) + total_progress)
-			print("[PM] %s: %.1f%% (+%.3f)" % [task.get("name", ""), task.get("progress", 0.0) * 100.0, total_progress])
-			if task.get("progress", 0.0) >= 1.0:
-				tasks_newly_done.append(task.get("id", ""))
+			if task_status == "in_progress" and not emp_ids.is_empty():
+				proj_had_work = true
 		if proj_had_work:
 			proj["_had_work_this_month"] = true
-		for task_id in tasks_newly_done:
-			_complete_task(task_id, proj, gm)
-			any_changed = true
-		_update_project_completion(proj, gm)
-	if any_changed:
-		projects_updated.emit()
+		# Refresh dependency unlocks each tick
+		_refresh_task_deps(proj)
 
-func _get_employee(gm: Node, emp_id: String) -> Employee:
+func _get_employee(gm_or_id: Variant, emp_id_arg: String = "") -> Employee:
+	# Supports both legacy call _get_employee(gm, id) and new call _get_employee(id)
+	var gm: Node = null
+	var emp_id: String = ""
+	if gm_or_id is String:
+		gm = get_node_or_null("/root/GameManager")
+		emp_id = gm_or_id as String
+	else:
+		gm = gm_or_id as Node
+		emp_id = emp_id_arg
 	if gm != null and gm.employees != null:
 		return gm.employees.get_employee_by_id(emp_id)
 	return null
@@ -576,6 +558,237 @@ func _get_stat(emp: Employee, stat_name: String) -> int:
 		"logistics":     return emp.logistics
 		"precision":     return emp.precision
 	return 0
+
+func _add_stat(emp: Employee, stat_name: String, amount: int) -> void:
+	match stat_name:
+		"charm": emp.charm = mini(emp.charm + amount, 1000)
+		"technical": emp.technical = mini(emp.technical + amount, 1000)
+		"procurement": emp.procurement = mini(emp.procurement + amount, 1000)
+		"focus": emp.focus = mini(emp.focus + amount, 1000)
+		"communication": emp.communication = mini(emp.communication + amount, 1000)
+		"management": emp.management = mini(emp.management + amount, 1000)
+		"logistics": emp.logistics = mini(emp.logistics + amount, 1000)
+		"precision": emp.precision = mini(emp.precision + amount, 1000)
+
+# ─────────────────────────────────────────
+#  WORK ROUND SYSTEM
+# ─────────────────────────────────────────
+func run_work_round(task_id: String) -> Dictionary:
+	# Find the task
+	var task: Dictionary = _find_task(task_id)
+	if task.is_empty():
+		return {"error": "Task not found"}
+	if task.get("status", "") != "in_progress":
+		return {"error": "Task not in progress"}
+
+	var emp_ids: Array = task.get("assigned_employee_ids", [])
+	if emp_ids.is_empty():
+		return {"error": "No employees assigned"}
+
+	# Calculate contributions
+	var results: Array[Dictionary] = []
+	var total_progress: float = 0.0
+	var combo_bonus: float = _calculate_combo(emp_ids, task)
+
+	for emp_id in emp_ids:
+		var emp: Employee = _get_employee(emp_id)
+		if emp == null:
+			continue
+		var primary_stat: String = task.get("primary_stat", "technical")
+		var secondary_stat: String = task.get("secondary_stat", "focus")
+		var primary_val: int = _get_stat(emp, primary_stat)
+		var secondary_val: int = _get_stat(emp, secondary_stat)
+
+		var contribution: float = (primary_val / 1000.0) * 0.60 + (secondary_val / 1000.0) * 0.30 + combo_bonus
+		total_progress += contribution
+
+		# Stat gains placeholder (set after grade)
+		var grade_multiplier: float = 1.0
+		var primary_gain: int = 0
+		var secondary_gain: int = 0
+
+		results.append({
+			"employee_name": emp.display_name,
+			"employee_role": emp.role,
+			"primary_stat_name": primary_stat,
+			"primary_stat_value": primary_val,
+			"secondary_stat_name": secondary_stat,
+			"secondary_stat_value": secondary_val,
+			"contribution": contribution,
+		})
+
+	# Determine grade
+	var grade: String = "F"
+	var grade_text: String = ""
+	if total_progress >= 0.80:
+		grade = "S"
+		grade_text = "Outstanding! Your donor is crying tears of joy."
+	elif total_progress >= 0.60:
+		grade = "A"
+		grade_text = "Excellent work. The report practically wrote itself."
+	elif total_progress >= 0.45:
+		grade = "B"
+		grade_text = "Solid effort. Nothing caught fire. That's a win."
+	elif total_progress >= 0.30:
+		grade = "C"
+		grade_text = "Adequate. Like a C+ in college. You passed."
+	elif total_progress >= 0.15:
+		grade = "D"
+		grade_text = "Below expectations. HR is 'concerned.'"
+	else:
+		grade = "F"
+		grade_text = "Did anyone actually show up? Asking for a friend."
+
+	# Apply progress
+	var old_progress: float = task.get("progress", 0.0)
+	task["progress"] = minf(old_progress + total_progress, 1.0)
+
+	# Calculate partial rewards based on grade
+	var reward_pct: float = 0.05
+	match grade:
+		"S": reward_pct = 0.30
+		"A": reward_pct = 0.25
+		"B": reward_pct = 0.20
+		"C": reward_pct = 0.15
+		"D": reward_pct = 0.10
+		"F": reward_pct = 0.05
+
+	var task_cash: int = task.get("reward_cash", 0)
+	var task_cp: int = task.get("reward_cp", 0)
+	var round_cash: int = int(task_cash * reward_pct)
+	var round_cp: int = int(task_cp * reward_pct)
+
+	# Pay partial reward
+	var gm: Node = get_node_or_null("/root/GameManager")
+	if gm and gm.economy:
+		gm.economy.add_revenue(round_cash, "Task round: %s" % task.get("name", ""))
+	if gm:
+		gm.corp_points = gm.get("corp_points", 0) + round_cp
+
+	# Apply stat gains to employees
+	var stat_gains: Array[Dictionary] = []
+	for emp_id in emp_ids:
+		var emp: Employee = _get_employee(emp_id)
+		if emp == null:
+			continue
+		var primary_gain: int = 0
+		var secondary_gain: int = 0
+		match grade:
+			"S":
+				primary_gain = 3
+				secondary_gain = 2
+			"A":
+				primary_gain = 2
+				secondary_gain = 1
+			"B":
+				primary_gain = 2
+				secondary_gain = 1
+			"C":
+				primary_gain = 1
+				secondary_gain = 1
+			"D":
+				primary_gain = 1
+				secondary_gain = 0
+			"F":
+				primary_gain = 0
+				secondary_gain = 0
+
+		var ps: String = task.get("primary_stat", "technical")
+		var ss: String = task.get("secondary_stat", "focus")
+		_add_stat(emp, ps, primary_gain)
+		_add_stat(emp, ss, secondary_gain)
+		stat_gains.append({
+			"name": emp.display_name,
+			"primary_stat": ps,
+			"primary_gain": primary_gain,
+			"secondary_stat": ss,
+			"secondary_gain": secondary_gain,
+		})
+
+	# Check task completion
+	var task_completed_flag: bool = task.get("progress", 0.0) >= 1.0
+	if task_completed_flag:
+		task["status"] = "completed"
+		var proj: Dictionary = _find_project_for_task(task_id)
+		_refresh_task_deps(proj)
+		if gm:
+			_update_project_completion(proj, gm)
+		task_completed.emit(task)
+
+	projects_updated.emit()
+
+	# Return full result for UI
+	return {
+		"task_name": task.get("name", ""),
+		"task_subtitle": task.get("subtitle", ""),
+		"grade": grade,
+		"grade_text": grade_text,
+		"total_progress": total_progress,
+		"task_progress": task.get("progress", 0.0),
+		"task_completed": task_completed_flag,
+		"round_cash": round_cash,
+		"round_cp": round_cp,
+		"combo_bonus": combo_bonus,
+		"combo_name": _get_combo_name(emp_ids),
+		"employee_results": results,
+		"stat_gains": stat_gains,
+	}
+
+func _calculate_combo(emp_ids: Array, task: Dictionary) -> float:
+	var roles: Array[int] = []
+	for emp_id in emp_ids:
+		var emp: Employee = _get_employee(emp_id)
+		if emp:
+			roles.append(emp.role)
+	roles.sort()
+
+	# Full Stack NGO: OPS + PROCUREMENT + MANAGEMENT
+	if 0 in roles and 1 in roles and 3 in roles:
+		return 0.25
+	# Field & Office: OPS + SECRETARY
+	if 0 in roles and 2 in roles:
+		return 0.15
+	# Money Talks: FINANCE + PROCUREMENT
+	if 4 in roles and 1 in roles:
+		return 0.15
+	# The A-Team: OPS + MANAGEMENT
+	if 0 in roles and 3 in roles:
+		return 0.15
+	# Smooth Operators: SECRETARY + MANAGEMENT
+	if 2 in roles and 3 in roles:
+		return 0.10
+	# Dream Team: Any 3 different roles
+	var unique_roles: Array = []
+	for r in roles:
+		if r not in unique_roles:
+			unique_roles.append(r)
+	if unique_roles.size() >= 3:
+		return 0.10
+	return 0.0
+
+func _get_combo_name(emp_ids: Array) -> String:
+	var roles: Array[int] = []
+	for emp_id in emp_ids:
+		var emp: Employee = _get_employee(emp_id)
+		if emp:
+			roles.append(emp.role)
+	if 0 in roles and 1 in roles and 3 in roles:
+		return "Full Stack NGO"
+	if 0 in roles and 2 in roles:
+		return "Field & Office"
+	if 4 in roles and 1 in roles:
+		return "Money Talks"
+	if 0 in roles and 3 in roles:
+		return "The A-Team"
+	if 2 in roles and 3 in roles:
+		return "Smooth Operators"
+	var unique: Array = []
+	for r in roles:
+		if r not in unique:
+			unique.append(r)
+	if unique.size() >= 3:
+		return "The Dream Team"
+	return ""
 
 # ─────────────────────────────────────────
 #  CLOCK TICK — month_changed
