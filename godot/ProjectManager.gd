@@ -512,34 +512,43 @@ func _on_work_day_started() -> void:
 	if gm == null:
 		print("[PM] ERROR: GameManager not found, skipping tick")
 		return
+	var projects: Array = get_projects()
+	print("[PM-DEBUG] Area has %d projects" % projects.size())
 	var any_changed: bool = false
-	for proj in get_projects():
+	for proj in projects:
 		var proj_status: String = proj.get("status", "")
 		if proj_status == "locked" or proj_status == "completed":
 			continue
+		var proj_tasks: Array = proj.get("tasks", [])
+		print("[PM-DEBUG] Project '%s' status=%s tasks=%d" % [proj.get("name", ""), proj_status, proj_tasks.size()])
 		var proj_had_work: bool = false
 		var tasks_newly_done: Array[String] = []
-		for task in proj.get("tasks", []):
-			if task.get("status", "") != "in_progress":
-				continue
+		for task in proj_tasks:
+			var task_status: String = task.get("status", "")
 			var emp_ids: Array = task.get("assigned_employee_ids", [])
+			print("[PM-DEBUG]   Task '%s' status=%s assigned=%d" % [task.get("name", ""), task_status, emp_ids.size()])
+			if task_status != "in_progress":
+				continue
 			if emp_ids.is_empty():
 				continue
 			proj_had_work = true
 			any_changed = true
 			var total_progress: float = 0.0
+			var primary_stat: String = task.get("primary_stat", "technical")
+			var secondary_stat: String = task.get("secondary_stat", "focus")
 			for emp_id in emp_ids:
 				var emp: Employee = _get_employee(gm, emp_id)
 				if emp == null:
 					print("[PM] Employee %s not found!" % str(emp_id))
 					continue
-				var contribution: float = (float(emp.technical) / 1000.0) * TASK_PROGRESS_PER_TICK
-				contribution = minf(contribution, TASK_PROGRESS_CAP_PER_TICK)
+				var primary_val: int = _get_stat(emp, primary_stat)
+				var secondary_val: int = _get_stat(emp, secondary_stat)
+				print("[PM-DEBUG]     emp=%s %s=%d %s=%d" % [str(emp_id), primary_stat, primary_val, secondary_stat, secondary_val])
+				var contribution: float = (primary_val / 1000.0) * 0.10 + (secondary_val / 1000.0) * 0.05
+				contribution = minf(contribution, 0.15)
 				total_progress += contribution
 			task["progress"] = minf(1.0, task.get("progress", 0.0) + total_progress)
-			print("[PM] Task '%s' progress: %.1f%%" % [
-				task.get("name", ""), task.get("progress", 0.0) * 100.0
-			])
+			print("[PM] %s: %.1f%% (+%.3f)" % [task.get("name", ""), task.get("progress", 0.0) * 100.0, total_progress])
 			if task.get("progress", 0.0) >= 1.0:
 				tasks_newly_done.append(task.get("id", ""))
 		if proj_had_work:
@@ -555,6 +564,18 @@ func _get_employee(gm: Node, emp_id: String) -> Employee:
 	if gm != null and gm.employees != null:
 		return gm.employees.get_employee_by_id(emp_id)
 	return null
+
+func _get_stat(emp: Employee, stat_name: String) -> int:
+	match stat_name:
+		"charm":         return emp.charm
+		"technical":     return emp.technical
+		"procurement":   return emp.procurement
+		"focus":         return emp.focus
+		"communication": return emp.communication
+		"management":    return emp.management
+		"logistics":     return emp.logistics
+		"precision":     return emp.precision
+	return 0
 
 # ─────────────────────────────────────────
 #  CLOCK TICK — month_changed
