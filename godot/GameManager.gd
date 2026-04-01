@@ -152,10 +152,6 @@ func _advance_month() -> void:
 	company_data["current_month"] += 1
 	month_passed.emit(company_data["current_month"])
 
-	economy.process_monthly_costs(
-		employees.get_total_monthly_salary(),
-		office.get_monthly_rent()
-	)
 	projects.generate_new_projects(2)
 
 	if company_data["current_month"] > 12:
@@ -390,8 +386,9 @@ func format_cash(amount: int) -> String:
 # ─────────────────────────────────────────
 func _on_clock_month_changed(_month: int, _year: int) -> void:
 	var total_salary: int = employees.get_total_monthly_salary()
-	economy.spend(total_salary, "Monthly Salaries")
-	print("[Economy] Monthly salary paid: $%d" % total_salary)
+	var monthly_rent: int = office.get_monthly_rent()
+	print("[ECON] Monthly: salary=$%d rent=$%d total=$%d" % [total_salary, monthly_rent, total_salary + monthly_rent])
+	economy.process_monthly_costs(total_salary, monthly_rent)
 
 	var dm: Node = get_node_or_null("/root/DonorManager")
 	if dm != null:
