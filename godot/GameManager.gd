@@ -57,6 +57,7 @@ var company_data := {
 var _tick_timer: float = 0.0
 var is_paused: bool  = false
 var corp_points: int = 0
+var total_rounds_played: int = 0
 
 var game_year:               int   = 1
 var last_evaluation_year:    int   = 0
@@ -331,6 +332,7 @@ func save_game() -> void:
 		"office":              office.to_save_dict(),
 		"is_fever_mode":       is_fever_mode,
 		"fever_cooldown_month": _fever_cooldown_month,
+		"total_rounds_played": total_rounds_played,
 	}
 	SaveSystem.save(data)
 
@@ -354,6 +356,7 @@ func load_game() -> void:
 	events.initialize()
 	is_fever_mode         = data.get("is_fever_mode", false)
 	_fever_cooldown_month = data.get("fever_cooldown_month", -1)
+	total_rounds_played   = int(data.get("total_rounds_played", 0))
 	broadcast("Game loaded! Welcome back to %s." % company_data["company_name"])
 
 # ─────────────────────────────────────────

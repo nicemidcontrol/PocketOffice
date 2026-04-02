@@ -585,6 +585,31 @@ func run_work_round(task_id: String) -> Dictionary:
 	if emp_ids.is_empty():
 		return {"error": "No employees assigned"}
 
+	# Determine CP cost based on task duration
+	var duration: int = int(task.get("duration_ticks", task.get("duration", 2)))
+	var cp_cost: int = 3
+	if duration >= 5:
+		cp_cost = 8
+	elif duration >= 3:
+		cp_cost = 5
+
+	# First round ever is free
+	var gm: Node = get_node_or_null("/root/GameManager")
+	var total_rounds: int = gm.total_rounds_played if gm else 0
+	var was_free: bool = total_rounds == 0
+	var actual_cp_cost: int = 0
+
+	if not was_free:
+		if gm and gm.corp_points < cp_cost:
+			return {"error": "Not enough CP! Need %d CP (have %d)" % [cp_cost, gm.corp_points]}
+		if gm:
+			gm.corp_points -= cp_cost
+		actual_cp_cost = cp_cost
+
+	# Track total rounds
+	if gm:
+		gm.total_rounds_played += 1
+
 	# Calculate contributions
 	var results: Array[Dictionary] = []
 	var total_progress: float = 0.0
@@ -659,7 +684,6 @@ func run_work_round(task_id: String) -> Dictionary:
 	var round_cp: int = int(task_cp * reward_pct)
 
 	# Pay partial reward
-	var gm: Node = get_node_or_null("/root/GameManager")
 	if gm and gm.economy:
 		gm.economy.add_revenue(round_cash, "Task round: %s" % task.get("name", ""))
 	if gm:
@@ -707,8 +731,17 @@ func run_work_round(task_id: String) -> Dictionary:
 
 	# Check task completion
 	var task_completed_flag: bool = task.get("progress", 0.0) >= 1.0
+	var completion_cp_bonus: int = 0
 	if task_completed_flag:
 		task["status"] = "completed"
+		var task_duration: int = int(task.get("duration_ticks", task.get("duration", 2)))
+		completion_cp_bonus = 10
+		if task_duration >= 5:
+			completion_cp_bonus = 25
+		elif task_duration >= 3:
+			completion_cp_bonus = 15
+		if gm:
+			gm.corp_points += completion_cp_bonus
 		var proj: Dictionary = _find_project_for_task(task_id)
 		_refresh_task_deps(proj)
 		if gm:
@@ -728,6 +761,9 @@ func run_work_round(task_id: String) -> Dictionary:
 		"task_completed": task_completed_flag,
 		"round_cash": round_cash,
 		"round_cp": round_cp,
+		"cp_cost": actual_cp_cost,
+		"was_free": was_free,
+		"completion_cp_bonus": completion_cp_bonus,
 		"combo_bonus": combo_bonus,
 		"combo_name": _get_combo_name(emp_ids),
 		"employee_results": results,
