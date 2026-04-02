@@ -271,7 +271,8 @@ func _refresh_tasks_display() -> void:
 	else:
 		var names: Array[String] = []
 		if _gm != null:
-			for emp in _gm.employees.get_hired_employees():
+			var hired: Array[Employee] = _gm.employees.get_hired_employees()
+			for emp in hired:
 				if str(emp.id) in ids:
 					names.append(str(emp.first_name))
 		_team_label.text = "Team: %s  (%d/3)" % [", ".join(names), ids.size()]
@@ -379,7 +380,7 @@ func _open_assign_for_task(task: Dictionary) -> void:
 			if eid not in busy_ids:
 				busy_ids.append(eid)
 
-	var all_emps: Array = _gm.employees.get_hired_employees()
+	var all_emps: Array[Employee] = _gm.employees.get_hired_employees()
 	var shown: int      = 0
 	for emp in all_emps:
 		var eid: String = str(emp.id)
