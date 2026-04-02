@@ -628,7 +628,7 @@ func _add_stat_preview(emp_ids: Array, primary_stat: String, secondary_stat: Str
 	var total_primary: float = 0.0
 	var total_secondary: float = 0.0
 	for emp_id in emp_ids:
-		var emp: Node = null
+		var emp: Employee = null
 		for e in _gm.employees.get_hired_employees():
 			if str(e.id) == str(emp_id):
 				emp = e
@@ -651,7 +651,7 @@ func _add_stat_preview(emp_ids: Array, primary_stat: String, secondary_stat: Str
 	var avg_secondary: float = total_secondary / float(emp_ids.size()) if emp_ids.size() > 0 else 0.0
 	var est_progress: float = 0.0
 	for emp_id in emp_ids:
-		var emp: Node = null
+		var emp: Employee = null
 		for e in _gm.employees.get_hired_employees():
 			if str(e.id) == str(emp_id):
 				emp = e
@@ -668,7 +668,7 @@ func _add_stat_preview(emp_ids: Array, primary_stat: String, secondary_stat: Str
 	est_lbl.add_theme_color_override("font_color", _grade_color(est_grade))
 	_ot_list.add_child(est_lbl)
 
-func _get_emp_stat(emp: Node, stat_name: String) -> int:
+func _get_emp_stat(emp: Employee, stat_name: String) -> int:
 	match stat_name:
 		"charm":         return int(emp.charm)
 		"technical":     return int(emp.technical)
