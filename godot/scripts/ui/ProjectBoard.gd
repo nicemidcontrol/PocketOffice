@@ -310,12 +310,22 @@ func _refresh_tasks_display() -> void:
 		_action_btn.disabled = true
 		_action_btn.add_theme_color_override("font_color", Color(0.4, 0.8, 1.0, 1.0))
 	elif not ids.is_empty():
-		# Has employees — show START WORK
+		# Has employees — show START WORK as main action
 		_status_label.text = "READY"
 		_status_label.add_theme_color_override("font_color", Color(0.22, 0.9, 0.42, 1.0))
 		_action_btn.text     = "START WORK"
 		_action_btn.disabled = false
 		_action_btn.add_theme_color_override("font_color", Color(0.22, 0.9, 0.42, 1.0))
+		# If team not full, add ASSIGN button to add more
+		if ids.size() < 3:
+			var assign_btn: Button = Button.new()
+			assign_btn.text = "ASSIGN (%d/3)" % ids.size()
+			assign_btn.custom_minimum_size = Vector2(0, 30)
+			assign_btn.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+			assign_btn.add_theme_font_size_override("font_size", 12)
+			assign_btn.add_theme_color_override("font_color", Color(0.4, 0.8, 1.0, 1.0))
+			assign_btn.pressed.connect(func() -> void: _open_assign_for_task(task))
+			_ot_list.add_child(assign_btn)
 	else:
 		# available, no employees
 		_status_label.text = "AVAILABLE"
