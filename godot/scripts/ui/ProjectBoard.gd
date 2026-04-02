@@ -313,9 +313,31 @@ func _refresh_tasks_display() -> void:
 		# Has employees — show START WORK as main action
 		_status_label.text = "READY"
 		_status_label.add_theme_color_override("font_color", Color(0.22, 0.9, 0.42, 1.0))
-		_action_btn.text     = "START WORK"
-		_action_btn.disabled = false
-		_action_btn.add_theme_color_override("font_color", Color(0.22, 0.9, 0.42, 1.0))
+		var cp_cost: int = _get_round_cp_cost(task)
+		var is_first: bool = _gm.total_rounds_played == 0 if _gm else false
+		var has_cp: bool = _gm.corp_points >= cp_cost if _gm else false
+		if is_first:
+			_action_btn.text     = "START WORK (FREE!)"
+			_action_btn.disabled = false
+			_action_btn.add_theme_color_override("font_color", Color(0.22, 0.9, 0.42, 1.0))
+		elif has_cp:
+			_action_btn.text     = "START WORK (%d CP)" % cp_cost
+			_action_btn.disabled = false
+			_action_btn.add_theme_color_override("font_color", Color(0.22, 0.9, 0.42, 1.0))
+		else:
+			_action_btn.text     = "NEED %d CP" % cp_cost
+			_action_btn.disabled = true
+			_action_btn.add_theme_color_override("font_color", Color(0.9, 0.3, 0.3, 1.0))
+		# Show round cost info
+		var cost_lbl: Label = Label.new()
+		if is_first:
+			cost_lbl.text = "Round cost: FREE!"
+			cost_lbl.add_theme_color_override("font_color", Color(0.22, 0.9, 0.42, 1.0))
+		else:
+			cost_lbl.text = "Round cost: %d CP" % cp_cost
+			cost_lbl.add_theme_color_override("font_color", Color(1.0, 0.82, 0.2, 1.0))
+		cost_lbl.add_theme_font_size_override("font_size", 10)
+		_ot_list.add_child(cost_lbl)
 		# If team not full, add ASSIGN button to add more
 		if ids.size() < 3:
 			var assign_btn: Button = Button.new()
@@ -583,6 +605,27 @@ func _show_result_popup(result: Dictionary) -> void:
 	reward_lbl.add_theme_color_override("font_color", Color(1.0, 0.82, 0.2, 1.0))
 	vbox.add_child(reward_lbl)
 
+	# CP cost display
+	var cp_spent: int = int(result.get("cp_cost", 0))
+	if cp_spent > 0:
+		var cost_lbl: Label = Label.new()
+		cost_lbl.text = "-%d CP (round cost)" % cp_spent
+		cost_lbl.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+		cost_lbl.add_theme_font_size_override("font_size", 11)
+		cost_lbl.add_theme_color_override("font_color", Color(0.9, 0.5, 0.3, 1.0))
+		vbox.add_child(cost_lbl)
+
+	# Free round message
+	var was_free: bool = result.get("was_free", false)
+	if was_free:
+		var free_lbl: Label = Label.new()
+		free_lbl.text = "First round FREE! Next time it'll cost CP."
+		free_lbl.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+		free_lbl.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+		free_lbl.add_theme_font_size_override("font_size", 11)
+		free_lbl.add_theme_color_override("font_color", Color(0.22, 0.9, 0.42, 1.0))
+		vbox.add_child(free_lbl)
+
 	# Separator
 	var sep2: HSeparator = HSeparator.new()
 	vbox.add_child(sep2)
@@ -606,7 +649,8 @@ func _show_result_popup(result: Dictionary) -> void:
 	var is_completed: bool = result.get("task_completed", false)
 	if is_completed:
 		var complete_lbl: Label = Label.new()
-		complete_lbl.text = "TASK COMPLETE!"
+		var bonus_cp: int = int(result.get("completion_cp_bonus", 0))
+		complete_lbl.text = "TASK COMPLETE! +%d CP bonus!" % bonus_cp
 		complete_lbl.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 		complete_lbl.add_theme_font_size_override("font_size", 18)
 		complete_lbl.add_theme_color_override("font_color", Color(1.0, 0.85, 0.0, 1.0))
@@ -711,6 +755,14 @@ func _estimate_grade(progress: float) -> String:
 	elif progress >= 0.15:
 		return "D"
 	return "F"
+
+func _get_round_cp_cost(task: Dictionary) -> int:
+	var duration: int = int(task.get("duration_ticks", task.get("duration", 2)))
+	if duration >= 5:
+		return 8
+	elif duration >= 3:
+		return 5
+	return 3
 
 func _grade_color(grade: String) -> Color:
 	match grade:
