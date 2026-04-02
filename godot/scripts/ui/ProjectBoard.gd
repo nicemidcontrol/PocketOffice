@@ -32,6 +32,7 @@ var _projects:           Array  = []
 var _tasks:              Array  = []
 var _desc_label:         Label  = null
 var _subtitle_label:     Label  = null
+var _result_panel:       Panel  = null
 
 # ─────────────────────────────────────────
 #  LIFECYCLE
@@ -277,6 +278,12 @@ func _refresh_tasks_display() -> void:
 		_team_label.text = "Team: %s  (%d/3)" % [", ".join(names), ids.size()]
 		_team_label.add_theme_color_override("font_color", Color(0.22, 0.9, 0.42, 1.0))
 
+	# Stat preview for assigned employees
+	if not ids.is_empty() and not is_done and not is_locked:
+		var primary_stat: String = task.get("primary_stat", "technical")
+		var secondary_stat: String = task.get("secondary_stat", "focus")
+		_add_stat_preview(ids, primary_stat, secondary_stat)
+
 	# Line 9: Status badge + action button
 	if is_locked:
 		var prereqs: Array  = task.get("requires", task.get("prerequisites", []))
@@ -303,20 +310,15 @@ func _refresh_tasks_display() -> void:
 		_action_btn.text     = "DONE"
 		_action_btn.disabled = true
 		_action_btn.add_theme_color_override("font_color", Color(0.4, 0.8, 1.0, 1.0))
-	elif ids.size() >= 3:
-		_status_label.text = "IN PROGRESS"
-		_status_label.add_theme_color_override("font_color", Color(1.0, 0.85, 0.1, 1.0))
-		_action_btn.text     = "FULL (3/3)"
-		_action_btn.disabled = true
-		_action_btn.add_theme_color_override("font_color", Color(0.5, 0.51, 0.62, 1.0))
-	elif is_progress:
-		_status_label.text = "IN PROGRESS"
-		_status_label.add_theme_color_override("font_color", Color(1.0, 0.85, 0.1, 1.0))
-		_action_btn.text     = "ASSIGN"
+	elif not ids.is_empty():
+		# Has employees — show START WORK
+		_status_label.text = "READY"
+		_status_label.add_theme_color_override("font_color", Color(0.22, 0.9, 0.42, 1.0))
+		_action_btn.text     = "START WORK"
 		_action_btn.disabled = false
-		_action_btn.add_theme_color_override("font_color", Color(0.4, 0.8, 1.0, 1.0))
+		_action_btn.add_theme_color_override("font_color", Color(0.22, 0.9, 0.42, 1.0))
 	else:
-		# available
+		# available, no employees
 		_status_label.text = "AVAILABLE"
 		_status_label.add_theme_color_override("font_color", Color(0.22, 0.9, 0.42, 1.0))
 		_action_btn.text     = "ASSIGN"
@@ -341,8 +343,13 @@ func _on_action_pressed() -> void:
 			return
 		var task: Dictionary = _tasks[_current_index]
 		var s: String = task.get("status", "")
-		if s != "locked" and s != "completed":
+		if s == "locked" or s == "completed":
+			return
+		var emp_ids: Array = task.get("assigned_employee_ids", [])
+		if emp_ids.is_empty():
 			_open_assign_for_task(task)
+		else:
+			_start_work_round(task)
 
 func _on_back_pressed() -> void:
 	_view_mode = MODE_PROJECTS
@@ -409,6 +416,302 @@ func _on_assign_employee(task_id: String, emp_id: String) -> void:
 	if _current_project_id != "":
 		_tasks = _gm.projects.get_tasks_for_project(_current_project_id)
 	_refresh_display()
+
+# ─────────────────────────────────────────
+#  WORK ROUND
+# ─────────────────────────────────────────
+func _start_work_round(task: Dictionary) -> void:
+	if _gm == null:
+		return
+	var task_id: String = task.get("id", "")
+	var result: Dictionary = _gm.projects.run_work_round(task_id)
+	if result.has("error"):
+		_status_label.text = str(result.get("error", "Error"))
+		_status_label.add_theme_color_override("font_color", Color(0.9, 0.3, 0.3, 1.0))
+		return
+	_show_result_popup(result)
+
+func _show_result_popup(result: Dictionary) -> void:
+	if _result_panel != null:
+		_result_panel.queue_free()
+		_result_panel = null
+
+	_result_panel = Panel.new()
+	_result_panel.anchors_preset = Control.PRESET_CENTER
+	_result_panel.anchor_left = 0.5
+	_result_panel.anchor_right = 0.5
+	_result_panel.anchor_top = 0.5
+	_result_panel.anchor_bottom = 0.5
+	_result_panel.offset_left = -170.0
+	_result_panel.offset_right = 170.0
+	_result_panel.offset_top = -255.0
+	_result_panel.offset_bottom = 255.0
+	_result_panel.grow_horizontal = Control.GROW_DIRECTION_BOTH
+	_result_panel.grow_vertical = Control.GROW_DIRECTION_BOTH
+
+	var style: StyleBoxFlat = StyleBoxFlat.new()
+	style.bg_color = Color(0.04, 0.04, 0.10, 0.98)
+	style.border_width_left = 2
+	style.border_width_top = 2
+	style.border_width_right = 2
+	style.border_width_bottom = 2
+	style.border_color = Color(0.18, 0.42, 0.78, 1.0)
+	style.corner_radius_top_left = 10
+	style.corner_radius_top_right = 10
+	style.corner_radius_bottom_right = 10
+	style.corner_radius_bottom_left = 10
+	_result_panel.add_theme_stylebox_override("panel", style)
+
+	var margin: MarginContainer = MarginContainer.new()
+	margin.layout_mode = 1
+	margin.anchors_preset = Control.PRESET_FULL_RECT
+	margin.anchor_right = 1.0
+	margin.anchor_bottom = 1.0
+	margin.grow_horizontal = Control.GROW_DIRECTION_BOTH
+	margin.grow_vertical = Control.GROW_DIRECTION_BOTH
+	margin.add_theme_constant_override("margin_left", 14)
+	margin.add_theme_constant_override("margin_top", 14)
+	margin.add_theme_constant_override("margin_right", 14)
+	margin.add_theme_constant_override("margin_bottom", 14)
+	_result_panel.add_child(margin)
+
+	var scroll: ScrollContainer = ScrollContainer.new()
+	scroll.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	scroll.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
+	margin.add_child(scroll)
+
+	var vbox: VBoxContainer = VBoxContainer.new()
+	vbox.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	vbox.add_theme_constant_override("separation", 6)
+	scroll.add_child(vbox)
+
+	# Title
+	var title_lbl: Label = Label.new()
+	title_lbl.text = "ROUND COMPLETE!"
+	title_lbl.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	title_lbl.add_theme_font_size_override("font_size", 16)
+	title_lbl.add_theme_color_override("font_color", Color(0.95, 0.95, 0.98, 1.0))
+	vbox.add_child(title_lbl)
+
+	# Task name
+	var task_lbl: Label = Label.new()
+	task_lbl.text = result.get("task_name", "")
+	task_lbl.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	task_lbl.add_theme_font_size_override("font_size", 12)
+	task_lbl.add_theme_color_override("font_color", Color(0.6, 0.7, 0.9, 1.0))
+	vbox.add_child(task_lbl)
+
+	# Grade (big letter)
+	var grade: String = result.get("grade", "F")
+	var grade_lbl: Label = Label.new()
+	grade_lbl.text = grade
+	grade_lbl.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	grade_lbl.add_theme_font_size_override("font_size", 48)
+	grade_lbl.add_theme_color_override("font_color", _grade_color(grade))
+	vbox.add_child(grade_lbl)
+
+	# Grade text
+	var grade_text_lbl: Label = Label.new()
+	grade_text_lbl.text = result.get("grade_text", "")
+	grade_text_lbl.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	grade_text_lbl.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	grade_text_lbl.add_theme_font_size_override("font_size", 11)
+	grade_text_lbl.add_theme_color_override("font_color", Color(0.5, 0.51, 0.62, 1.0))
+	vbox.add_child(grade_text_lbl)
+
+	# Combo bonus
+	var combo_name: String = result.get("combo_name", "")
+	if combo_name != "":
+		var combo_lbl: Label = Label.new()
+		var combo_pct: int = int(result.get("combo_bonus", 0.0) * 100.0)
+		combo_lbl.text = "Combo: %s +%d%%" % [combo_name, combo_pct]
+		combo_lbl.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+		combo_lbl.add_theme_font_size_override("font_size", 12)
+		combo_lbl.add_theme_color_override("font_color", Color(1.0, 0.85, 0.0, 1.0))
+		vbox.add_child(combo_lbl)
+
+	# Separator
+	var sep1: HSeparator = HSeparator.new()
+	vbox.add_child(sep1)
+
+	# Employee results
+	var emp_results: Array = result.get("employee_results", [])
+	for er in emp_results:
+		var er_lbl: Label = Label.new()
+		var contrib_pct: int = int(er.get("contribution", 0.0) * 100.0)
+		er_lbl.text = "%s: +%d%%" % [er.get("employee_name", ""), contrib_pct]
+		er_lbl.add_theme_font_size_override("font_size", 11)
+		er_lbl.add_theme_color_override("font_color", Color(0.75, 0.75, 0.85, 1.0))
+		vbox.add_child(er_lbl)
+
+	# Total progress
+	var total_pct: int = int(result.get("total_progress", 0.0) * 100.0)
+	var total_lbl: Label = Label.new()
+	total_lbl.text = "Progress: +%d%%" % total_pct
+	total_lbl.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	total_lbl.add_theme_font_size_override("font_size", 13)
+	total_lbl.add_theme_color_override("font_color", Color(0.22, 0.9, 0.42, 1.0))
+	vbox.add_child(total_lbl)
+
+	# Task progress bar
+	var task_prog: float = result.get("task_progress", 0.0)
+	var bar_lbl: Label = Label.new()
+	bar_lbl.text = _progress_bar(task_prog, 16)
+	bar_lbl.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	bar_lbl.add_theme_font_size_override("font_size", 11)
+	bar_lbl.add_theme_color_override("font_color", Color(1.0, 0.85, 0.1, 1.0))
+	vbox.add_child(bar_lbl)
+
+	# Rewards
+	var reward_lbl: Label = Label.new()
+	reward_lbl.text = "+$%d  +%d CP" % [
+		int(result.get("round_cash", 0)),
+		int(result.get("round_cp", 0)),
+	]
+	reward_lbl.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	reward_lbl.add_theme_font_size_override("font_size", 13)
+	reward_lbl.add_theme_color_override("font_color", Color(1.0, 0.82, 0.2, 1.0))
+	vbox.add_child(reward_lbl)
+
+	# Separator
+	var sep2: HSeparator = HSeparator.new()
+	vbox.add_child(sep2)
+
+	# Stat gains
+	var stat_gains: Array = result.get("stat_gains", [])
+	for sg in stat_gains:
+		var sg_lbl: Label = Label.new()
+		var pg: int = int(sg.get("primary_gain", 0))
+		var ssg: int = int(sg.get("secondary_gain", 0))
+		sg_lbl.text = "%s: %s +%d, %s +%d" % [
+			sg.get("name", ""),
+			str(sg.get("primary_stat", "")).capitalize(), pg,
+			str(sg.get("secondary_stat", "")).capitalize(), ssg,
+		]
+		sg_lbl.add_theme_font_size_override("font_size", 11)
+		sg_lbl.add_theme_color_override("font_color", Color(0.4, 0.8, 1.0, 1.0))
+		vbox.add_child(sg_lbl)
+
+	# Task complete banner
+	var is_completed: bool = result.get("task_completed", false)
+	if is_completed:
+		var complete_lbl: Label = Label.new()
+		complete_lbl.text = "TASK COMPLETE!"
+		complete_lbl.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+		complete_lbl.add_theme_font_size_override("font_size", 18)
+		complete_lbl.add_theme_color_override("font_color", Color(1.0, 0.85, 0.0, 1.0))
+		vbox.add_child(complete_lbl)
+
+	# Continue button
+	var continue_btn: Button = Button.new()
+	continue_btn.text = "CONTINUE"
+	continue_btn.custom_minimum_size = Vector2(0, 36)
+	continue_btn.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	continue_btn.add_theme_font_size_override("font_size", 13)
+	continue_btn.add_theme_color_override("font_color", Color(0.22, 0.9, 0.42, 1.0))
+	continue_btn.pressed.connect(_on_result_continue)
+	vbox.add_child(continue_btn)
+
+	add_child(_result_panel)
+
+func _on_result_continue() -> void:
+	if _result_panel != null:
+		_result_panel.queue_free()
+		_result_panel = null
+	if _current_project_id != "" and _gm != null:
+		_tasks = _gm.projects.get_tasks_for_project(_current_project_id)
+	_refresh_display()
+
+func _add_stat_preview(emp_ids: Array, primary_stat: String, secondary_stat: String) -> void:
+	if _gm == null:
+		return
+	var total_primary: float = 0.0
+	var total_secondary: float = 0.0
+	for emp_id in emp_ids:
+		var emp: Node = null
+		for e in _gm.employees.get_hired_employees():
+			if str(e.id) == str(emp_id):
+				emp = e
+				break
+		if emp == null:
+			continue
+		var pv: int = _get_emp_stat(emp, primary_stat)
+		var sv: int = _get_emp_stat(emp, secondary_stat)
+		total_primary += pv
+		total_secondary += sv
+		var stars: String = _star_rating(pv) + " " + primary_stat.capitalize() + "  " + _star_rating(sv) + " " + secondary_stat.capitalize()
+		var preview_lbl: Label = Label.new()
+		preview_lbl.text = "%s: %s" % [str(emp.first_name), stars]
+		preview_lbl.add_theme_font_size_override("font_size", 10)
+		preview_lbl.add_theme_color_override("font_color", Color(0.55, 0.65, 0.75, 1.0))
+		_ot_list.add_child(preview_lbl)
+
+	# Estimated grade
+	var avg_primary: float = total_primary / float(emp_ids.size()) if emp_ids.size() > 0 else 0.0
+	var avg_secondary: float = total_secondary / float(emp_ids.size()) if emp_ids.size() > 0 else 0.0
+	var est_progress: float = 0.0
+	for emp_id in emp_ids:
+		var emp: Node = null
+		for e in _gm.employees.get_hired_employees():
+			if str(e.id) == str(emp_id):
+				emp = e
+				break
+		if emp == null:
+			continue
+		var pv: int = _get_emp_stat(emp, primary_stat)
+		var sv: int = _get_emp_stat(emp, secondary_stat)
+		est_progress += (pv / 1000.0) * 0.60 + (sv / 1000.0) * 0.30
+	var est_grade: String = _estimate_grade(est_progress)
+	var est_lbl: Label = Label.new()
+	est_lbl.text = "Est. Grade: %s" % est_grade
+	est_lbl.add_theme_font_size_override("font_size", 11)
+	est_lbl.add_theme_color_override("font_color", _grade_color(est_grade))
+	_ot_list.add_child(est_lbl)
+
+func _get_emp_stat(emp: Node, stat_name: String) -> int:
+	match stat_name:
+		"charm":         return int(emp.charm)
+		"technical":     return int(emp.technical)
+		"procurement":   return int(emp.procurement)
+		"focus":         return int(emp.focus)
+		"communication": return int(emp.communication)
+		"management":    return int(emp.management)
+		"logistics":     return int(emp.logistics)
+		"precision":     return int(emp.precision)
+	return 0
+
+func _star_rating(stat_val: int) -> String:
+	if stat_val >= 400:
+		return "***"
+	elif stat_val >= 200:
+		return "**-"
+	elif stat_val >= 100:
+		return "*--"
+	return "---"
+
+func _estimate_grade(progress: float) -> String:
+	if progress >= 0.80:
+		return "S"
+	elif progress >= 0.60:
+		return "A"
+	elif progress >= 0.45:
+		return "B"
+	elif progress >= 0.30:
+		return "C"
+	elif progress >= 0.15:
+		return "D"
+	return "F"
+
+func _grade_color(grade: String) -> Color:
+	match grade:
+		"S": return Color(1.0, 0.85, 0.0, 1.0)
+		"A": return Color(0.3, 0.9, 0.3, 1.0)
+		"B": return Color(0.4, 0.6, 1.0, 1.0)
+		"C": return Color(1.0, 1.0, 0.3, 1.0)
+		"D": return Color(1.0, 0.6, 0.2, 1.0)
+		"F": return Color(0.9, 0.3, 0.3, 1.0)
+	return Color(0.5, 0.51, 0.62, 1.0)
 
 # ─────────────────────────────────────────
 #  SIGNAL HANDLERS

@@ -24,6 +24,9 @@ itch.io asset pack      PixelLab AI gen          Aseprite final pass
 Buy pack             →  Prompt in PixelLab    →  Lock to PICO-8 palette
 Extract relevant      →  Generate 10+ variants →  Add 1px dark outline
 sprites               →  Pick best candidate   →  Verify pixel grid
+Buy pack             ->  Prompt in PixelLab    ->  Lock to PICO-8 palette
+Extract relevant      ->  Generate 10+ variants ->  Add 1px dark outline
+sprites               ->  Pick best candidate   ->  Verify pixel grid
 alignment (16x16 or
 16x24)
 Export to godot/assets/
