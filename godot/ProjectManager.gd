@@ -533,6 +533,29 @@ func _on_work_day_started() -> void:
 		# Refresh dependency unlocks each tick
 		_refresh_task_deps(proj)
 
+	# Idle employees earn CP by working at their desks
+	var busy_ids: Array = []
+	for proj in get_projects():
+		for task in proj.get("tasks", []):
+			if task.get("status", "") == "in_progress":
+				for eid in task.get("assigned_employee_ids", []):
+					if eid not in busy_ids:
+						busy_ids.append(eid)
+
+	var all_employees: Array = []
+	if gm.employees:
+		all_employees = gm.employees.get_hired_employees()
+
+	var idle_count: int = 0
+	for emp in all_employees:
+		if str(emp.id) not in busy_ids:
+			idle_count += 1
+
+	if idle_count > 0:
+		var desk_cp: int = idle_count
+		gm.corp_points += desk_cp
+		print("[PM] %d idle employee(s) working at desk: +%d CP (total: %d)" % [idle_count, desk_cp, gm.corp_points])
+
 func _get_employee(gm_or_id: Variant, emp_id_arg: String = "") -> Employee:
 	# Supports both legacy call _get_employee(gm, id) and new call _get_employee(id)
 	var gm: Node = null
