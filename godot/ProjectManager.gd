@@ -608,7 +608,7 @@ func run_work_round(task_id: String) -> Dictionary:
 		var secondary_gain: int = 0
 
 		results.append({
-			"employee_name": emp.display_name,
+			"employee_name": emp.full_name(),
 			"employee_role": emp.role,
 			"primary_stat_name": primary_stat,
 			"primary_stat_value": primary_val,
@@ -663,7 +663,7 @@ func run_work_round(task_id: String) -> Dictionary:
 	if gm and gm.economy:
 		gm.economy.add_revenue(round_cash, "Task round: %s" % task.get("name", ""))
 	if gm:
-		gm.corp_points = gm.get("corp_points", 0) + round_cp
+		gm.corp_points = gm.corp_points + round_cp
 
 	# Apply stat gains to employees
 	var stat_gains: Array[Dictionary] = []
@@ -698,7 +698,7 @@ func run_work_round(task_id: String) -> Dictionary:
 		_add_stat(emp, ps, primary_gain)
 		_add_stat(emp, ss, secondary_gain)
 		stat_gains.append({
-			"name": emp.display_name,
+			"name": emp.full_name(),
 			"primary_stat": ps,
 			"primary_gain": primary_gain,
 			"secondary_stat": ss,
