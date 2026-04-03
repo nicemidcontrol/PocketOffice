@@ -9,6 +9,17 @@
 - All @onready paths must exactly match .tscn scene tree
 - Use proj.get("key", default) — never proj["key"]
 
+## Confidence Rule
+If confidence < 95% on any decision, STOP and ask before coding.
+Never guess architecture, file paths, or signal connections — verify first.
+
+## Output Limit Rule
+Always limit shell command output to avoid context bloat.
+- git log: use -5 or -10 max
+- file listings: use head -50 or limit scope
+- test output: summarize, don't dump full logs
+Never run unbounded commands that could flood the context window.
+
 ## Autoload Order
 SaveSystem → ClockManager → GameManager → EventManager → FacilityManager → DonorManager → CompetitorManager
 
