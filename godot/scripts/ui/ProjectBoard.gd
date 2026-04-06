@@ -477,15 +477,24 @@ func _show_result_popup(result: Dictionary) -> void:
 		_result_panel.queue_free()
 		_result_panel = null
 
-	# Dark overlay panel — fills the Card completely
+	# Hide the main card VBox so nothing shows through
+	var card_vbox: Node = get_node_or_null("Dimmer/Card/VBox")
+	if card_vbox:
+		card_vbox.visible = false
+
+	# Build result panel as direct child of Card, anchored to fill it
+	var card: Node = get_node_or_null("Dimmer/Card")
+	var parent_node: Node = card if card else self
+
 	_result_panel = Panel.new()
-	_result_panel.layout_mode = 1
-	_result_panel.anchors_preset = Control.PRESET_FULL_RECT
+	_result_panel.anchor_left = 0.0
+	_result_panel.anchor_top = 0.0
 	_result_panel.anchor_right = 1.0
 	_result_panel.anchor_bottom = 1.0
 	_result_panel.grow_horizontal = Control.GROW_DIRECTION_BOTH
 	_result_panel.grow_vertical = Control.GROW_DIRECTION_BOTH
 	_result_panel.mouse_filter = Control.MOUSE_FILTER_STOP
+	_result_panel.z_index = 10
 
 	var style: StyleBoxFlat = StyleBoxFlat.new()
 	style.bg_color = Color(0.1, 0.12, 0.18, 1.0)
@@ -501,8 +510,8 @@ func _show_result_popup(result: Dictionary) -> void:
 	_result_panel.add_theme_stylebox_override("panel", style)
 
 	var margin: MarginContainer = MarginContainer.new()
-	margin.layout_mode = 1
-	margin.anchors_preset = Control.PRESET_FULL_RECT
+	margin.anchor_left = 0.0
+	margin.anchor_top = 0.0
 	margin.anchor_right = 1.0
 	margin.anchor_bottom = 1.0
 	margin.grow_horizontal = Control.GROW_DIRECTION_BOTH
@@ -604,12 +613,8 @@ func _show_result_popup(result: Dictionary) -> void:
 	continue_btn.pressed.connect(_on_result_continue)
 	vbox.add_child(continue_btn)
 
-	var card: Node = get_node_or_null("Dimmer/Card")
-	if card:
-		card.add_child(_result_panel)
-		_result_panel.move_to_front()
-	else:
-		add_child(_result_panel)
+	parent_node.add_child(_result_panel)
+	_result_panel.move_to_front()
 
 func _add_result_label(parent: VBoxContainer, text: String, size: int, color: Color, centered: bool = false) -> Label:
 	var lbl: Label = Label.new()
@@ -625,6 +630,9 @@ func _on_result_continue() -> void:
 	if _result_panel != null:
 		_result_panel.queue_free()
 		_result_panel = null
+	var card_vbox: Node = get_node_or_null("Dimmer/Card/VBox")
+	if card_vbox:
+		card_vbox.visible = true
 	if _current_project_id != "" and _gm != null:
 		_tasks = _gm.projects.get_tasks_for_project(_current_project_id)
 	_refresh_display()
