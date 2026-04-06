@@ -477,22 +477,18 @@ func _show_result_popup(result: Dictionary) -> void:
 		_result_panel.queue_free()
 		_result_panel = null
 
-	# Dark overlay panel
+	# Dark overlay panel — fills the Card completely
 	_result_panel = Panel.new()
-	_result_panel.anchors_preset = Control.PRESET_CENTER
-	_result_panel.anchor_left = 0.5
-	_result_panel.anchor_right = 0.5
-	_result_panel.anchor_top = 0.5
-	_result_panel.anchor_bottom = 0.5
-	_result_panel.offset_left = -170.0
-	_result_panel.offset_right = 170.0
-	_result_panel.offset_top = -260.0
-	_result_panel.offset_bottom = 260.0
+	_result_panel.layout_mode = 1
+	_result_panel.anchors_preset = Control.PRESET_FULL_RECT
+	_result_panel.anchor_right = 1.0
+	_result_panel.anchor_bottom = 1.0
 	_result_panel.grow_horizontal = Control.GROW_DIRECTION_BOTH
 	_result_panel.grow_vertical = Control.GROW_DIRECTION_BOTH
+	_result_panel.mouse_filter = Control.MOUSE_FILTER_STOP
 
 	var style: StyleBoxFlat = StyleBoxFlat.new()
-	style.bg_color = Color(0.1, 0.12, 0.18, 0.95)
+	style.bg_color = Color(0.1, 0.12, 0.18, 1.0)
 	style.border_width_left = 2
 	style.border_width_top = 2
 	style.border_width_right = 2
@@ -608,7 +604,12 @@ func _show_result_popup(result: Dictionary) -> void:
 	continue_btn.pressed.connect(_on_result_continue)
 	vbox.add_child(continue_btn)
 
-	add_child(_result_panel)
+	var card: Node = get_node_or_null("Dimmer/Card")
+	if card:
+		card.add_child(_result_panel)
+		_result_panel.move_to_front()
+	else:
+		add_child(_result_panel)
 
 func _add_result_label(parent: VBoxContainer, text: String, size: int, color: Color, centered: bool = false) -> Label:
 	var lbl: Label = Label.new()
