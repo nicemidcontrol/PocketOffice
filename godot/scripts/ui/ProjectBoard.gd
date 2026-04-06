@@ -236,35 +236,25 @@ func _refresh_tasks_display() -> void:
 	var progress: float     = task.get("progress", 0.0)
 	var ids: Array          = task.get("assigned_employee_ids", [])
 
-	# Lines 1-3: name, subtitle, description
+	# --- Header: name, subtitle, description ---
 	_item_name_label.text = task.get("name", "Task")
 	_subtitle_label.text  = task.get("subtitle", "")
 	_desc_label.text      = task.get("description", "")
 
-	# Line 4: Stats
+	# --- Stats + Duration + Reward (combined into existing labels) ---
 	var primary: String   = task.get("primary_stat", "").capitalize()
 	var secondary: String = task.get("secondary_stat", "").capitalize()
 	_role_label.text = primary + " + " + secondary
 
-	# Line 5: Duration
 	var duration_ticks: int = int(task.get("duration_ticks", task.get("duration", 0)))
-	_info_label.text = "%d ticks" % duration_ticks
-
-	# Line 6: Reward
-	_reward_label.text = "%s  +%d CP" % [
+	_info_label.text = "%d ticks | %s  +%d CP" % [
+		duration_ticks,
 		_gm.format_cash(int(task.get("reward_cash", 0))),
 		int(task.get("reward_cp", 0)),
 	]
+	_reward_label.text = ""
 
-	# Line 7: Progress bar — only if in_progress
-	if is_progress:
-		var bar_lbl: Label = Label.new()
-		bar_lbl.text = _progress_bar(progress, 12)
-		bar_lbl.add_theme_font_size_override("font_size", 11)
-		bar_lbl.add_theme_color_override("font_color", Color(1.0, 0.85, 0.1, 1.0))
-		_ot_list.add_child(bar_lbl)
-
-	# Line 8: Assigned employees
+	# --- Team line ---
 	if ids.is_empty():
 		_team_label.text = "Unassigned"
 		_team_label.add_theme_color_override("font_color", Color(0.5, 0.51, 0.62, 1.0))
@@ -277,15 +267,24 @@ func _refresh_tasks_display() -> void:
 		_team_label.text = "Team: %s  (%d/3)" % [", ".join(names), ids.size()]
 		_team_label.add_theme_color_override("font_color", Color(0.22, 0.9, 0.42, 1.0))
 
-	# Stat preview for assigned employees
+	# --- Progress bar (in _ot_list) ---
+	if is_progress or (is_done and progress > 0.0):
+		var bar_lbl: Label = Label.new()
+		bar_lbl.text = _progress_bar(progress, 14)
+		bar_lbl.add_theme_font_size_override("font_size", 11)
+		bar_lbl.add_theme_color_override("font_color", Color(1.0, 0.85, 0.1, 1.0))
+		_ot_list.add_child(bar_lbl)
+
+	# --- Stat preview (in _ot_list, only if employees assigned) ---
+	var est_grade: String = ""
 	if not ids.is_empty() and not is_done and not is_locked:
 		var primary_stat: String = task.get("primary_stat", "technical")
 		var secondary_stat: String = task.get("secondary_stat", "focus")
-		_add_stat_preview(ids, primary_stat, secondary_stat)
+		est_grade = _add_stat_preview(ids, primary_stat, secondary_stat)
 
-	# Line 9: Status badge + action button
+	# --- Status badge + action button ---
 	if is_locked:
-		var prereqs: Array  = task.get("requires", task.get("prerequisites", []))
+		var prereqs: Array = task.get("requires", task.get("prerequisites", []))
 		var prereq_name: String = ""
 		if not prereqs.is_empty():
 			var prereq_id: String = str(prereqs[0])
@@ -298,8 +297,11 @@ func _refresh_tasks_display() -> void:
 		_status_label.text = "LOCKED"
 		_status_label.add_theme_color_override("font_color", Color(0.5, 0.51, 0.62, 1.0))
 		if prereq_name != "":
-			_team_label.text = "Requires: " + prereq_name
-			_team_label.add_theme_color_override("font_color", Color(0.55, 0.55, 0.65, 1.0))
+			var req_lbl: Label = Label.new()
+			req_lbl.text = "Requires: " + prereq_name
+			req_lbl.add_theme_font_size_override("font_size", 10)
+			req_lbl.add_theme_color_override("font_color", Color(0.55, 0.55, 0.65, 1.0))
+			_ot_list.add_child(req_lbl)
 		_action_btn.text     = "LOCKED"
 		_action_btn.disabled = true
 		_action_btn.add_theme_color_override("font_color", Color(0.5, 0.51, 0.62, 1.0))
@@ -316,6 +318,24 @@ func _refresh_tasks_display() -> void:
 		var cp_cost: int = _get_round_cp_cost(task)
 		var is_first: bool = _gm.total_rounds_played == 0 if _gm else false
 		var has_cp: bool = _gm.corp_points >= cp_cost if _gm else false
+		# Est. Grade + Round cost on one line
+		var cost_text: String = "FREE!" if is_first else "%d CP" % cp_cost
+		var info_line: String = ""
+		if est_grade != "":
+			info_line = "Est. Grade: %s | Cost: %s" % [est_grade, cost_text]
+		else:
+			info_line = "Round cost: %s" % cost_text
+		var info_lbl: Label = Label.new()
+		info_lbl.text = info_line
+		info_lbl.add_theme_font_size_override("font_size", 11)
+		if not has_cp and not is_first:
+			info_lbl.add_theme_color_override("font_color", Color(0.9, 0.3, 0.3, 1.0))
+		elif est_grade != "":
+			info_lbl.add_theme_color_override("font_color", _grade_color(est_grade))
+		else:
+			info_lbl.add_theme_color_override("font_color", Color(1.0, 0.82, 0.2, 1.0))
+		_ot_list.add_child(info_lbl)
+		# START WORK button
 		if is_first:
 			_action_btn.text     = "START WORK (FREE!)"
 			_action_btn.disabled = false
@@ -328,21 +348,11 @@ func _refresh_tasks_display() -> void:
 			_action_btn.text     = "NEED %d CP" % cp_cost
 			_action_btn.disabled = true
 			_action_btn.add_theme_color_override("font_color", Color(0.9, 0.3, 0.3, 1.0))
-		# Show round cost info
-		var cost_lbl: Label = Label.new()
-		if is_first:
-			cost_lbl.text = "Round cost: FREE!"
-			cost_lbl.add_theme_color_override("font_color", Color(0.22, 0.9, 0.42, 1.0))
-		else:
-			cost_lbl.text = "Round cost: %d CP" % cp_cost
-			cost_lbl.add_theme_color_override("font_color", Color(1.0, 0.82, 0.2, 1.0))
-		cost_lbl.add_theme_font_size_override("font_size", 10)
-		_ot_list.add_child(cost_lbl)
-		# If team not full, add ASSIGN button to add more
+		# ASSIGN button if team not full
 		if ids.size() < 3:
 			var assign_btn: Button = Button.new()
 			assign_btn.text = "ASSIGN (%d/3)" % ids.size()
-			assign_btn.custom_minimum_size = Vector2(0, 30)
+			assign_btn.custom_minimum_size = Vector2(0, 32)
 			assign_btn.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 			assign_btn.add_theme_font_size_override("font_size", 12)
 			assign_btn.add_theme_color_override("font_color", Color(0.4, 0.8, 1.0, 1.0))
@@ -618,33 +628,9 @@ func _on_result_continue() -> void:
 		_tasks = _gm.projects.get_tasks_for_project(_current_project_id)
 	_refresh_display()
 
-func _add_stat_preview(emp_ids: Array, primary_stat: String, secondary_stat: String) -> void:
+func _add_stat_preview(emp_ids: Array, primary_stat: String, secondary_stat: String) -> String:
 	if _gm == null:
-		return
-	var total_primary: float = 0.0
-	var total_secondary: float = 0.0
-	for emp_id in emp_ids:
-		var emp: Employee = null
-		for e in _gm.employees.get_hired_employees():
-			if str(e.id) == str(emp_id):
-				emp = e
-				break
-		if emp == null:
-			continue
-		var pv: int = _get_emp_stat(emp, primary_stat)
-		var sv: int = _get_emp_stat(emp, secondary_stat)
-		total_primary += pv
-		total_secondary += sv
-		var stars: String = _star_rating(pv) + " " + primary_stat.capitalize() + "  " + _star_rating(sv) + " " + secondary_stat.capitalize()
-		var preview_lbl: Label = Label.new()
-		preview_lbl.text = "%s: %s" % [str(emp.first_name), stars]
-		preview_lbl.add_theme_font_size_override("font_size", 10)
-		preview_lbl.add_theme_color_override("font_color", Color(0.55, 0.65, 0.75, 1.0))
-		_ot_list.add_child(preview_lbl)
-
-	# Estimated grade
-	var avg_primary: float = total_primary / float(emp_ids.size()) if emp_ids.size() > 0 else 0.0
-	var avg_secondary: float = total_secondary / float(emp_ids.size()) if emp_ids.size() > 0 else 0.0
+		return "F"
 	var est_progress: float = 0.0
 	for emp_id in emp_ids:
 		var emp: Employee = null
@@ -657,12 +643,13 @@ func _add_stat_preview(emp_ids: Array, primary_stat: String, secondary_stat: Str
 		var pv: int = _get_emp_stat(emp, primary_stat)
 		var sv: int = _get_emp_stat(emp, secondary_stat)
 		est_progress += (pv / 1000.0) * 0.60 + (sv / 1000.0) * 0.30
-	var est_grade: String = _estimate_grade(est_progress)
-	var est_lbl: Label = Label.new()
-	est_lbl.text = "Est. Grade: %s" % est_grade
-	est_lbl.add_theme_font_size_override("font_size", 11)
-	est_lbl.add_theme_color_override("font_color", _grade_color(est_grade))
-	_ot_list.add_child(est_lbl)
+		var stars: String = _star_rating(pv) + " " + primary_stat.capitalize() + "  " + _star_rating(sv) + " " + secondary_stat.capitalize()
+		var preview_lbl: Label = Label.new()
+		preview_lbl.text = "%s: %s" % [str(emp.first_name), stars]
+		preview_lbl.add_theme_font_size_override("font_size", 10)
+		preview_lbl.add_theme_color_override("font_color", Color(0.55, 0.65, 0.75, 1.0))
+		_ot_list.add_child(preview_lbl)
+	return _estimate_grade(est_progress)
 
 func _get_emp_stat(emp: Employee, stat_name: String) -> int:
 	match stat_name:
