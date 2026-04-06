@@ -467,6 +467,7 @@ func _show_result_popup(result: Dictionary) -> void:
 		_result_panel.queue_free()
 		_result_panel = null
 
+	# Dark overlay panel
 	_result_panel = Panel.new()
 	_result_panel.anchors_preset = Control.PRESET_CENTER
 	_result_panel.anchor_left = 0.5
@@ -475,13 +476,13 @@ func _show_result_popup(result: Dictionary) -> void:
 	_result_panel.anchor_bottom = 0.5
 	_result_panel.offset_left = -170.0
 	_result_panel.offset_right = 170.0
-	_result_panel.offset_top = -255.0
-	_result_panel.offset_bottom = 255.0
+	_result_panel.offset_top = -260.0
+	_result_panel.offset_bottom = 260.0
 	_result_panel.grow_horizontal = Control.GROW_DIRECTION_BOTH
 	_result_panel.grow_vertical = Control.GROW_DIRECTION_BOTH
 
 	var style: StyleBoxFlat = StyleBoxFlat.new()
-	style.bg_color = Color(0.04, 0.04, 0.10, 0.98)
+	style.bg_color = Color(0.1, 0.12, 0.18, 0.95)
 	style.border_width_left = 2
 	style.border_width_top = 2
 	style.border_width_right = 2
@@ -500,10 +501,10 @@ func _show_result_popup(result: Dictionary) -> void:
 	margin.anchor_bottom = 1.0
 	margin.grow_horizontal = Control.GROW_DIRECTION_BOTH
 	margin.grow_vertical = Control.GROW_DIRECTION_BOTH
-	margin.add_theme_constant_override("margin_left", 14)
-	margin.add_theme_constant_override("margin_top", 14)
-	margin.add_theme_constant_override("margin_right", 14)
-	margin.add_theme_constant_override("margin_bottom", 14)
+	margin.add_theme_constant_override("margin_left", 16)
+	margin.add_theme_constant_override("margin_top", 16)
+	margin.add_theme_constant_override("margin_right", 16)
+	margin.add_theme_constant_override("margin_bottom", 16)
 	_result_panel.add_child(margin)
 
 	var scroll: ScrollContainer = ScrollContainer.new()
@@ -514,159 +515,100 @@ func _show_result_popup(result: Dictionary) -> void:
 
 	var vbox: VBoxContainer = VBoxContainer.new()
 	vbox.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	vbox.add_theme_constant_override("separation", 6)
+	vbox.add_theme_constant_override("separation", 8)
 	scroll.add_child(vbox)
 
-	# Title
-	var title_lbl: Label = Label.new()
-	title_lbl.text = "ROUND COMPLETE!"
-	title_lbl.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	title_lbl.add_theme_font_size_override("font_size", 16)
-	title_lbl.add_theme_color_override("font_color", Color(0.95, 0.95, 0.98, 1.0))
-	vbox.add_child(title_lbl)
+	# --- Header ---
+	_add_result_label(vbox, "ROUND COMPLETE!", 18, Color(0.95, 0.95, 0.98), true)
+	_add_result_label(vbox, result.get("task_name", ""), 13, Color(0.4, 0.8, 1.0), true)
 
-	# Task name
-	var task_lbl: Label = Label.new()
-	task_lbl.text = result.get("task_name", "")
-	task_lbl.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	task_lbl.add_theme_font_size_override("font_size", 12)
-	task_lbl.add_theme_color_override("font_color", Color(0.6, 0.7, 0.9, 1.0))
-	vbox.add_child(task_lbl)
-
-	# Grade (big letter)
+	# --- Grade ---
 	var grade: String = result.get("grade", "F")
-	var grade_lbl: Label = Label.new()
-	grade_lbl.text = grade
-	grade_lbl.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	grade_lbl.add_theme_font_size_override("font_size", 48)
-	grade_lbl.add_theme_color_override("font_color", _grade_color(grade))
-	vbox.add_child(grade_lbl)
+	_add_result_label(vbox, grade, 48, _grade_color(grade), true)
 
-	# Grade text
-	var grade_text_lbl: Label = Label.new()
-	grade_text_lbl.text = result.get("grade_text", "")
-	grade_text_lbl.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	var grade_text_lbl: Label = _add_result_label(vbox, result.get("grade_text", ""), 11, Color(0.5, 0.51, 0.62), true)
 	grade_text_lbl.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-	grade_text_lbl.add_theme_font_size_override("font_size", 11)
-	grade_text_lbl.add_theme_color_override("font_color", Color(0.5, 0.51, 0.62, 1.0))
-	vbox.add_child(grade_text_lbl)
 
-	# Combo bonus
-	var combo_name: String = result.get("combo_name", "")
-	if combo_name != "":
-		var combo_lbl: Label = Label.new()
-		var combo_pct: int = int(result.get("combo_bonus", 0.0) * 100.0)
-		combo_lbl.text = "Combo: %s +%d%%" % [combo_name, combo_pct]
-		combo_lbl.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-		combo_lbl.add_theme_font_size_override("font_size", 12)
-		combo_lbl.add_theme_color_override("font_color", Color(1.0, 0.85, 0.0, 1.0))
-		vbox.add_child(combo_lbl)
+	# --- Separator ---
+	vbox.add_child(HSeparator.new())
 
-	# Separator
-	var sep1: HSeparator = HSeparator.new()
-	vbox.add_child(sep1)
-
-	# Employee results
+	# --- Employee contributions ---
 	var emp_results: Array = result.get("employee_results", [])
 	for er in emp_results:
-		var er_lbl: Label = Label.new()
 		var contrib_pct: int = int(er.get("contribution", 0.0) * 100.0)
-		er_lbl.text = "%s: +%d%%" % [er.get("employee_name", ""), contrib_pct]
-		er_lbl.add_theme_font_size_override("font_size", 11)
-		er_lbl.add_theme_color_override("font_color", Color(0.75, 0.75, 0.85, 1.0))
-		vbox.add_child(er_lbl)
+		_add_result_label(vbox, "%s: +%d%%" % [er.get("employee_name", ""), contrib_pct], 12, Color(0.85, 0.85, 0.92))
 
-	# Total progress
+	# Combo line
+	var combo_name: String = result.get("combo_name", "")
+	if combo_name != "":
+		var combo_pct: int = int(result.get("combo_bonus", 0.0) * 100.0)
+		_add_result_label(vbox, "Combo: %s +%d%%" % [combo_name, combo_pct], 12, Color(1.0, 0.85, 0.0))
+	else:
+		_add_result_label(vbox, "Combo: None", 11, Color(0.4, 0.4, 0.5))
+
+	# --- Progress ---
 	var total_pct: int = int(result.get("total_progress", 0.0) * 100.0)
-	var total_lbl: Label = Label.new()
-	total_lbl.text = "Progress: +%d%%" % total_pct
-	total_lbl.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	total_lbl.add_theme_font_size_override("font_size", 13)
-	total_lbl.add_theme_color_override("font_color", Color(0.22, 0.9, 0.42, 1.0))
-	vbox.add_child(total_lbl)
+	_add_result_label(vbox, "Progress: +%d%%" % total_pct, 14, Color(0.22, 0.9, 0.42), true)
 
-	# Task progress bar
 	var task_prog: float = result.get("task_progress", 0.0)
-	var bar_lbl: Label = Label.new()
-	bar_lbl.text = _progress_bar(task_prog, 16)
-	bar_lbl.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	bar_lbl.add_theme_font_size_override("font_size", 11)
-	bar_lbl.add_theme_color_override("font_color", Color(1.0, 0.85, 0.1, 1.0))
-	vbox.add_child(bar_lbl)
+	_add_result_label(vbox, _progress_bar(task_prog, 16), 11, Color(1.0, 0.85, 0.1), true)
 
-	# Rewards
-	var reward_lbl: Label = Label.new()
-	reward_lbl.text = "+$%d  +%d CP" % [
-		int(result.get("round_cash", 0)),
-		int(result.get("round_cp", 0)),
-	]
-	reward_lbl.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	reward_lbl.add_theme_font_size_override("font_size", 13)
-	reward_lbl.add_theme_color_override("font_color", Color(1.0, 0.82, 0.2, 1.0))
-	vbox.add_child(reward_lbl)
+	# --- Rewards ---
+	var reward_text: String = "Rewards: +$%d  +%d CP" % [int(result.get("round_cash", 0)), int(result.get("round_cp", 0))]
+	_add_result_label(vbox, reward_text, 13, Color(1.0, 0.82, 0.2), true)
 
-	# CP cost display
+	# CP cost
 	var cp_spent: int = int(result.get("cp_cost", 0))
 	if cp_spent > 0:
-		var cost_lbl: Label = Label.new()
-		cost_lbl.text = "-%d CP (round cost)" % cp_spent
-		cost_lbl.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-		cost_lbl.add_theme_font_size_override("font_size", 11)
-		cost_lbl.add_theme_color_override("font_color", Color(0.9, 0.5, 0.3, 1.0))
-		vbox.add_child(cost_lbl)
+		_add_result_label(vbox, "-%d CP (round cost)" % cp_spent, 11, Color(0.9, 0.5, 0.3), true)
 
 	# Free round message
-	var was_free: bool = result.get("was_free", false)
-	if was_free:
-		var free_lbl: Label = Label.new()
-		free_lbl.text = "First round FREE! Next time it'll cost CP."
-		free_lbl.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	if result.get("was_free", false):
+		var free_lbl: Label = _add_result_label(vbox, "First round FREE! Next time it'll cost CP.", 11, Color(0.22, 0.9, 0.42), true)
 		free_lbl.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-		free_lbl.add_theme_font_size_override("font_size", 11)
-		free_lbl.add_theme_color_override("font_color", Color(0.22, 0.9, 0.42, 1.0))
-		vbox.add_child(free_lbl)
 
-	# Separator
-	var sep2: HSeparator = HSeparator.new()
-	vbox.add_child(sep2)
+	# --- Separator ---
+	vbox.add_child(HSeparator.new())
 
-	# Stat gains
+	# --- Stat gains ---
 	var stat_gains: Array = result.get("stat_gains", [])
 	for sg in stat_gains:
-		var sg_lbl: Label = Label.new()
 		var pg: int = int(sg.get("primary_gain", 0))
 		var ssg: int = int(sg.get("secondary_gain", 0))
-		sg_lbl.text = "%s: %s +%d, %s +%d" % [
+		var sg_text: String = "%s: %s +%d, %s +%d" % [
 			sg.get("name", ""),
 			str(sg.get("primary_stat", "")).capitalize(), pg,
 			str(sg.get("secondary_stat", "")).capitalize(), ssg,
 		]
-		sg_lbl.add_theme_font_size_override("font_size", 11)
-		sg_lbl.add_theme_color_override("font_color", Color(0.4, 0.8, 1.0, 1.0))
-		vbox.add_child(sg_lbl)
+		_add_result_label(vbox, sg_text, 11, Color(0.4, 0.8, 1.0))
 
-	# Task complete banner
-	var is_completed: bool = result.get("task_completed", false)
-	if is_completed:
-		var complete_lbl: Label = Label.new()
+	# --- Task complete banner ---
+	if result.get("task_completed", false):
 		var bonus_cp: int = int(result.get("completion_cp_bonus", 0))
-		complete_lbl.text = "TASK COMPLETE! +%d CP bonus!" % bonus_cp
-		complete_lbl.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-		complete_lbl.add_theme_font_size_override("font_size", 18)
-		complete_lbl.add_theme_color_override("font_color", Color(1.0, 0.85, 0.0, 1.0))
-		vbox.add_child(complete_lbl)
+		_add_result_label(vbox, "TASK COMPLETE!", 20, Color(1.0, 0.85, 0.0), true)
+		_add_result_label(vbox, "+%d CP bonus!" % bonus_cp, 14, Color(1.0, 0.85, 0.0), true)
 
-	# Continue button
+	# --- Continue button ---
 	var continue_btn: Button = Button.new()
 	continue_btn.text = "CONTINUE"
-	continue_btn.custom_minimum_size = Vector2(0, 36)
+	continue_btn.custom_minimum_size = Vector2(0, 40)
 	continue_btn.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	continue_btn.add_theme_font_size_override("font_size", 13)
+	continue_btn.add_theme_font_size_override("font_size", 14)
 	continue_btn.add_theme_color_override("font_color", Color(0.22, 0.9, 0.42, 1.0))
 	continue_btn.pressed.connect(_on_result_continue)
 	vbox.add_child(continue_btn)
 
 	add_child(_result_panel)
+
+func _add_result_label(parent: VBoxContainer, text: String, size: int, color: Color, centered: bool = false) -> Label:
+	var lbl: Label = Label.new()
+	lbl.text = text
+	lbl.add_theme_font_size_override("font_size", size)
+	lbl.add_theme_color_override("font_color", color)
+	if centered:
+		lbl.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	parent.add_child(lbl)
+	return lbl
 
 func _on_result_continue() -> void:
 	if _result_panel != null:
