@@ -32,7 +32,10 @@ var _projects:           Array  = []
 var _tasks:              Array  = []
 var _desc_label:         Label  = null
 var _subtitle_label:     Label  = null
-var _result_panel:       Panel  = null
+
+# Sub-helpers (set up in _ready)
+var _task_detail:  Object = null
+var _work_result:  Object = null
 
 # ─────────────────────────────────────────
 #  LIFECYCLE
@@ -72,6 +75,16 @@ func _ready() -> void:
 	_back_btn.pressed.connect(_on_back_pressed)
 	_back_btn.visible  = false
 	_assign_panel.visible = false
+
+	# Create sub-helpers
+	var task_detail_script: GDScript = load("res://scripts/ui/TaskDetailView.gd")
+	_task_detail = task_detail_script.new()
+	_task_detail.setup(self)
+
+	var work_result_script: GDScript = load("res://scripts/ui/WorkRoundResult.gd")
+	_work_result = work_result_script.new()
+	_work_result.setup(self)
+
 	_show_projects_mode()
 
 # ─────────────────────────────────────────
@@ -117,7 +130,11 @@ func _refresh_display() -> void:
 	if _view_mode == MODE_PROJECTS:
 		_refresh_projects_display()
 	else:
-		_refresh_tasks_display()
+		_task_detail.refresh_display(_tasks, _current_index)
+
+# Called by sub-helpers to invoke BaseModal's _refresh_display
+func _base_refresh() -> void:
+	super._refresh_display()
 
 func _refresh_projects_display() -> void:
 	if _projects.is_empty():
@@ -212,161 +229,6 @@ func _refresh_projects_display() -> void:
 		_action_btn.disabled = false
 		_action_btn.add_theme_color_override("font_color", Color(0.3, 1.0, 0.4, 1.0))
 
-func _refresh_tasks_display() -> void:
-	if _tasks.is_empty():
-		_item_name_label.text = "No Tasks"
-		_page_label.text      = "0 / 0"
-		_subtitle_label.text  = ""
-		_desc_label.text      = "This project has no tasks."
-		_role_label.text      = ""
-		_info_label.text      = ""
-		_reward_label.text    = ""
-		_team_label.text      = ""
-		_action_btn.visible   = false
-		return
-
-	super._refresh_display()
-	_action_btn.visible = true
-
-	var task: Dictionary    = _tasks[_current_index]
-	var task_status: String = task.get("status", "locked")
-	var is_done: bool       = task_status == "completed"
-	var is_locked: bool     = task_status == "locked"
-	var is_progress: bool   = task_status == "in_progress"
-	var progress: float     = task.get("progress", 0.0)
-	var ids: Array          = task.get("assigned_employee_ids", [])
-
-	# --- Header: name, subtitle, description ---
-	_item_name_label.text = task.get("name", "Task")
-	_subtitle_label.text  = task.get("subtitle", "")
-	_desc_label.text      = task.get("description", "")
-
-	# --- Stats + Duration + Reward (combined into existing labels) ---
-	var primary: String   = task.get("primary_stat", "").capitalize()
-	var secondary: String = task.get("secondary_stat", "").capitalize()
-	_role_label.text = primary + " + " + secondary
-
-	var duration_ticks: int = int(task.get("duration_ticks", task.get("duration", 0)))
-	_info_label.text = "%d ticks | %s  +%d CP" % [
-		duration_ticks,
-		_gm.format_cash(int(task.get("reward_cash", 0))),
-		int(task.get("reward_cp", 0)),
-	]
-	_reward_label.text = ""
-
-	# --- Team line ---
-	if ids.is_empty():
-		_team_label.text = "Unassigned"
-		_team_label.add_theme_color_override("font_color", Color(0.5, 0.51, 0.62, 1.0))
-	else:
-		var names: Array[String] = []
-		if _gm != null:
-			var hired: Array[Employee] = _gm.employees.get_hired_employees()
-			for emp in hired:
-				if str(emp.id) in ids:
-					names.append(str(emp.first_name))
-		_team_label.text = "Team: %s  (%d/3)" % [", ".join(names), ids.size()]
-		_team_label.add_theme_color_override("font_color", Color(0.22, 0.9, 0.42, 1.0))
-
-	# --- Progress bar (in _ot_list) ---
-	if is_progress or (is_done and progress > 0.0):
-		var bar_lbl: Label = Label.new()
-		bar_lbl.text = _progress_bar(progress, 14)
-		bar_lbl.add_theme_font_size_override("font_size", 11)
-		bar_lbl.add_theme_color_override("font_color", Color(1.0, 0.85, 0.1, 1.0))
-		_ot_list.add_child(bar_lbl)
-
-	# --- Stat preview (in _ot_list, only if employees assigned) ---
-	var est_grade: String = ""
-	if not ids.is_empty() and not is_done and not is_locked:
-		var primary_stat: String = task.get("primary_stat", "technical")
-		var secondary_stat: String = task.get("secondary_stat", "focus")
-		est_grade = _add_stat_preview(ids, primary_stat, secondary_stat)
-
-	# --- Status badge + action button ---
-	if is_locked:
-		var prereqs: Array = task.get("requires", task.get("prerequisites", []))
-		var prereq_name: String = ""
-		if not prereqs.is_empty():
-			var prereq_id: String = str(prereqs[0])
-			for other in _tasks:
-				if other.get("id", "") == prereq_id:
-					prereq_name = other.get("name", "")
-					break
-			if prereq_name == "":
-				prereq_name = prereq_id.replace("_", " ").capitalize()
-		_status_label.text = "LOCKED"
-		_status_label.add_theme_color_override("font_color", Color(0.5, 0.51, 0.62, 1.0))
-		if prereq_name != "":
-			var req_lbl: Label = Label.new()
-			req_lbl.text = "Requires: " + prereq_name
-			req_lbl.add_theme_font_size_override("font_size", 10)
-			req_lbl.add_theme_color_override("font_color", Color(0.55, 0.55, 0.65, 1.0))
-			_ot_list.add_child(req_lbl)
-		_action_btn.text     = "LOCKED"
-		_action_btn.disabled = true
-		_action_btn.add_theme_color_override("font_color", Color(0.5, 0.51, 0.62, 1.0))
-	elif is_done:
-		_status_label.text = "COMPLETED"
-		_status_label.add_theme_color_override("font_color", Color(0.4, 0.8, 1.0, 1.0))
-		_action_btn.text     = "DONE"
-		_action_btn.disabled = true
-		_action_btn.add_theme_color_override("font_color", Color(0.4, 0.8, 1.0, 1.0))
-	elif not ids.is_empty():
-		# Has employees — show START WORK as main action
-		_status_label.text = "READY"
-		_status_label.add_theme_color_override("font_color", Color(0.22, 0.9, 0.42, 1.0))
-		var cp_cost: int = _get_round_cp_cost(task)
-		var is_first: bool = _gm.total_rounds_played == 0 if _gm else false
-		var has_cp: bool = _gm.corp_points >= cp_cost if _gm else false
-		# Est. Grade + Round cost on one line
-		var cost_text: String = "FREE!" if is_first else "%d CP" % cp_cost
-		var info_line: String = ""
-		if est_grade != "":
-			info_line = "Est. Grade: %s | Cost: %s" % [est_grade, cost_text]
-		else:
-			info_line = "Round cost: %s" % cost_text
-		var info_lbl: Label = Label.new()
-		info_lbl.text = info_line
-		info_lbl.add_theme_font_size_override("font_size", 11)
-		if not has_cp and not is_first:
-			info_lbl.add_theme_color_override("font_color", Color(0.9, 0.3, 0.3, 1.0))
-		elif est_grade != "":
-			info_lbl.add_theme_color_override("font_color", _grade_color(est_grade))
-		else:
-			info_lbl.add_theme_color_override("font_color", Color(1.0, 0.82, 0.2, 1.0))
-		_ot_list.add_child(info_lbl)
-		# START WORK button
-		if is_first:
-			_action_btn.text     = "START WORK (FREE!)"
-			_action_btn.disabled = false
-			_action_btn.add_theme_color_override("font_color", Color(0.22, 0.9, 0.42, 1.0))
-		elif has_cp:
-			_action_btn.text     = "START WORK (%d CP)" % cp_cost
-			_action_btn.disabled = false
-			_action_btn.add_theme_color_override("font_color", Color(0.22, 0.9, 0.42, 1.0))
-		else:
-			_action_btn.text     = "NEED %d CP" % cp_cost
-			_action_btn.disabled = true
-			_action_btn.add_theme_color_override("font_color", Color(0.9, 0.3, 0.3, 1.0))
-		# ASSIGN button if team not full
-		if ids.size() < 3:
-			var assign_btn: Button = Button.new()
-			assign_btn.text = "ASSIGN (%d/3)" % ids.size()
-			assign_btn.custom_minimum_size = Vector2(0, 32)
-			assign_btn.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-			assign_btn.add_theme_font_size_override("font_size", 12)
-			assign_btn.add_theme_color_override("font_color", Color(0.4, 0.8, 1.0, 1.0))
-			assign_btn.pressed.connect(func() -> void: _open_assign_for_task(task))
-			_ot_list.add_child(assign_btn)
-	else:
-		# available, no employees
-		_status_label.text = "AVAILABLE"
-		_status_label.add_theme_color_override("font_color", Color(0.22, 0.9, 0.42, 1.0))
-		_action_btn.text     = "ASSIGN"
-		_action_btn.disabled = false
-		_action_btn.add_theme_color_override("font_color", Color(0.4, 0.8, 1.0, 1.0))
-
 # ─────────────────────────────────────────
 #  ACTIONS
 # ─────────────────────────────────────────
@@ -389,9 +251,9 @@ func _on_action_pressed() -> void:
 			return
 		var emp_ids: Array = task.get("assigned_employee_ids", [])
 		if emp_ids.is_empty():
-			_open_assign_for_task(task)
+			_task_detail.open_assign_for_task(task, _tasks)
 		else:
-			_start_work_round(task)
+			_work_result.start_work_round(task)
 
 func _on_back_pressed() -> void:
 	_view_mode = MODE_PROJECTS
@@ -404,314 +266,9 @@ func _on_active_tab() -> void:
 func _on_avail_tab() -> void:
 	pass
 
-func _open_assign_for_task(task: Dictionary) -> void:
-	_assign_title.text = "Assign to: " + task.get("name", "Task")
-	for child in _assign_list.get_children():
-		child.queue_free()
-	if _gm == null:
-		return
-
-	# Collect employee IDs already busy on OTHER tasks
-	var busy_ids: Array  = []
-	var curr_ids: Array  = task.get("assigned_employee_ids", [])
-	var this_id: String  = task.get("id", "")
-	for t in _tasks:
-		if t.get("id", "") == this_id:
-			continue
-		for eid in t.get("assigned_employee_ids", []):
-			if eid not in busy_ids:
-				busy_ids.append(eid)
-
-	var all_emps: Array[Employee] = _gm.employees.get_hired_employees()
-	var shown: int      = 0
-	for emp in all_emps:
-		var eid: String = str(emp.id)
-		if eid in busy_ids or eid in curr_ids:
-			continue
-		var btn: Button = Button.new()
-		btn.text = "%s  (%s)" % [emp.full_name(), _role_name(int(emp.role))]
-		btn.custom_minimum_size = Vector2(0, 36)
-		btn.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-		btn.add_theme_color_override("font_color", _role_color(int(emp.role)))
-		btn.add_theme_font_size_override("font_size", 12)
-		var task_id: String = this_id
-		btn.pressed.connect(func() -> void: _on_assign_employee(task_id, eid))
-		_assign_list.add_child(btn)
-		shown += 1
-
-	if shown == 0:
-		var lbl: Label = Label.new()
-		lbl.text = "No available employees."
-		lbl.add_theme_color_override("font_color", Color(0.5, 0.51, 0.62, 1.0))
-		lbl.add_theme_font_size_override("font_size", 12)
-		_assign_list.add_child(lbl)
-	_assign_panel.visible = true
-
+# Delegated from scene signal (AssignPanel close button)
 func _on_assign_close_pressed() -> void:
-	_assign_panel.visible = false
-
-func _on_assign_employee(task_id: String, emp_id: String) -> void:
-	if _gm == null:
-		return
-	_gm.projects.assign_employee_to_task(task_id, emp_id)
-	_assign_panel.visible = false
-	if _current_project_id != "":
-		_tasks = _gm.projects.get_tasks_for_project(_current_project_id)
-	_refresh_display()
-
-# ─────────────────────────────────────────
-#  WORK ROUND
-# ─────────────────────────────────────────
-func _start_work_round(task: Dictionary) -> void:
-	if _gm == null:
-		return
-	var task_id: String = task.get("id", "")
-	var result: Dictionary = _gm.projects.run_work_round(task_id)
-	if result.has("error"):
-		_status_label.text = str(result.get("error", "Error"))
-		_status_label.add_theme_color_override("font_color", Color(0.9, 0.3, 0.3, 1.0))
-		return
-	_show_result_popup(result)
-
-func _show_result_popup(result: Dictionary) -> void:
-	if _result_panel != null:
-		_result_panel.queue_free()
-		_result_panel = null
-
-	# Hide the main card VBox so nothing shows through
-	var card_vbox: Node = get_node_or_null("Dimmer/Card/VBox")
-	if card_vbox:
-		card_vbox.visible = false
-
-	# Build result panel as direct child of Card, anchored to fill it
-	var card: Node = get_node_or_null("Dimmer/Card")
-	var parent_node: Node = card if card else self
-
-	_result_panel = Panel.new()
-	_result_panel.anchor_left = 0.0
-	_result_panel.anchor_top = 0.0
-	_result_panel.anchor_right = 1.0
-	_result_panel.anchor_bottom = 1.0
-	_result_panel.grow_horizontal = Control.GROW_DIRECTION_BOTH
-	_result_panel.grow_vertical = Control.GROW_DIRECTION_BOTH
-	_result_panel.mouse_filter = Control.MOUSE_FILTER_STOP
-	_result_panel.z_index = 10
-
-	var style: StyleBoxFlat = StyleBoxFlat.new()
-	style.bg_color = Color(0.1, 0.12, 0.18, 1.0)
-	style.border_width_left = 2
-	style.border_width_top = 2
-	style.border_width_right = 2
-	style.border_width_bottom = 2
-	style.border_color = Color(0.18, 0.42, 0.78, 1.0)
-	style.corner_radius_top_left = 10
-	style.corner_radius_top_right = 10
-	style.corner_radius_bottom_right = 10
-	style.corner_radius_bottom_left = 10
-	_result_panel.add_theme_stylebox_override("panel", style)
-
-	var margin: MarginContainer = MarginContainer.new()
-	margin.anchor_left = 0.0
-	margin.anchor_top = 0.0
-	margin.anchor_right = 1.0
-	margin.anchor_bottom = 1.0
-	margin.grow_horizontal = Control.GROW_DIRECTION_BOTH
-	margin.grow_vertical = Control.GROW_DIRECTION_BOTH
-	margin.add_theme_constant_override("margin_left", 16)
-	margin.add_theme_constant_override("margin_top", 16)
-	margin.add_theme_constant_override("margin_right", 16)
-	margin.add_theme_constant_override("margin_bottom", 16)
-	_result_panel.add_child(margin)
-
-	var scroll: ScrollContainer = ScrollContainer.new()
-	scroll.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	scroll.size_flags_vertical = Control.SIZE_EXPAND_FILL
-	scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
-	margin.add_child(scroll)
-
-	var vbox: VBoxContainer = VBoxContainer.new()
-	vbox.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	vbox.add_theme_constant_override("separation", 8)
-	scroll.add_child(vbox)
-
-	# --- Header ---
-	_add_result_label(vbox, "ROUND COMPLETE!", 18, Color(0.95, 0.95, 0.98), true)
-	_add_result_label(vbox, result.get("task_name", ""), 13, Color(0.4, 0.8, 1.0), true)
-
-	# --- Grade ---
-	var grade: String = result.get("grade", "F")
-	_add_result_label(vbox, grade, 48, _grade_color(grade), true)
-
-	var grade_text_lbl: Label = _add_result_label(vbox, result.get("grade_text", ""), 11, Color(0.5, 0.51, 0.62), true)
-	grade_text_lbl.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-
-	# --- Separator ---
-	vbox.add_child(HSeparator.new())
-
-	# --- Employee contributions ---
-	var emp_results: Array = result.get("employee_results", [])
-	for er in emp_results:
-		var contrib_pct: int = int(er.get("contribution", 0.0) * 100.0)
-		_add_result_label(vbox, "%s: +%d%%" % [er.get("employee_name", ""), contrib_pct], 12, Color(0.85, 0.85, 0.92))
-
-	# Combo line
-	var combo_name: String = result.get("combo_name", "")
-	if combo_name != "":
-		var combo_pct: int = int(result.get("combo_bonus", 0.0) * 100.0)
-		_add_result_label(vbox, "Combo: %s +%d%%" % [combo_name, combo_pct], 12, Color(1.0, 0.85, 0.0))
-	else:
-		_add_result_label(vbox, "Combo: None", 11, Color(0.4, 0.4, 0.5))
-
-	# --- Progress ---
-	var total_pct: int = int(result.get("total_progress", 0.0) * 100.0)
-	_add_result_label(vbox, "Progress: +%d%%" % total_pct, 14, Color(0.22, 0.9, 0.42), true)
-
-	var task_prog: float = result.get("task_progress", 0.0)
-	_add_result_label(vbox, _progress_bar(task_prog, 16), 11, Color(1.0, 0.85, 0.1), true)
-
-	# --- Rewards ---
-	var reward_text: String = "Rewards: +$%d  +%d CP" % [int(result.get("round_cash", 0)), int(result.get("round_cp", 0))]
-	_add_result_label(vbox, reward_text, 13, Color(1.0, 0.82, 0.2), true)
-
-	# CP cost
-	var cp_spent: int = int(result.get("cp_cost", 0))
-	if cp_spent > 0:
-		_add_result_label(vbox, "-%d CP (round cost)" % cp_spent, 11, Color(0.9, 0.5, 0.3), true)
-
-	# Free round message
-	if result.get("was_free", false):
-		var free_lbl: Label = _add_result_label(vbox, "First round FREE! Next time it'll cost CP.", 11, Color(0.22, 0.9, 0.42), true)
-		free_lbl.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-
-	# --- Separator ---
-	vbox.add_child(HSeparator.new())
-
-	# --- Stat gains ---
-	var stat_gains: Array = result.get("stat_gains", [])
-	for sg in stat_gains:
-		var pg: int = int(sg.get("primary_gain", 0))
-		var ssg: int = int(sg.get("secondary_gain", 0))
-		var sg_text: String = "%s: %s +%d, %s +%d" % [
-			sg.get("name", ""),
-			str(sg.get("primary_stat", "")).capitalize(), pg,
-			str(sg.get("secondary_stat", "")).capitalize(), ssg,
-		]
-		_add_result_label(vbox, sg_text, 11, Color(0.4, 0.8, 1.0))
-
-	# --- Task complete banner ---
-	if result.get("task_completed", false):
-		var bonus_cp: int = int(result.get("completion_cp_bonus", 0))
-		_add_result_label(vbox, "TASK COMPLETE!", 20, Color(1.0, 0.85, 0.0), true)
-		_add_result_label(vbox, "+%d CP bonus!" % bonus_cp, 14, Color(1.0, 0.85, 0.0), true)
-
-	# --- Continue button ---
-	var continue_btn: Button = Button.new()
-	continue_btn.text = "CONTINUE"
-	continue_btn.custom_minimum_size = Vector2(0, 40)
-	continue_btn.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	continue_btn.add_theme_font_size_override("font_size", 14)
-	continue_btn.add_theme_color_override("font_color", Color(0.22, 0.9, 0.42, 1.0))
-	continue_btn.pressed.connect(_on_result_continue)
-	vbox.add_child(continue_btn)
-
-	parent_node.add_child(_result_panel)
-	_result_panel.move_to_front()
-
-func _add_result_label(parent: VBoxContainer, text: String, size: int, color: Color, centered: bool = false) -> Label:
-	var lbl: Label = Label.new()
-	lbl.text = text
-	lbl.add_theme_font_size_override("font_size", size)
-	lbl.add_theme_color_override("font_color", color)
-	if centered:
-		lbl.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	parent.add_child(lbl)
-	return lbl
-
-func _on_result_continue() -> void:
-	if _result_panel != null:
-		_result_panel.queue_free()
-		_result_panel = null
-	var card_vbox: Node = get_node_or_null("Dimmer/Card/VBox")
-	if card_vbox:
-		card_vbox.visible = true
-	if _current_project_id != "" and _gm != null:
-		_tasks = _gm.projects.get_tasks_for_project(_current_project_id)
-	_refresh_display()
-
-func _add_stat_preview(emp_ids: Array, primary_stat: String, secondary_stat: String) -> String:
-	if _gm == null:
-		return "F"
-	var est_progress: float = 0.0
-	for emp_id in emp_ids:
-		var emp: Employee = null
-		for e in _gm.employees.get_hired_employees():
-			if str(e.id) == str(emp_id):
-				emp = e
-				break
-		if emp == null:
-			continue
-		var pv: int = _get_emp_stat(emp, primary_stat)
-		var sv: int = _get_emp_stat(emp, secondary_stat)
-		est_progress += (pv / 1000.0) * 0.60 + (sv / 1000.0) * 0.30
-		var stars: String = _star_rating(pv) + " " + primary_stat.capitalize() + "  " + _star_rating(sv) + " " + secondary_stat.capitalize()
-		var preview_lbl: Label = Label.new()
-		preview_lbl.text = "%s: %s" % [str(emp.first_name), stars]
-		preview_lbl.add_theme_font_size_override("font_size", 10)
-		preview_lbl.add_theme_color_override("font_color", Color(0.55, 0.65, 0.75, 1.0))
-		_ot_list.add_child(preview_lbl)
-	return _estimate_grade(est_progress)
-
-func _get_emp_stat(emp: Employee, stat_name: String) -> int:
-	match stat_name:
-		"charm":         return int(emp.charm)
-		"technical":     return int(emp.technical)
-		"procurement":   return int(emp.procurement)
-		"focus":         return int(emp.focus)
-		"communication": return int(emp.communication)
-		"management":    return int(emp.management)
-		"logistics":     return int(emp.logistics)
-		"precision":     return int(emp.precision)
-	return 0
-
-func _star_rating(stat_val: int) -> String:
-	if stat_val >= 400:
-		return "***"
-	elif stat_val >= 200:
-		return "**-"
-	elif stat_val >= 100:
-		return "*--"
-	return "---"
-
-func _estimate_grade(progress: float) -> String:
-	if progress >= 0.80:
-		return "S"
-	elif progress >= 0.60:
-		return "A"
-	elif progress >= 0.45:
-		return "B"
-	elif progress >= 0.30:
-		return "C"
-	elif progress >= 0.15:
-		return "D"
-	return "F"
-
-func _get_round_cp_cost(task: Dictionary) -> int:
-	var duration: int = int(task.get("duration_ticks", task.get("duration", 2)))
-	if duration >= 5:
-		return 8
-	elif duration >= 3:
-		return 5
-	return 3
-
-func _grade_color(grade: String) -> Color:
-	match grade:
-		"S": return Color(1.0, 0.85, 0.0, 1.0)
-		"A": return Color(0.3, 0.9, 0.3, 1.0)
-		"B": return Color(0.4, 0.6, 1.0, 1.0)
-		"C": return Color(1.0, 1.0, 0.3, 1.0)
-		"D": return Color(1.0, 0.6, 0.2, 1.0)
-		"F": return Color(0.9, 0.3, 0.3, 1.0)
-	return Color(0.5, 0.51, 0.62, 1.0)
+	_task_detail.on_assign_close_pressed()
 
 # ─────────────────────────────────────────
 #  SIGNAL HANDLERS
@@ -734,8 +291,26 @@ func _on_projects_updated() -> void:
 		set_items_count(_tasks.size())
 
 # ─────────────────────────────────────────
-#  HELPERS
+#  HELPERS (shared by sub-helpers via _board ref)
 # ─────────────────────────────────────────
+func _get_round_cp_cost(task: Dictionary) -> int:
+	var duration: int = int(task.get("duration_ticks", task.get("duration", 2)))
+	if duration >= 5:
+		return 8
+	elif duration >= 3:
+		return 5
+	return 3
+
+func _grade_color(grade: String) -> Color:
+	match grade:
+		"S": return Color(1.0, 0.85, 0.0, 1.0)
+		"A": return Color(0.3, 0.9, 0.3, 1.0)
+		"B": return Color(0.4, 0.6, 1.0, 1.0)
+		"C": return Color(1.0, 1.0, 0.3, 1.0)
+		"D": return Color(1.0, 0.6, 0.2, 1.0)
+		"F": return Color(0.9, 0.3, 0.3, 1.0)
+	return Color(0.5, 0.51, 0.62, 1.0)
+
 func _progress_bar(pct: float, width: int) -> String:
 	var filled: int = int(round(pct * float(width)))
 	var bar: String = ""
