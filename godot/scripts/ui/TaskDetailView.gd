@@ -68,20 +68,36 @@ func refresh_display(tasks: Array, current_index: int) -> void:
 		_board._team_label.text = "Team: %s  (%d/3)" % [", ".join(names), ids.size()]
 		_board._team_label.add_theme_color_override("font_color", Color(0.22, 0.9, 0.42, 1.0))
 
-	# --- Progress bar (in _ot_list) ---
+	# 12px gap after description / team section
+	_add_spacer(12)
+
+	# --- Progress bar ---
 	if is_progress or (is_done and progress > 0.0):
 		var bar_lbl: Label = Label.new()
 		bar_lbl.text = _board._progress_bar(progress, 14)
 		bar_lbl.add_theme_font_size_override("font_size", 11)
 		bar_lbl.add_theme_color_override("font_color", Color(1.0, 0.85, 0.1, 1.0))
 		_board._ot_list.add_child(bar_lbl)
+		_add_spacer(12)  # 12px gap after progress bar
 
 	# --- Stat preview (only if employees assigned and not done/locked) ---
 	var est_grade: String = ""
 	if not ids.is_empty() and not is_done and not is_locked:
 		var primary_stat: String   = task.get("primary_stat", "technical")
 		var secondary_stat: String = task.get("secondary_stat", "focus")
-		est_grade = _add_stat_preview(ids, primary_stat, secondary_stat)
+		# Stat requirements box: 8px internal padding
+		var stat_margin: MarginContainer = MarginContainer.new()
+		stat_margin.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		stat_margin.add_theme_constant_override("margin_left",   8)
+		stat_margin.add_theme_constant_override("margin_top",    8)
+		stat_margin.add_theme_constant_override("margin_right",  8)
+		stat_margin.add_theme_constant_override("margin_bottom", 8)
+		var stat_vbox: VBoxContainer = VBoxContainer.new()
+		stat_vbox.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		stat_margin.add_child(stat_vbox)
+		_board._ot_list.add_child(stat_margin)
+		est_grade = _add_stat_preview(ids, primary_stat, secondary_stat, stat_vbox)
+		_add_spacer(12)  # 12px gap after stat requirements box
 
 	# --- Status badge + action button ---
 	if is_locked:
@@ -125,6 +141,9 @@ func refresh_display(tasks: Array, current_index: int) -> void:
 			info_line = "Est. Grade: %s | Cost: %s" % [est_grade, cost_text]
 		else:
 			info_line = "Round cost: %s" % cost_text
+
+		# 4px top margin before est. grade / cost line
+		_add_spacer(4)
 		var info_lbl: Label = Label.new()
 		info_lbl.text = info_line
 		info_lbl.add_theme_font_size_override("font_size", 11)
@@ -135,6 +154,7 @@ func refresh_display(tasks: Array, current_index: int) -> void:
 		else:
 			info_lbl.add_theme_color_override("font_color", Color(1.0, 0.82, 0.2, 1.0))
 		_board._ot_list.add_child(info_lbl)
+
 		if is_first:
 			_board._action_btn.text     = "START WORK (FREE!)"
 			_board._action_btn.disabled = false
@@ -147,15 +167,35 @@ func refresh_display(tasks: Array, current_index: int) -> void:
 			_board._action_btn.text     = "NEED %d CP" % cp_cost
 			_board._action_btn.disabled = true
 			_board._action_btn.add_theme_color_override("font_color", Color(0.9, 0.3, 0.3, 1.0))
+		_board._action_btn.custom_minimum_size = Vector2(0, 36)
+
+		# 8px gap before button row
+		_add_spacer(8)
+
 		if ids.size() < 3:
+			# ASSIGN and BACK on same line, 4px gap between them
+			var btn_row: HBoxContainer = HBoxContainer.new()
+			btn_row.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+			btn_row.add_theme_constant_override("separation", 4)
+			_board._ot_list.add_child(btn_row)
+
 			var assign_btn: Button = Button.new()
 			assign_btn.text = "ASSIGN (%d/3)" % ids.size()
-			assign_btn.custom_minimum_size = Vector2(0, 32)
+			assign_btn.custom_minimum_size = Vector2(0, 36)
 			assign_btn.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 			assign_btn.add_theme_font_size_override("font_size", 12)
 			assign_btn.add_theme_color_override("font_color", Color(0.4, 0.8, 1.0, 1.0))
 			assign_btn.pressed.connect(func() -> void: open_assign_for_task(task, tasks))
-			_board._ot_list.add_child(assign_btn)
+			btn_row.add_child(assign_btn)
+
+			var back_btn: Button = Button.new()
+			back_btn.text = "BACK"
+			back_btn.custom_minimum_size = Vector2(0, 36)
+			back_btn.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+			back_btn.add_theme_font_size_override("font_size", 12)
+			back_btn.add_theme_color_override("font_color", Color(0.5, 0.51, 0.62, 1.0))
+			back_btn.pressed.connect(_board._on_back_pressed)
+			btn_row.add_child(back_btn)
 	else:
 		# available, no employees
 		_board._status_label.text = "AVAILABLE"
@@ -224,7 +264,7 @@ func on_assign_employee(task_id: String, emp_id: String) -> void:
 # ─────────────────────────────────────────
 #  STAT PREVIEW HELPERS
 # ─────────────────────────────────────────
-func _add_stat_preview(emp_ids: Array, primary_stat: String, secondary_stat: String) -> String:
+func _add_stat_preview(emp_ids: Array, primary_stat: String, secondary_stat: String, parent: VBoxContainer) -> String:
 	if _board._gm == null:
 		return "F"
 	var est_progress: float = 0.0
@@ -242,9 +282,9 @@ func _add_stat_preview(emp_ids: Array, primary_stat: String, secondary_stat: Str
 		var stars: String = _star_rating(pv) + " " + primary_stat.capitalize() + "  " + _star_rating(sv) + " " + secondary_stat.capitalize()
 		var preview_lbl: Label = Label.new()
 		preview_lbl.text = "%s: %s" % [str(emp.first_name), stars]
-		preview_lbl.add_theme_font_size_override("font_size", 10)
+		preview_lbl.add_theme_font_size_override("font_size", 12)
 		preview_lbl.add_theme_color_override("font_color", Color(0.55, 0.65, 0.75, 1.0))
-		_board._ot_list.add_child(preview_lbl)
+		parent.add_child(preview_lbl)
 	return _estimate_grade(est_progress)
 
 func _get_emp_stat(emp: Employee, stat_name: String) -> int:
@@ -280,3 +320,11 @@ func _estimate_grade(progress: float) -> String:
 	elif progress >= 0.15:
 		return "D"
 	return "F"
+
+# ─────────────────────────────────────────
+#  LAYOUT HELPERS
+# ─────────────────────────────────────────
+func _add_spacer(height: int) -> void:
+	var spacer: Control = Control.new()
+	spacer.custom_minimum_size = Vector2(0, height)
+	_board._ot_list.add_child(spacer)
