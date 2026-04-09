@@ -13,6 +13,11 @@ func setup(board: Node) -> void:
 #  TASK DETAIL DISPLAY
 # ─────────────────────────────────────────
 func refresh_display(tasks: Array, current_index: int) -> void:
+	# In task mode we own the full button area — hide the scene's ActionBtn and
+	# BackBtn and build everything inside OtList so order is fully controlled.
+	_board._action_btn.visible = false
+	_board._back_btn.visible   = false
+
 	if tasks.is_empty():
 		_board._item_name_label.text = "No Tasks"
 		_board._page_label.text      = "0 / 0"
@@ -22,11 +27,9 @@ func refresh_display(tasks: Array, current_index: int) -> void:
 		_board._info_label.text      = ""
 		_board._reward_label.text    = ""
 		_board._team_label.text      = ""
-		_board._action_btn.visible   = false
 		return
 
 	_board._base_refresh()
-	_board._action_btn.visible = true
 
 	var task: Dictionary    = tasks[current_index]
 	var task_status: String = task.get("status", "locked")
@@ -99,7 +102,9 @@ func refresh_display(tasks: Array, current_index: int) -> void:
 		est_grade = _add_stat_preview(ids, primary_stat, secondary_stat, stat_vbox)
 		_add_spacer(12)  # 12px gap after stat requirements box
 
-	# --- Status badge + action button ---
+	# ─────────────────────────────────────────
+	#  BUTTON SECTION — built entirely in OtList
+	# ─────────────────────────────────────────
 	if is_locked:
 		var prereqs: Array      = task.get("requires", task.get("prerequisites", []))
 		var prereq_name: String = ""
@@ -111,39 +116,33 @@ func refresh_display(tasks: Array, current_index: int) -> void:
 					break
 			if prereq_name == "":
 				prereq_name = prereq_id.replace("_", " ").capitalize()
-		_board._status_label.text = "LOCKED"
-		_board._status_label.add_theme_color_override("font_color", Color(0.5, 0.51, 0.62, 1.0))
 		if prereq_name != "":
 			var req_lbl: Label = Label.new()
 			req_lbl.text = "Requires: " + prereq_name
 			req_lbl.add_theme_font_size_override("font_size", 10)
 			req_lbl.add_theme_color_override("font_color", Color(0.55, 0.55, 0.65, 1.0))
 			_board._ot_list.add_child(req_lbl)
-		_board._action_btn.text     = "LOCKED"
-		_board._action_btn.disabled = true
-		_board._action_btn.add_theme_color_override("font_color", Color(0.5, 0.51, 0.62, 1.0))
+		_add_spacer(8)
+		_board._ot_list.add_child(_make_btn("LOCKED", Color(0.5, 0.51, 0.62, 1.0), false))
+
 	elif is_done:
-		_board._status_label.text = "COMPLETED"
-		_board._status_label.add_theme_color_override("font_color", Color(0.4, 0.8, 1.0, 1.0))
-		_board._action_btn.text     = "DONE"
-		_board._action_btn.disabled = true
-		_board._action_btn.add_theme_color_override("font_color", Color(0.4, 0.8, 1.0, 1.0))
+		_add_spacer(8)
+		_board._ot_list.add_child(_make_btn("DONE", Color(0.4, 0.8, 1.0, 1.0), false))
+
 	elif not ids.is_empty():
-		# Has employees — show START WORK as main action
-		_board._status_label.text = "READY"
-		_board._status_label.add_theme_color_override("font_color", Color(0.22, 0.9, 0.42, 1.0))
-		var cp_cost: int    = _board._get_round_cp_cost(task)
-		var is_first: bool  = _board._gm.total_rounds_played == 0 if _board._gm else false
-		var has_cp: bool    = _board._gm.corp_points >= cp_cost if _board._gm else false
+		# READY state: team assigned, task not complete
+		var cp_cost: int      = _board._get_round_cp_cost(task)
+		var is_first: bool    = _board._gm.total_rounds_played == 0 if _board._gm else false
+		var has_cp: bool      = _board._gm.corp_points >= cp_cost if _board._gm else false
 		var cost_text: String = "FREE!" if is_first else "%d CP" % cp_cost
+
+		# Est. Grade / cost line
+		_add_spacer(4)
 		var info_line: String = ""
 		if est_grade != "":
 			info_line = "Est. Grade: %s | Cost: %s" % [est_grade, cost_text]
 		else:
 			info_line = "Round cost: %s" % cost_text
-
-		# 4px top margin before est. grade / cost line
-		_add_spacer(4)
 		var info_lbl: Label = Label.new()
 		info_lbl.text = info_line
 		info_lbl.add_theme_font_size_override("font_size", 11)
@@ -155,54 +154,48 @@ func refresh_display(tasks: Array, current_index: int) -> void:
 			info_lbl.add_theme_color_override("font_color", Color(1.0, 0.82, 0.2, 1.0))
 		_board._ot_list.add_child(info_lbl)
 
-		if is_first:
-			_board._action_btn.text     = "START WORK (FREE!)"
-			_board._action_btn.disabled = false
-			_board._action_btn.add_theme_color_override("font_color", Color(0.22, 0.9, 0.42, 1.0))
-		elif has_cp:
-			_board._action_btn.text     = "START WORK (%d CP)" % cp_cost
-			_board._action_btn.disabled = false
-			_board._action_btn.add_theme_color_override("font_color", Color(0.22, 0.9, 0.42, 1.0))
-		else:
-			_board._action_btn.text     = "NEED %d CP" % cp_cost
-			_board._action_btn.disabled = true
-			_board._action_btn.add_theme_color_override("font_color", Color(0.9, 0.3, 0.3, 1.0))
-		_board._action_btn.custom_minimum_size = Vector2(0, 36)
-
-		# 8px gap before button row
+		# 8px gap before START WORK button
 		_add_spacer(8)
 
+		# [ START WORK ] — full width, calls _on_action_pressed
+		var sw_color: Color  = Color(0.22, 0.9, 0.42, 1.0) if (is_first or has_cp) else Color(0.9, 0.3, 0.3, 1.0)
+		var sw_text: String  = ""
+		var sw_on: bool      = true
+		if is_first:
+			sw_text = "START WORK (FREE!)"
+		elif has_cp:
+			sw_text = "START WORK (%d CP)" % cp_cost
+		else:
+			sw_text = "NEED %d CP" % cp_cost
+			sw_on   = false
+		var sw_btn: Button = _make_btn(sw_text, sw_color, sw_on)
+		sw_btn.pressed.connect(_board._on_action_pressed)
+		_board._ot_list.add_child(sw_btn)
+
+		# 12px gap then [ ASSIGN (n/3) ] [ BACK ] — only if team not full
 		if ids.size() < 3:
-			# ASSIGN and BACK on same line, 4px gap between them
+			_add_spacer(12)
 			var btn_row: HBoxContainer = HBoxContainer.new()
 			btn_row.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 			btn_row.add_theme_constant_override("separation", 4)
 			_board._ot_list.add_child(btn_row)
 
-			var assign_btn: Button = Button.new()
-			assign_btn.text = "ASSIGN (%d/3)" % ids.size()
-			assign_btn.custom_minimum_size = Vector2(0, 36)
-			assign_btn.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+			var assign_btn: Button = _make_btn("ASSIGN (%d/3)" % ids.size(), Color(0.4, 0.8, 1.0, 1.0), true)
 			assign_btn.add_theme_font_size_override("font_size", 12)
-			assign_btn.add_theme_color_override("font_color", Color(0.4, 0.8, 1.0, 1.0))
 			assign_btn.pressed.connect(func() -> void: open_assign_for_task(task, tasks))
 			btn_row.add_child(assign_btn)
 
-			var back_btn: Button = Button.new()
-			back_btn.text = "BACK"
-			back_btn.custom_minimum_size = Vector2(0, 36)
-			back_btn.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+			var back_btn: Button = _make_btn("BACK", Color(0.5, 0.51, 0.62, 1.0), true)
 			back_btn.add_theme_font_size_override("font_size", 12)
-			back_btn.add_theme_color_override("font_color", Color(0.5, 0.51, 0.62, 1.0))
 			back_btn.pressed.connect(_board._on_back_pressed)
 			btn_row.add_child(back_btn)
+
 	else:
-		# available, no employees
-		_board._status_label.text = "AVAILABLE"
-		_board._status_label.add_theme_color_override("font_color", Color(0.22, 0.9, 0.42, 1.0))
-		_board._action_btn.text     = "ASSIGN"
-		_board._action_btn.disabled = false
-		_board._action_btn.add_theme_color_override("font_color", Color(0.4, 0.8, 1.0, 1.0))
+		# Available state: no employees assigned — full-width ASSIGN
+		_add_spacer(8)
+		var assign_btn: Button = _make_btn("ASSIGN (0/3)", Color(0.4, 0.8, 1.0, 1.0), true)
+		assign_btn.pressed.connect(func() -> void: open_assign_for_task(task, tasks))
+		_board._ot_list.add_child(assign_btn)
 
 # ─────────────────────────────────────────
 #  ASSIGN PANEL
@@ -328,3 +321,13 @@ func _add_spacer(height: int) -> void:
 	var spacer: Control = Control.new()
 	spacer.custom_minimum_size = Vector2(0, height)
 	_board._ot_list.add_child(spacer)
+
+func _make_btn(txt: String, color: Color, enabled: bool) -> Button:
+	var btn: Button = Button.new()
+	btn.text = txt
+	btn.custom_minimum_size   = Vector2(0, 36)
+	btn.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	btn.add_theme_font_size_override("font_size", 13)
+	btn.add_theme_color_override("font_color", color)
+	btn.disabled = not enabled
+	return btn
