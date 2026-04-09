@@ -4,7 +4,8 @@ extends RefCounted
 # Receives a reference to the ProjectBoard node at setup time and
 # accesses its node-refs and state directly.
 
-var _board: Node = null
+var _board:   Node          = null
+var _btn_row: HBoxContainer = null
 
 func setup(board: Node) -> void:
 	_board = board
@@ -13,6 +14,11 @@ func setup(board: Node) -> void:
 #  TASK DETAIL DISPLAY
 # ─────────────────────────────────────────
 func refresh_display(tasks: Array, current_index: int) -> void:
+	# Clean up any ASSIGN+BACK row injected into the VBox on the previous call.
+	if _btn_row != null and is_instance_valid(_btn_row):
+		_btn_row.queue_free()
+	_btn_row = null
+
 	# In task mode we own the full button area — hide the scene's ActionBtn and
 	# BackBtn and build everything inside OtList so order is fully controlled.
 	_board._action_btn.visible = false
@@ -172,23 +178,27 @@ func refresh_display(tasks: Array, current_index: int) -> void:
 		sw_btn.pressed.connect(_board._on_action_pressed)
 		_board._ot_list.add_child(sw_btn)
 
-		# 12px gap then [ ASSIGN (n/3) ] [ BACK ] — only if team not full
+		# [ ASSIGN (n/3) ] [ BACK ] — only if team not full.
+		# Injected directly into the parent VBox just before CloseBtn so the
+		# render order is always: START WORK → ASSIGN+BACK → CLOSE.
 		if ids.size() < 3:
-			_add_spacer(12)
-			var btn_row: HBoxContainer = HBoxContainer.new()
-			btn_row.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-			btn_row.add_theme_constant_override("separation", 4)
-			_board._ot_list.add_child(btn_row)
+			_btn_row = HBoxContainer.new()
+			_btn_row.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+			_btn_row.add_theme_constant_override("separation", 4)
 
 			var assign_btn: Button = _make_btn("ASSIGN (%d/3)" % ids.size(), Color(0.4, 0.8, 1.0, 1.0), true)
 			assign_btn.add_theme_font_size_override("font_size", 12)
 			assign_btn.pressed.connect(func() -> void: open_assign_for_task(task, tasks))
-			btn_row.add_child(assign_btn)
+			_btn_row.add_child(assign_btn)
 
 			var back_btn: Button = _make_btn("BACK", Color(0.5, 0.51, 0.62, 1.0), true)
 			back_btn.add_theme_font_size_override("font_size", 12)
 			back_btn.pressed.connect(_board._on_back_pressed)
-			btn_row.add_child(back_btn)
+			_btn_row.add_child(back_btn)
+
+			var vbox: Node = _board._close_btn.get_parent()
+			vbox.add_child(_btn_row)
+			vbox.move_child(_btn_row, _board._close_btn.get_index() - 1)
 
 	else:
 		# Available state: no employees assigned — full-width ASSIGN
