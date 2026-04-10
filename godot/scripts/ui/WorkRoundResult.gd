@@ -19,16 +19,18 @@ func setup(board: Node) -> void:
 func start_work_round(task: Dictionary) -> void:
 	if _board._gm == null:
 		return
-	# Snapshot which tasks and projects are currently locked before the round runs.
+	# Snapshot which tasks/projects are blocked/locked BEFORE the round changes state.
+	# Tasks use "blocked"; projects use "locked".
 	_locked_task_ids    = []
 	_locked_project_ids = []
 	if _board._current_project_id != "":
 		for t in _board._gm.projects.get_tasks_for_project(_board._current_project_id):
-			if t.get("status", "") == "locked":
+			if t.get("status", "") == "blocked":
 				_locked_task_ids.append(t.get("id", ""))
 	for p in _board._gm.projects.get_projects():
 		if p.get("status", "") == "locked":
 			_locked_project_ids.append(p.get("id", ""))
+	print("[WRR] Snapshot before round — blocked tasks: %s  locked projects: %s" % [_locked_task_ids, _locked_project_ids])
 
 	var task_id: String        = task.get("id", "")
 	var result: Dictionary     = _board._gm.projects.run_work_round(task_id)
@@ -204,25 +206,34 @@ func on_result_continue() -> void:
 		_board._tasks = _board._gm.projects.get_tasks_for_project(_board._current_project_id)
 
 	var unlocked: Array = _gather_unlocked()
+	print("[WRR] on_result_continue — unlocked items: %d" % unlocked.size())
 	if unlocked.is_empty():
 		_board._refresh_display()
 	else:
+		print("[WRR] Showing UnlockPopup with %d item(s)" % unlocked.size())
 		var popup_script: GDScript = load("res://scripts/ui/UnlockPopup.gd")
 		_unlock_popup = popup_script.new()
 		_unlock_popup.show_unlock(_board, unlocked, func() -> void: _board._refresh_display())
 
-# Returns items that were locked before the round but are now unlocked.
+# Returns items that were blocked/locked before the round but are now available.
 func _gather_unlocked() -> Array:
 	var result: Array = []
 	if _board._gm == null:
 		return result
 	if _board._current_project_id != "":
 		for t in _board._gm.projects.get_tasks_for_project(_board._current_project_id):
-			var tid: String = t.get("id", "")
-			if tid in _locked_task_ids and t.get("status", "") != "locked":
+			var tid: String  = t.get("id", "")
+			var tnow: String = t.get("status", "")
+			print("[WRR] Task '%s' id=%s was_blocked=%s now=%s" % [t.get("name", ""), tid, str(tid in _locked_task_ids), tnow])
+			# Was blocked before round, now available → newly unlocked
+			if tid in _locked_task_ids and tnow == "available":
 				result.append({"type": "task", "name": t.get("name", tid)})
 	for p in _board._gm.projects.get_projects():
-		var pid: String = p.get("id", "")
-		if pid in _locked_project_ids and p.get("status", "") != "locked":
+		var pid: String  = p.get("id", "")
+		var pnow: String = p.get("status", "")
+		print("[WRR] Project '%s' id=%s was_locked=%s now=%s" % [p.get("name", ""), pid, str(pid in _locked_project_ids), pnow])
+		# Was locked before round, now not locked → newly available
+		if pid in _locked_project_ids and pnow != "locked":
 			result.append({"type": "project", "name": p.get("name", pid)})
+	print("[WRR] _gather_unlocked result: %s" % str(result))
 	return result

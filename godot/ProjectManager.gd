@@ -757,6 +757,7 @@ func run_work_round(task_id: String) -> Dictionary:
 	var completion_cp_bonus: int = 0
 	if task_completed_flag:
 		task["status"] = "completed"
+		task["assigned_employee_ids"] = []
 		var task_duration: int = int(task.get("duration_ticks", task.get("duration", 2)))
 		completion_cp_bonus = 10
 		if task_duration >= 5:
