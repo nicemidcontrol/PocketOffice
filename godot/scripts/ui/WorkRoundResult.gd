@@ -4,8 +4,11 @@ extends RefCounted
 # Receives a reference to the ProjectBoard node at setup time and
 # accesses its node-refs and state directly.
 
-var _board: Node  = null
-var _result_panel: Panel = null
+var _board:              Node   = null
+var _result_panel:       Panel  = null
+var _locked_task_ids:    Array  = []
+var _locked_project_ids: Array  = []
+var _unlock_popup:       Object = null
 
 func setup(board: Node) -> void:
 	_board = board
@@ -16,6 +19,17 @@ func setup(board: Node) -> void:
 func start_work_round(task: Dictionary) -> void:
 	if _board._gm == null:
 		return
+	# Snapshot which tasks and projects are currently locked before the round runs.
+	_locked_task_ids    = []
+	_locked_project_ids = []
+	if _board._current_project_id != "":
+		for t in _board._gm.projects.get_tasks_for_project(_board._current_project_id):
+			if t.get("status", "") == "locked":
+				_locked_task_ids.append(t.get("id", ""))
+	for p in _board._gm.projects.get_projects():
+		if p.get("status", "") == "locked":
+			_locked_project_ids.append(p.get("id", ""))
+
 	var task_id: String        = task.get("id", "")
 	var result: Dictionary     = _board._gm.projects.run_work_round(task_id)
 	if result.has("error"):
@@ -188,4 +202,27 @@ func on_result_continue() -> void:
 		card_vbox.visible = true
 	if _board._current_project_id != "" and _board._gm != null:
 		_board._tasks = _board._gm.projects.get_tasks_for_project(_board._current_project_id)
-	_board._refresh_display()
+
+	var unlocked: Array = _gather_unlocked()
+	if unlocked.is_empty():
+		_board._refresh_display()
+	else:
+		var popup_script: GDScript = load("res://scripts/ui/UnlockPopup.gd")
+		_unlock_popup = popup_script.new()
+		_unlock_popup.show_unlock(_board, unlocked, func() -> void: _board._refresh_display())
+
+# Returns items that were locked before the round but are now unlocked.
+func _gather_unlocked() -> Array:
+	var result: Array = []
+	if _board._gm == null:
+		return result
+	if _board._current_project_id != "":
+		for t in _board._gm.projects.get_tasks_for_project(_board._current_project_id):
+			var tid: String = t.get("id", "")
+			if tid in _locked_task_ids and t.get("status", "") != "locked":
+				result.append({"type": "task", "name": t.get("name", tid)})
+	for p in _board._gm.projects.get_projects():
+		var pid: String = p.get("id", "")
+		if pid in _locked_project_ids and p.get("status", "") != "locked":
+			result.append({"type": "project", "name": p.get("name", pid)})
+	return result
