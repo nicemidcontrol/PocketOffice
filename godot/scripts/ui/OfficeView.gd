@@ -37,6 +37,10 @@ func _ready() -> void:
 	_gm.employees.employee_hired.connect(_on_employee_hired)
 	refresh_office()
 
+	var clock: Node = get_node_or_null("/root/ClockManager")
+	if clock != null:
+		clock.work_day_started.connect(_on_work_day_started)
+
 func _init_styles() -> void:
 	_style_empty.bg_color            = Color(0.07, 0.07, 0.15, 1.0)
 	_style_empty.border_width_left   = 1
@@ -121,6 +125,45 @@ func _clear_slot(slot: Panel) -> void:
 # ─── SIGNAL HANDLERS ──────────────────────────────────────────────────────────
 func _on_employee_hired(_emp: Object) -> void:
 	refresh_office()
+
+func _on_work_day_started() -> void:
+	if _gm == null:
+		return
+	# Mirror the idle logic from ProjectManager: employees not assigned to any
+	# in_progress task are "at their desks" and earn 1 CP — show the popup.
+	var busy_ids: Array = []
+	for proj in _gm.projects.get_projects():
+		for task in proj.get("tasks", []):
+			if task.get("status", "") == "in_progress":
+				for eid in task.get("assigned_employee_ids", []):
+					if eid not in busy_ids:
+						busy_ids.append(eid)
+	var hired: Array = _gm.employees.get_hired_employees()
+	for i: int in range(min(hired.size(), _slots.size())):
+		var emp: Object = hired[i]
+		if str(emp.id) not in busy_ids:
+			_show_cp_popup(_slots[i])
+
+# ─── FLOATING +1 CP POPUP ─────────────────────────────────────────────────────
+func _show_cp_popup(slot: Panel) -> void:
+	if slot.size.y == 0.0:
+		return  # layout not ready yet (e.g. startup emission)
+	var lbl: Label            = Label.new()
+	lbl.text                  = "+1 CP"
+	lbl.mouse_filter          = Control.MOUSE_FILTER_IGNORE
+	lbl.size                  = Vector2(slot.size.x, 14.0)
+	lbl.position              = Vector2(0.0, slot.size.y * 0.25)
+	lbl.horizontal_alignment  = HORIZONTAL_ALIGNMENT_CENTER
+	lbl.add_theme_font_size_override("font_size", 10)
+	lbl.add_theme_color_override("font_color", Color.GREEN)
+	slot.add_child(lbl)
+
+	var end_y: float = lbl.position.y - 20.0
+	var tw: Tween    = slot.create_tween()
+	tw.set_parallel(true)
+	tw.tween_property(lbl, "position:y", end_y, 0.8).set_ease(Tween.EASE_OUT).set_trans(Tween.TRANS_SINE)
+	tw.tween_property(lbl, "modulate:a", 0.0, 0.8)
+	tw.finished.connect(func() -> void: lbl.queue_free())
 
 # ─── DISPLAY HELPERS ──────────────────────────────────────────────────────────
 
