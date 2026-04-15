@@ -4,7 +4,6 @@ extends CanvasLayer
 #  NODE REFS
 # ─────────────────────────────────────────
 @onready var cash_label:    Label = $TopBar/Margin/HBox/CashSection/CashLabel
-@onready var cp_label:      Label = $TopBar/Margin/HBox/CpSection/CpLabel
 @onready var date_label:    Label = $TopBar/Margin/HBox/DateSection/DateLabel
 @onready var season_label:  Label = $TopBar/Margin/HBox/SeasonSection/SeasonLabel
 @onready var message_panel: Panel = $MessagePanel
@@ -33,7 +32,6 @@ func _ready() -> void:
 
 	_gm.game_message.connect(_on_game_message)
 	_gm.economy.cash_changed.connect(_on_cash_changed)
-	_gm.corp_points_changed.connect(_on_cp_changed)
 	_gm.month_passed.connect(_on_month_passed)
 
 	_cm = get_node_or_null("/root/ClockManager")
@@ -50,14 +48,12 @@ func _ready() -> void:
 # ─────────────────────────────────────────
 func _refresh_all() -> void:
 	_update_cash(_gm.economy.current_cash)
-	_update_cp(_gm.corp_points)
 	_update_date()
+	# Sync initial CP into Main.gd's CpValue box via the signal.
+	_gm.corp_points_changed.emit(_gm.corp_points)
 
 func _update_cash(amount: int) -> void:
 	cash_label.text = _gm.format_cash(amount)
-
-func _update_cp(amount: int) -> void:
-	cp_label.text = str(amount) + " CP"
 
 func _update_reputation() -> void:
 	pass
@@ -86,12 +82,11 @@ func _update_season(month: int) -> void:
 func _on_cash_changed(new_cash: int) -> void:
 	_update_cash(new_cash)
 
-func _on_cp_changed(new_cp: int) -> void:
-	_update_cp(new_cp)
-
 func _on_work_day_started() -> void:
-	# Catches idle CP awarded via direct corp_points += (no signal emitted).
-	_update_cp(_gm.corp_points)
+	# Idle CP is awarded via direct gm.corp_points += (no signal emitted).
+	# Re-emit corp_points_changed so Main.gd's CpValue box updates.
+	if _gm != null:
+		_gm.corp_points_changed.emit(_gm.corp_points)
 
 func _on_month_passed(_month: int) -> void:
 	_update_date()
