@@ -1,0 +1,55 @@
+# ============================================
+# Godot 4+ specific ignores
+# ============================================
+# Godot 4 imported files and cache
+.godot/
+/android/
+
+# Godot-specific ignores
+.import/
+export.cfg
+export_presets.cfg
+
+# Imported translations (automatically generated from CSV files)
+*.translation
+
+# Mono-specific ignores
+.mono/
+data_*/
+mono_crash.*.json
+
+# ============================================
+# Pocket Office: Raw asset packs (too large for repo)
+# ============================================
+assets/sprites/raw/
+
+# ============================================
+# Aseprite / PixelLab working files
+# ============================================
+*.aseprite-bak
+*.ase-bak
+pixellab_temp/
+
+# ============================================
+# Scene temporary files (Godot auto-saves)
+# ============================================
+*.tscn*.tmp
+*.tres*.tmp
+
+# ============================================
+# OS / IDE junk
+# ============================================
+.DS_Store
+Thumbs.db
+desktop.ini
+*.swp
+*.swo
+*~
+.vscode/
+.idea/
+
+# ============================================
+# Logs
+# ============================================
+logs/
+*.log
