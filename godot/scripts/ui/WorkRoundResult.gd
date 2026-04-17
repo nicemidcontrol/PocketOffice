@@ -9,6 +9,10 @@ var _result_panel:       Panel  = null
 var _locked_task_ids:    Array  = []
 var _locked_project_ids: Array  = []
 var _unlock_popup:       Object = null
+var _is_thinking:        bool   = false
+var _thinking_label:     Label  = null
+var _grade_lbl:          Label  = null
+var _result_scroll:      ScrollContainer = null
 
 func setup(board: Node) -> void:
 	_board = board
@@ -44,6 +48,10 @@ func start_work_round(task: Dictionary) -> void:
 #  RESULT POPUP
 # ─────────────────────────────────────────
 func show_result_popup(result: Dictionary) -> void:
+	_is_thinking    = false
+	_thinking_label = null
+	_grade_lbl      = null
+	_result_scroll  = null
 	if _result_panel != null:
 		_result_panel.queue_free()
 		_result_panel = null
@@ -93,16 +101,16 @@ func show_result_popup(result: Dictionary) -> void:
 	margin.add_theme_constant_override("margin_bottom", 16)
 	_result_panel.add_child(margin)
 
-	var scroll: ScrollContainer = ScrollContainer.new()
-	scroll.size_flags_horizontal     = Control.SIZE_EXPAND_FILL
-	scroll.size_flags_vertical       = Control.SIZE_EXPAND_FILL
-	scroll.horizontal_scroll_mode    = ScrollContainer.SCROLL_MODE_DISABLED
-	margin.add_child(scroll)
+	_result_scroll = ScrollContainer.new()
+	_result_scroll.size_flags_horizontal  = Control.SIZE_EXPAND_FILL
+	_result_scroll.size_flags_vertical    = Control.SIZE_EXPAND_FILL
+	_result_scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
+	margin.add_child(_result_scroll)
 
 	var vbox: VBoxContainer = VBoxContainer.new()
 	vbox.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	vbox.add_theme_constant_override("separation", 8)
-	scroll.add_child(vbox)
+	_result_scroll.add_child(vbox)
 
 	# --- Header ---
 	_add_result_label(vbox, "ROUND COMPLETE!", 18, Color(0.95, 0.95, 0.98), true)
@@ -110,7 +118,7 @@ func show_result_popup(result: Dictionary) -> void:
 
 	# --- Grade ---
 	var grade: String = result.get("grade", "F")
-	_add_result_label(vbox, grade, 48, _board._grade_color(grade), true)
+	_grade_lbl = _add_result_label(vbox, grade, 48, _board._grade_color(grade), true)
 
 	var grade_text_lbl: Label = _add_result_label(vbox, result.get("grade_text", ""), 11, Color(0.5, 0.51, 0.62), true)
 	grade_text_lbl.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
@@ -182,8 +190,52 @@ func show_result_popup(result: Dictionary) -> void:
 	continue_btn.pressed.connect(on_result_continue)
 	vbox.add_child(continue_btn)
 
+	_thinking_label = Label.new()
+	_thinking_label.text = "Analyzing..."
+	_thinking_label.add_theme_font_size_override("font_size", 28)
+	_thinking_label.add_theme_color_override("font_color", Color(0.95, 0.95, 0.98, 1.0))
+	_thinking_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	_thinking_label.vertical_alignment   = VERTICAL_ALIGNMENT_CENTER
+	_thinking_label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	_thinking_label.size_flags_vertical   = Control.SIZE_EXPAND_FILL
+	margin.add_child(_thinking_label)
+	_result_scroll.visible = false
+
 	parent_node.add_child(_result_panel)
 	_result_panel.move_to_front()
+	_start_thinking_phase()
+
+func _start_thinking_phase() -> void:
+	_is_thinking = true
+	var tw: Tween = _board.create_tween()
+	tw.tween_interval(0.5)
+	tw.tween_callback(func() -> void: _thinking_label.text = "Calculating...")
+	tw.tween_interval(0.5)
+	tw.tween_callback(func() -> void: _thinking_label.text = "Evaluating...")
+	tw.tween_interval(0.5)
+	tw.tween_callback(func() -> void: _reveal_result())
+
+func _reveal_result() -> void:
+	_is_thinking = false
+	if _thinking_label != null:
+		_thinking_label.visible = false
+	if _result_scroll != null:
+		_result_scroll.visible = true
+	if _grade_lbl == null:
+		return
+	var tw: Tween = _board.create_tween()
+	tw.tween_interval(0.05)
+	tw.tween_callback(func() -> void: _animate_grade_reveal())
+
+func _animate_grade_reveal() -> void:
+	if _grade_lbl == null or not is_instance_valid(_grade_lbl):
+		return
+	_grade_lbl.pivot_offset = _grade_lbl.size / 2.0
+	_grade_lbl.scale = Vector2(0.3, 0.3)
+	var tw: Tween = _board.create_tween()
+	tw.set_trans(Tween.TRANS_BACK)
+	tw.set_ease(Tween.EASE_OUT)
+	tw.tween_property(_grade_lbl, "scale", Vector2(1.0, 1.0), 0.35)
 
 func _add_result_label(parent: VBoxContainer, text: String, size: int, color: Color, centered: bool = false) -> Label:
 	var lbl: Label = Label.new()
@@ -196,6 +248,10 @@ func _add_result_label(parent: VBoxContainer, text: String, size: int, color: Co
 	return lbl
 
 func on_result_continue() -> void:
+	_is_thinking    = false
+	_thinking_label = null
+	_grade_lbl      = null
+	_result_scroll  = null
 	if _result_panel != null:
 		_result_panel.queue_free()
 		_result_panel = null
