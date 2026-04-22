@@ -647,7 +647,7 @@ func run_work_round(task_id: String) -> Dictionary:
 		var primary_val: int = _get_stat(emp, primary_stat)
 		var secondary_val: int = _get_stat(emp, secondary_stat)
 
-		var contribution: float = (primary_val / 1000.0) * 0.60 + (secondary_val / 1000.0) * 0.30 + combo_bonus
+		var contribution: float = _employee_contribution(primary_val, secondary_val, combo_bonus)
 		total_progress += contribution
 
 		# Stat gains placeholder (set after grade)
@@ -666,26 +666,15 @@ func run_work_round(task_id: String) -> Dictionary:
 		})
 
 	# Determine grade
-	var grade: String = "F"
+	var grade: String = _grade_from_progress(total_progress)
 	var grade_text: String = ""
-	if total_progress >= 0.80:
-		grade = "S"
-		grade_text = "Outstanding! Your donor is crying tears of joy."
-	elif total_progress >= 0.60:
-		grade = "A"
-		grade_text = "Excellent work. The report practically wrote itself."
-	elif total_progress >= 0.45:
-		grade = "B"
-		grade_text = "Solid effort. Nothing caught fire. That's a win."
-	elif total_progress >= 0.30:
-		grade = "C"
-		grade_text = "Adequate. Like a C+ in college. You passed."
-	elif total_progress >= 0.15:
-		grade = "D"
-		grade_text = "Below expectations. HR is 'concerned.'"
-	else:
-		grade = "F"
-		grade_text = "Did anyone actually show up? Asking for a friend."
+	match grade:
+		"S": grade_text = "Outstanding! Your donor is crying tears of joy."
+		"A": grade_text = "Excellent work. The report practically wrote itself."
+		"B": grade_text = "Solid effort. Nothing caught fire. That's a win."
+		"C": grade_text = "Adequate. Like a C+ in college. You passed."
+		"D": grade_text = "Below expectations. HR is 'concerned.'"
+		"F": grade_text = "Did anyone actually show up? Asking for a friend."
 
 	# Apply progress
 	var old_progress: float = task.get("progress", 0.0)
@@ -793,6 +782,22 @@ func run_work_round(task_id: String) -> Dictionary:
 		"employee_results": results,
 		"stat_gains": stat_gains,
 	}
+
+func _grade_from_progress(progress: float) -> String:
+	if progress >= 0.80:
+		return "S"
+	elif progress >= 0.60:
+		return "A"
+	elif progress >= 0.45:
+		return "B"
+	elif progress >= 0.30:
+		return "C"
+	elif progress >= 0.15:
+		return "D"
+	return "F"
+
+func _employee_contribution(primary_val: float, secondary_val: float, combo_bonus: float) -> float:
+	return (primary_val / 1000.0) * 0.60 + (secondary_val / 1000.0) * 0.30 + combo_bonus
 
 func _calculate_combo(emp_ids: Array, task: Dictionary) -> float:
 	var roles: Array[int] = []
