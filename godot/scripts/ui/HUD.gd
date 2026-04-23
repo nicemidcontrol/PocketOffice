@@ -37,9 +37,6 @@ func _ready() -> void:
 	_cm = get_node_or_null("/root/ClockManager")
 	if _cm != null:
 		_cm.time_updated.connect(_on_time_updated)
-		# Poll corp_points on each work day: idle CP uses gm.corp_points += directly
-		# and bypasses corp_points_changed, so work_day_started is the safety net.
-		_cm.work_day_started.connect(_on_work_day_started)
 
 	_refresh_all()
 
@@ -81,12 +78,6 @@ func _update_season(month: int) -> void:
 # ─────────────────────────────────────────
 func _on_cash_changed(new_cash: int) -> void:
 	_update_cash(new_cash)
-
-func _on_work_day_started() -> void:
-	# Idle CP is awarded via direct gm.corp_points += (no signal emitted).
-	# Re-emit corp_points_changed so Main.gd's CpValue box updates.
-	if _gm != null:
-		_gm.corp_points_changed.emit(_gm.corp_points)
 
 func _on_month_passed(_month: int) -> void:
 	_update_date()
