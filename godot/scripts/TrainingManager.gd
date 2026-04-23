@@ -127,13 +127,8 @@ func get_available_trainings(gm: Node) -> Array:
 	return result
 
 func get_total_cp_cost(training: Dictionary, emp_count: int,
-		employees: Array, _discovered_combos: Array) -> int:
-	var base: int = training.get("cp_cost", 7) * emp_count
-	for combo in TRAINING_COMBOS:
-		if _check_combo_match(combo, employees):
-			if combo["id"] == "intern_hustle":
-				base = base / 2
-	return base
+		_employees: Array, _discovered_combos: Array) -> int:
+	return training.get("cp_cost", 7) * emp_count
 
 func check_combo(employees: Array) -> Dictionary:
 	for combo in TRAINING_COMBOS:

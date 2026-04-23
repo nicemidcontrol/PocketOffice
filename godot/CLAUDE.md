@@ -42,3 +42,11 @@ SaveSystem → ClockManager → GameManager → EventManager → FacilityManager
 - Never push to main directly
 - Always create new branch
 - Commit message format: "type: description"
+
+## Testing (GUT)
+- GUT framework installed at addons/gut/ (version: 9.5.0)
+- Test files live in godot/tests/unit/
+- Test file naming: test_<system>.gd
+- All test files extend GutTest
+- Before opening any PR that changes logic: run tests headlessly and confirm all pass
+- Headless run command: godot --headless --import && godot --headless -s addons/gut/gut_cmdln.gd -gdir=res://tests/unit/ -gexit
