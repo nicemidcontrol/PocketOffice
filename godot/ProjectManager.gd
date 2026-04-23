@@ -553,7 +553,7 @@ func _on_work_day_started() -> void:
 
 	if idle_count > 0:
 		var desk_cp: int = idle_count
-		gm.corp_points += desk_cp
+		gm.add_corp_points(desk_cp)
 		print("[PM] %d idle employee(s) working at desk: +%d CP (total: %d)" % [idle_count, desk_cp, gm.corp_points])
 
 func _get_employee(gm_or_id: Variant, emp_id_arg: String = "") -> Employee:
@@ -626,7 +626,7 @@ func run_work_round(task_id: String) -> Dictionary:
 		if gm and gm.corp_points < cp_cost:
 			return {"error": "Not enough CP! Need %d CP (have %d)" % [cp_cost, gm.corp_points]}
 		if gm:
-			gm.corp_points -= cp_cost
+			gm.add_corp_points(-cp_cost)
 		actual_cp_cost = cp_cost
 
 	# Track total rounds
@@ -699,7 +699,7 @@ func run_work_round(task_id: String) -> Dictionary:
 	if gm and gm.economy:
 		gm.economy.add_revenue(round_cash, "Task round: %s" % task.get("name", ""))
 	if gm:
-		gm.corp_points = gm.corp_points + round_cp
+		gm.add_corp_points(round_cp)
 
 	# Apply stat gains to employees
 	var stat_gains: Array[Dictionary] = []
@@ -754,7 +754,7 @@ func run_work_round(task_id: String) -> Dictionary:
 		elif task_duration >= 3:
 			completion_cp_bonus = 15
 		if gm:
-			gm.corp_points += completion_cp_bonus
+			gm.add_corp_points(completion_cp_bonus)
 		var proj: Dictionary = _find_project_for_task(task_id)
 		_refresh_task_deps(proj)
 		if gm:
