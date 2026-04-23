@@ -36,19 +36,14 @@ func start_work_round(task: Dictionary) -> void:
 			_locked_project_ids.append(p.get("id", ""))
 	print("[WRR] Snapshot before round — blocked tasks: %s  locked projects: %s" % [_locked_task_ids, _locked_project_ids])
 
-	var task_id: String        = task.get("id", "")
-	var result: Dictionary     = _board._gm.projects.run_work_round(task_id)
-	if result.has("error"):
-		_board._status_label.text = str(result.get("error", "Error"))
-		_board._status_label.add_theme_color_override("font_color", Color(0.9, 0.3, 0.3, 1.0))
-		return
-	show_result_popup(result)
+	_show_thinking_panel()
+	_start_thinking_phase(task)
 
 # ─────────────────────────────────────────
 #  RESULT POPUP
 # ─────────────────────────────────────────
-func show_result_popup(result: Dictionary) -> void:
-	_is_thinking    = false
+func _show_thinking_panel() -> void:
+	_is_thinking    = true
 	_thinking_label = null
 	_grade_lbl      = null
 	_result_scroll  = null
@@ -56,12 +51,10 @@ func show_result_popup(result: Dictionary) -> void:
 		_result_panel.queue_free()
 		_result_panel = null
 
-	# Hide the main card VBox so nothing shows through
 	var card_vbox: Node = _board.get_node_or_null("Dimmer/Card/VBox")
 	if card_vbox:
 		card_vbox.visible = false
 
-	# Build result panel as direct child of Card, anchored to fill it
 	var card: Node        = _board.get_node_or_null("Dimmer/Card")
 	var parent_node: Node = card if card else _board
 
@@ -101,10 +94,59 @@ func show_result_popup(result: Dictionary) -> void:
 	margin.add_theme_constant_override("margin_bottom", 16)
 	_result_panel.add_child(margin)
 
+	_thinking_label = Label.new()
+	_thinking_label.text = "Analyzing..."
+	_thinking_label.add_theme_font_size_override("font_size", 28)
+	_thinking_label.add_theme_color_override("font_color", Color(0.95, 0.95, 0.98, 1.0))
+	_thinking_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	_thinking_label.vertical_alignment   = VERTICAL_ALIGNMENT_CENTER
+	_thinking_label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	_thinking_label.size_flags_vertical   = Control.SIZE_EXPAND_FILL
+	margin.add_child(_thinking_label)
+
+	parent_node.add_child(_result_panel)
+	_result_panel.move_to_front()
+
+func _start_thinking_phase(task: Dictionary) -> void:
+	var tw: Tween = _board.create_tween()
+	tw.tween_interval(0.5)
+	tw.tween_callback(func() -> void: _set_thinking_text("Calculating..."))
+	tw.tween_interval(0.5)
+	tw.tween_callback(func() -> void: _set_thinking_text("Evaluating..."))
+	tw.tween_interval(0.5)
+	tw.tween_callback(func() -> void: _compute_and_reveal(task))
+
+func _set_thinking_text(text: String) -> void:
+	if _thinking_label != null:
+		_thinking_label.text = text
+
+func _compute_and_reveal(task: Dictionary) -> void:
+	if not is_instance_valid(_result_panel):
+		return
+	var task_id: String    = task.get("id", "")
+	var result: Dictionary = _board._gm.projects.run_work_round(task_id)
+	if result.has("error"):
+		_is_thinking = false
+		if _result_panel != null:
+			_result_panel.queue_free()
+			_result_panel = null
+		var card_vbox: Node = _board.get_node_or_null("Dimmer/Card/VBox")
+		if card_vbox:
+			card_vbox.visible = true
+		_board._status_label.text = str(result.get("error", "Error"))
+		_board._status_label.add_theme_color_override("font_color", Color(0.9, 0.3, 0.3, 1.0))
+		return
+	_populate_result(result)
+	_reveal_result()
+
+func _populate_result(result: Dictionary) -> void:
+	var margin: MarginContainer = _result_panel.get_child(0) as MarginContainer
+
 	_result_scroll = ScrollContainer.new()
 	_result_scroll.size_flags_horizontal  = Control.SIZE_EXPAND_FILL
 	_result_scroll.size_flags_vertical    = Control.SIZE_EXPAND_FILL
 	_result_scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
+	_result_scroll.visible = false
 	margin.add_child(_result_scroll)
 
 	var vbox: VBoxContainer = VBoxContainer.new()
@@ -189,31 +231,6 @@ func show_result_popup(result: Dictionary) -> void:
 	continue_btn.add_theme_color_override("font_color", Color(0.22, 0.9, 0.42, 1.0))
 	continue_btn.pressed.connect(on_result_continue)
 	vbox.add_child(continue_btn)
-
-	_thinking_label = Label.new()
-	_thinking_label.text = "Analyzing..."
-	_thinking_label.add_theme_font_size_override("font_size", 28)
-	_thinking_label.add_theme_color_override("font_color", Color(0.95, 0.95, 0.98, 1.0))
-	_thinking_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	_thinking_label.vertical_alignment   = VERTICAL_ALIGNMENT_CENTER
-	_thinking_label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	_thinking_label.size_flags_vertical   = Control.SIZE_EXPAND_FILL
-	margin.add_child(_thinking_label)
-	_result_scroll.visible = false
-
-	parent_node.add_child(_result_panel)
-	_result_panel.move_to_front()
-	_start_thinking_phase()
-
-func _start_thinking_phase() -> void:
-	_is_thinking = true
-	var tw: Tween = _board.create_tween()
-	tw.tween_interval(0.5)
-	tw.tween_callback(func() -> void: _thinking_label.text = "Calculating...")
-	tw.tween_interval(0.5)
-	tw.tween_callback(func() -> void: _thinking_label.text = "Evaluating...")
-	tw.tween_interval(0.5)
-	tw.tween_callback(func() -> void: _reveal_result())
 
 func _reveal_result() -> void:
 	_is_thinking = false
