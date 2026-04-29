@@ -233,6 +233,9 @@ func _refresh_projects_display() -> void:
 #  ACTIONS
 # ─────────────────────────────────────────
 func _on_action_pressed() -> void:
+	if _work_result != null and _work_result.is_awaiting_continue():
+		_work_result.on_result_continue()
+		return
 	if _gm == null:
 		return
 	if _view_mode == MODE_PROJECTS:
@@ -277,6 +280,8 @@ func _on_cash_changed(new_cash: int) -> void:
 	_cash_label.text = _gm.format_cash(new_cash)
 
 func _on_projects_updated() -> void:
+	if _work_result != null and _work_result.is_round_active():
+		return
 	if _view_mode == MODE_PROJECTS:
 		if _gm != null:
 			_projects = _gm.projects.get_projects()
