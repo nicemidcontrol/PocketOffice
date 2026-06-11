@@ -604,20 +604,12 @@ func _update_project_completion(proj: Dictionary, gm: Node) -> void:
 		project_completed.emit(proj)
 		projects_updated.emit()
 
-func _apply_decay(proj: Dictionary) -> void:
-	# Regress the last completed task to simulate month-over-month decay.
-	# Phase schema: the task reopens and its recorded phase work is lost.
-	var tasks: Array = proj.get("tasks", [])
-	for i: int in range(tasks.size() - 1, -1, -1):
-		var task: Dictionary = tasks[i]
-		if task.get("status", "") == "completed":
-			task["status"]        = "available"
-			task["phase_results"] = []
-			_refresh_task_deps(proj)
-			print("[ProjectManager] Decay: %s task regressed in %s" % [
-				task.get("name", ""), proj.get("name", "")
-			])
-			return
+func _apply_decay(_proj: Dictionary) -> void:
+	# v1.5.2: decay is replaced by the Project Archived State system
+	# (see GAME_BIBLE_v1.5.2). v1.4 decay condition is vacuously true
+	# after assignment removal and would destroy completed phase_results.
+	# Disabled permanently; archived state arrives in a later PR.
+	return
 
 # ─────────────────────────────────────────
 #  LOOKUP HELPERS
