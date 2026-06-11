@@ -27,7 +27,6 @@ FacilityManager="*res://scripts/FacilityManager.gd"
 DonorManager="*res://scripts/DonorManager.gd"
 CompetitorManager="*res://scripts/CompetitorManager.gd"
 CHAMPBulletinManager="*res://scripts/CHAMPBulletinManager.gd"
-InternalProblemManager="*res://scripts/InternalProblemManager.gd"
 
 [display]
 

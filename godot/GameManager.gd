@@ -100,7 +100,7 @@ func _init_sub_managers() -> void:
 	employees = load("res://EmployeeManager.gd").new()
 	economy   = load("res://EconomyManager.gd").new()
 	projects  = load("res://ProjectManager.gd").new()
-	events    = load("res://EventManager.gd").new()
+	events    = load("res://EventPoolManager.gd").new()
 	office    = load("res://OfficeManager.gd").new()
 
 	for manager in [employees, economy, projects, events, office]:
