@@ -1,9 +1,4 @@
-Read godot/CLAUDE.md first.
 
-Create FRESH branch from main: docs/pr0-playtest-findings
-
-Edit ONE file only: godot/NOTES.md
-Append a new section at the end:
 
 ## PR-0 Prototype Playtest Findings (2026-06-11)
 
