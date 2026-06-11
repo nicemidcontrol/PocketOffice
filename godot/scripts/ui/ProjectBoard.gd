@@ -33,10 +33,6 @@ var _tasks:              Array  = []
 var _desc_label:         Label  = null
 var _subtitle_label:     Label  = null
 
-# Sub-helpers (set up in _ready)
-var _task_detail:  Object = null
-var _work_result:  Object = null
-
 # ─────────────────────────────────────────
 #  LIFECYCLE
 # ─────────────────────────────────────────
@@ -75,15 +71,6 @@ func _ready() -> void:
 	_back_btn.pressed.connect(_on_back_pressed)
 	_back_btn.visible  = false
 	_assign_panel.visible = false
-
-	# Create sub-helpers
-	var task_detail_script: GDScript = load("res://scripts/ui/TaskDetailView.gd")
-	_task_detail = task_detail_script.new()
-	_task_detail.setup(self)
-
-	var work_result_script: GDScript = load("res://scripts/ui/WorkRoundResult.gd")
-	_work_result = work_result_script.new()
-	_work_result.setup(self)
 
 	_show_projects_mode()
 
@@ -130,11 +117,7 @@ func _refresh_display() -> void:
 	if _view_mode == MODE_PROJECTS:
 		_refresh_projects_display()
 	else:
-		_task_detail.refresh_display(_tasks, _current_index)
-
-# Called by sub-helpers to invoke BaseModal's _refresh_display
-func _base_refresh() -> void:
-	super._refresh_display()
+		_refresh_tasks_display()
 
 func _refresh_projects_display() -> void:
 	if _projects.is_empty():
@@ -230,12 +213,88 @@ func _refresh_projects_display() -> void:
 		_action_btn.add_theme_color_override("font_color", Color(0.3, 1.0, 0.4, 1.0))
 
 # ─────────────────────────────────────────
+#  READ-ONLY TASK DISPLAY
+# ─────────────────────────────────────────
+func _refresh_tasks_display() -> void:
+	# v1.4 work round flow removed — tasks are shown read-only.
+	_action_btn.visible = false
+	_back_btn.visible   = true
+
+	if _tasks.is_empty():
+		_item_name_label.text = "No Tasks"
+		_page_label.text      = "0 / 0"
+		_subtitle_label.text  = ""
+		_desc_label.text      = "This project has no tasks."
+		_role_label.text      = ""
+		_info_label.text      = ""
+		_reward_label.text    = ""
+		_team_label.text      = ""
+		return
+
+	super._refresh_display()
+
+	var task: Dictionary    = _tasks[_current_index]
+	var task_status: String = task.get("status", "blocked")
+	var progress: float     = float(task.get("progress", 0.0))
+	var ids: Array          = task.get("assigned_employee_ids", [])
+
+	_item_name_label.text = task.get("name", "Task")
+	_subtitle_label.text  = task.get("subtitle", "")
+	_desc_label.text      = task.get("description", "")
+
+	var primary: String   = str(task.get("primary_stat", "")).capitalize()
+	var secondary: String = str(task.get("secondary_stat", "")).capitalize()
+	_role_label.text = primary + " + " + secondary
+
+	var duration_ticks: int = int(task.get("duration_ticks", task.get("duration", 0)))
+	var cash_text: String = "$%d" % int(task.get("reward_cash", 0))
+	if _gm != null:
+		cash_text = _gm.format_cash(int(task.get("reward_cash", 0)))
+	_info_label.text = "%d ticks | %s  +%d CP" % [
+		duration_ticks,
+		cash_text,
+		int(task.get("reward_cp", 0)),
+	]
+	_reward_label.text = ""
+
+	# Status badge
+	_status_label.text = task_status.replace("_", " ").to_upper()
+	match task_status:
+		"completed":
+			_status_label.add_theme_color_override("font_color", Color(0.4, 0.8, 1.0, 1.0))
+		"in_progress":
+			_status_label.add_theme_color_override("font_color", Color(1.0, 0.85, 0.1, 1.0))
+		"available":
+			_status_label.add_theme_color_override("font_color", Color(0.22, 0.9, 0.42, 1.0))
+		_:
+			_status_label.add_theme_color_override("font_color", Color(0.5, 0.51, 0.62, 1.0))
+
+	# Team line
+	if ids.is_empty():
+		_team_label.text = "Unassigned"
+		_team_label.add_theme_color_override("font_color", Color(0.5, 0.51, 0.62, 1.0))
+	else:
+		var names: Array[String] = []
+		if _gm != null:
+			var hired: Array[Employee] = _gm.employees.get_hired_employees()
+			for emp in hired:
+				if str(emp.id) in ids:
+					names.append(str(emp.first_name))
+		_team_label.text = "Team: %s  (%d/3)" % [", ".join(names), ids.size()]
+		_team_label.add_theme_color_override("font_color", Color(0.22, 0.9, 0.42, 1.0))
+
+	# Progress bar
+	if progress > 0.0:
+		var bar_lbl: Label = Label.new()
+		bar_lbl.text = _progress_bar(progress, 14)
+		bar_lbl.add_theme_font_size_override("font_size", 11)
+		bar_lbl.add_theme_color_override("font_color", Color(1.0, 0.85, 0.1, 1.0))
+		_ot_list.add_child(bar_lbl)
+
+# ─────────────────────────────────────────
 #  ACTIONS
 # ─────────────────────────────────────────
 func _on_action_pressed() -> void:
-	if _work_result != null and _work_result.is_awaiting_continue():
-		_work_result.on_result_continue()
-		return
 	if _gm == null:
 		return
 	if _view_mode == MODE_PROJECTS:
@@ -245,18 +304,6 @@ func _on_action_pressed() -> void:
 		var s: String = proj.get("status", "")
 		if s != "locked" and s != "completed":
 			_show_tasks_mode(proj.get("id", ""))
-	else:
-		if _tasks.is_empty():
-			return
-		var task: Dictionary = _tasks[_current_index]
-		var s: String = task.get("status", "")
-		if s == "locked" or s == "completed":
-			return
-		var emp_ids: Array = task.get("assigned_employee_ids", [])
-		if emp_ids.is_empty():
-			_task_detail.open_assign_for_task(task, _tasks)
-		else:
-			_work_result.start_work_round(task)
 
 func _on_back_pressed() -> void:
 	_view_mode = MODE_PROJECTS
@@ -271,7 +318,7 @@ func _on_avail_tab() -> void:
 
 # Delegated from scene signal (AssignPanel close button)
 func _on_assign_close_pressed() -> void:
-	_task_detail.on_assign_close_pressed()
+	_assign_panel.visible = false
 
 # ─────────────────────────────────────────
 #  SIGNAL HANDLERS
@@ -280,8 +327,6 @@ func _on_cash_changed(new_cash: int) -> void:
 	_cash_label.text = _gm.format_cash(new_cash)
 
 func _on_projects_updated() -> void:
-	if _work_result != null and _work_result.is_round_active():
-		return
 	if _view_mode == MODE_PROJECTS:
 		if _gm != null:
 			_projects = _gm.projects.get_projects()
@@ -296,26 +341,8 @@ func _on_projects_updated() -> void:
 		set_items_count(_tasks.size())
 
 # ─────────────────────────────────────────
-#  HELPERS (shared by sub-helpers via _board ref)
+#  HELPERS
 # ─────────────────────────────────────────
-func _get_round_cp_cost(task: Dictionary) -> int:
-	var duration: int = int(task.get("duration_ticks", task.get("duration", 2)))
-	if duration >= 5:
-		return 8
-	elif duration >= 3:
-		return 5
-	return 3
-
-func _grade_color(grade: String) -> Color:
-	match grade:
-		"S": return Color(1.0, 0.85, 0.0, 1.0)
-		"A": return Color(0.3, 0.9, 0.3, 1.0)
-		"B": return Color(0.4, 0.6, 1.0, 1.0)
-		"C": return Color(1.0, 1.0, 0.3, 1.0)
-		"D": return Color(1.0, 0.6, 0.2, 1.0)
-		"F": return Color(0.9, 0.3, 0.3, 1.0)
-	return Color(0.5, 0.51, 0.62, 1.0)
-
 func _progress_bar(pct: float, width: int) -> String:
 	var filled: int = int(round(pct * float(width)))
 	var bar: String = ""
@@ -325,21 +352,3 @@ func _progress_bar(pct: float, width: int) -> String:
 		else:
 			bar += "-"
 	return "[%s] %d%%" % [bar, int(pct * 100.0)]
-
-func _role_name(role: int) -> String:
-	match role:
-		0: return "Operations"
-		1: return "Procurement"
-		2: return "Secretary"
-		3: return "Management"
-		4: return "Finance"
-	return "Unknown"
-
-func _role_color(role: int) -> Color:
-	match role:
-		0: return Color(0.22, 0.9,  0.42, 1.0)  # green  — OPS
-		1: return Color(0.94, 0.47, 0.20, 1.0)  # orange — PRO
-		2: return Color(0.20, 0.85, 0.94, 1.0)  # cyan   — SEC
-		3: return Color(0.78, 0.22, 0.90, 1.0)  # purple — MGT
-		4: return Color(1.00, 0.82, 0.10, 1.0)  # yellow — FIN
-	return Color(0.50, 0.51, 0.62, 1.0)
