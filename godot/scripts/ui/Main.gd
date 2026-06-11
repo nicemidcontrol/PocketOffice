@@ -48,9 +48,21 @@ func _ready() -> void:
 	var em: Node = get_node_or_null("/root/EventManager")
 	if em != null:
 		em.event_fired.connect(_on_event_fired)
-	_maybe_show_tutorial()
+	if gm != null and not gm.has_protagonist():
+		_show_character_customization()
+	else:
+		_maybe_show_tutorial()
 	_load_debug_menu()
 	_is_active = true
+
+func _show_character_customization() -> void:
+	var screen: Node = load("res://scenes/CharacterCustomization.tscn").instantiate()
+	add_child(screen)
+	get_tree().paused = true
+	screen.customization_complete.connect(func() -> void:
+		get_tree().paused = false
+		_maybe_show_tutorial()
+	)
 
 func _load_debug_menu() -> void:
 	if not OS.is_debug_build():

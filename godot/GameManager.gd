@@ -130,9 +130,48 @@ func new_game(company_name: String) -> void:
 	projects.initialize()
 	events.initialize()
 	office.initialize()
-	employees.hire_starting_team()
+	# v1.5.2 Starter Rules: a new game begins with zero employees. The
+	# protagonist is created by CharacterCustomization via create_protagonist().
 
 	broadcast("Welcome to %s! Let's build something great. 🚀" % company_name)
+
+# ─────────────────────────────────────────
+#  PROTAGONIST (v1.5.2 Character Customization)
+# ─────────────────────────────────────────
+# Fixed starter profile — every player begins as the same Tier D
+# Project Manager; only portrait and names are cosmetic choices.
+const PROTAGONIST_STATS: Dictionary = {
+	"management": 30, "focus": 25, "charm": 20, "communication": 20,
+	"technical": 15, "procurement": 15, "logistics": 15, "precision": 15,
+}
+
+func create_protagonist(portrait_id: int, pm_name: String, ngo_name: String) -> void:
+	if has_protagonist():
+		return
+	company_data["protagonist"] = {
+		"portrait_id": portrait_id,
+		"name": pm_name,
+		"ngo_name": ngo_name,
+	}
+	var emp: Employee = Employee.new()
+	emp.id = "protagonist"
+	emp.first_name = pm_name
+	emp.last_name = ""
+	emp.role = Employee.Role.MANAGEMENT
+	emp.personality = Employee.Personality.NORMAL
+	emp.tier = "D"
+	for stat_name in PROTAGONIST_STATS:
+		emp.set(str(stat_name), int(PROTAGONIST_STATS.get(stat_name, 0)))
+	emp.sp_current = 5
+	emp.sp_max = 5
+	emp.morale = 50
+	emp.monthly_salary = emp._calculate_base_salary()
+	employees.hire(emp)
+	broadcast("Welcome, %s of %s!" % [pm_name, ngo_name])
+
+func has_protagonist() -> bool:
+	var protagonist: Dictionary = company_data.get("protagonist", {})
+	return not protagonist.is_empty()
 
 # ─────────────────────────────────────────
 #  TIME PROGRESSION
