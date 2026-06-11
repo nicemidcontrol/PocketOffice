@@ -34,6 +34,8 @@ func test_create_protagonist_stores_dict_and_hires_exactly_one() -> void:
 	assert_eq(int(protagonist.get("portrait_id", -1)), 3)
 	assert_eq(protagonist.get("name", ""), "Anan")
 	assert_eq(protagonist.get("ngo_name", ""), "Mekong Hope")
+	assert_eq(gm.company_data.get("company_name", ""), "Mekong Hope",
+		"NGO name is the company name (GAME_BIBLE_v1.5.2)")
 
 	assert_eq(gm.employees.hired_count(), 1, "exactly one employee after customization")
 	var emp: Employee = gm.employees.get_hired_employees()[0]
@@ -52,6 +54,8 @@ func test_create_protagonist_is_idempotent() -> void:
 	assert_eq(gm.employees.hired_count(), 1, "second call must not add an employee")
 	var protagonist: Dictionary = gm.company_data.get("protagonist", {})
 	assert_eq(protagonist.get("name", ""), "Anan", "second call must not overwrite")
+	assert_eq(gm.company_data.get("company_name", ""), "Mekong Hope",
+		"second call must not overwrite company name")
 
 # ─────────────────────────────────────────
 #  VALIDATION LOGIC (static, tested directly)
@@ -96,3 +100,28 @@ func test_protagonist_survives_save_load_round_trip() -> void:
 	assert_eq(int(emp.role), int(Employee.Role.MANAGEMENT))
 	assert_eq(emp.sp_current, 5)
 	assert_eq(emp.sp_max, 5)
+	assert_eq(gm2.company_data.get("company_name", ""), "Lotus Aid",
+		"company name must survive save/load")
+
+func test_v2_wipe_preserves_company_name_and_clears_protagonist() -> void:
+	# PR-3 wipe path: a pre-phase-schema save starts a clean new game but
+	# keeps the saved company name. The protagonist is gone, so the
+	# customization screen reappears (NOTES.md answer 6).
+	var legacy_save: Dictionary = {
+		"company_data": {
+			"company_name": "Lotus Aid",
+			"protagonist": {"portrait_id": 1, "name": "Nok", "ngo_name": "Lotus Aid"},
+		},
+		"active_projects": [{"_v": 2, "projects": []}],
+	}
+	SaveSystem.save(legacy_save)
+
+	var gm2_script: GDScript = preload("res://GameManager.gd")
+	var gm2: Node = gm2_script.new()
+	# _ready loads the v2 save and must wipe it to a clean new game.
+	add_child_autofree(gm2)
+
+	assert_eq(gm2.company_data.get("company_name", ""), "Lotus Aid",
+		"wipe must preserve the company name")
+	assert_false(gm2.has_protagonist(), "wipe must clear the protagonist so customization reappears")
+	assert_eq(gm2.employees.hired_count(), 0, "wiped game starts with zero employees")

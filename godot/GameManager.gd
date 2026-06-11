@@ -148,14 +148,19 @@ const PROTAGONIST_STATS: Dictionary = {
 func create_protagonist(portrait_id: int, pm_name: String, ngo_name: String) -> void:
 	if has_protagonist():
 		return
+	# Defensive re-sanitize (limits match CharacterCustomization: 20/30).
+	var clean_name: String = pm_name.strip_edges().left(20)
+	var clean_ngo: String = ngo_name.strip_edges().left(30)
 	company_data["protagonist"] = {
 		"portrait_id": portrait_id,
-		"name": pm_name,
-		"ngo_name": ngo_name,
+		"name": clean_name,
+		"ngo_name": clean_ngo,
 	}
+	# Per GAME_BIBLE_v1.5.2 the NGO name IS the company name in the HUD.
+	company_data["company_name"] = clean_ngo
 	var emp: Employee = Employee.new()
 	emp.id = "protagonist"
-	emp.first_name = pm_name
+	emp.first_name = clean_name
 	emp.last_name = ""
 	emp.role = Employee.Role.MANAGEMENT
 	emp.personality = Employee.Personality.NORMAL
@@ -167,7 +172,7 @@ func create_protagonist(portrait_id: int, pm_name: String, ngo_name: String) -> 
 	emp.morale = 50
 	emp.monthly_salary = emp._calculate_base_salary()
 	employees.hire(emp)
-	broadcast("Welcome, %s of %s!" % [pm_name, ngo_name])
+	broadcast("Welcome, %s of %s!" % [clean_name, clean_ngo])
 
 func has_protagonist() -> bool:
 	var protagonist: Dictionary = company_data.get("protagonist", {})
