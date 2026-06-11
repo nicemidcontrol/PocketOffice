@@ -21,7 +21,7 @@ Always limit shell command output to avoid context bloat.
 Never run unbounded commands that could flood the context window.
 
 ## Autoload Order
-SaveSystem → ClockManager → GameManager → StaminaManager → EventManager → FacilityManager → DonorManager → CompetitorManager
+SaveSystem → ClockManager → GameManager → StaminaManager → ParameterTracker → EventManager → FacilityManager → DonorManager → CompetitorManager
 
 ## Modal Standard (BaseModal)
 - CanvasLayer layer=8
