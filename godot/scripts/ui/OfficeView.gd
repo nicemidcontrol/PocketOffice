@@ -129,20 +129,11 @@ func _on_employee_hired(_emp: Object) -> void:
 func _on_work_day_started() -> void:
 	if _gm == null:
 		return
-	# Mirror the idle logic from ProjectManager: employees not assigned to any
-	# in_progress task are "at their desks" and earn 1 CP — show the popup.
-	var busy_ids: Array = []
-	for proj in _gm.projects.get_projects():
-		for task in proj.get("tasks", []):
-			if task.get("status", "") == "in_progress":
-				for eid in task.get("assigned_employee_ids", []):
-					if eid not in busy_ids:
-						busy_ids.append(eid)
+	# v1.5.2 interim: task assignment removed; all employees are idle
+	# until PhaseManager lands (PR-10). Busy filtering returns then.
 	var hired: Array = _gm.employees.get_hired_employees()
 	for i: int in range(min(hired.size(), _slots.size())):
-		var emp: Object = hired[i]
-		if str(emp.id) not in busy_ids:
-			_show_cp_popup(_slots[i])
+		_show_cp_popup(_slots[i])
 
 # ─── FLOATING +1 CP POPUP ─────────────────────────────────────────────────────
 func _show_cp_popup(slot: Panel) -> void:

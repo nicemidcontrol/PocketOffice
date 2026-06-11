@@ -194,10 +194,7 @@ func _refresh_projects_display() -> void:
 	elif is_progress:
 		_status_label.text = "IN PROGRESS"
 		_status_label.add_theme_color_override("font_color", Color(1.0, 0.85, 0.1, 1.0))
-		var assigned_count: int = 0
-		for t in task_list:
-			assigned_count += t.get("assigned_employee_ids", []).size()
-		_team_label.text = "%d employee(s) working" % assigned_count
+		_team_label.text = "Work in progress"
 		_team_label.add_theme_color_override("font_color", Color(0.22, 0.9, 0.42, 1.0))
 		_action_btn.text     = "VIEW TASKS"
 		_action_btn.disabled = false
@@ -235,16 +232,16 @@ func _refresh_tasks_display() -> void:
 
 	var task: Dictionary    = _tasks[_current_index]
 	var task_status: String = task.get("status", "blocked")
-	var progress: float     = float(task.get("progress", 0.0))
-	var ids: Array          = task.get("assigned_employee_ids", [])
 
 	_item_name_label.text = task.get("name", "Task")
 	_subtitle_label.text  = task.get("subtitle", "")
 	_desc_label.text      = task.get("description", "")
 
-	var primary: String   = str(task.get("primary_stat", "")).capitalize()
-	var secondary: String = str(task.get("secondary_stat", "")).capitalize()
-	_role_label.text = primary + " + " + secondary
+	# Phase list, e.g. "PLANNING > EXECUTION > LOGISTICS"
+	var phase_names: Array[String] = []
+	for phase in task.get("phases", []):
+		phase_names.append(str(phase.get("parameter", "")))
+	_role_label.text = " > ".join(phase_names)
 
 	var duration_ticks: int = int(task.get("duration_ticks", task.get("duration", 0)))
 	var cash_text: String = "$%d" % int(task.get("reward_cash", 0))
@@ -269,27 +266,7 @@ func _refresh_tasks_display() -> void:
 		_:
 			_status_label.add_theme_color_override("font_color", Color(0.5, 0.51, 0.62, 1.0))
 
-	# Team line
-	if ids.is_empty():
-		_team_label.text = "Unassigned"
-		_team_label.add_theme_color_override("font_color", Color(0.5, 0.51, 0.62, 1.0))
-	else:
-		var names: Array[String] = []
-		if _gm != null:
-			var hired: Array[Employee] = _gm.employees.get_hired_employees()
-			for emp in hired:
-				if str(emp.id) in ids:
-					names.append(str(emp.first_name))
-		_team_label.text = "Team: %s  (%d/3)" % [", ".join(names), ids.size()]
-		_team_label.add_theme_color_override("font_color", Color(0.22, 0.9, 0.42, 1.0))
-
-	# Progress bar
-	if progress > 0.0:
-		var bar_lbl: Label = Label.new()
-		bar_lbl.text = _progress_bar(progress, 14)
-		bar_lbl.add_theme_font_size_override("font_size", 11)
-		bar_lbl.add_theme_color_override("font_color", Color(1.0, 0.85, 0.1, 1.0))
-		_ot_list.add_child(bar_lbl)
+	_team_label.text = ""
 
 # ─────────────────────────────────────────
 #  ACTIONS
@@ -339,16 +316,3 @@ func _on_projects_updated() -> void:
 		if not _tasks.is_empty() and _current_index >= _tasks.size():
 			_current_index = _tasks.size() - 1
 		set_items_count(_tasks.size())
-
-# ─────────────────────────────────────────
-#  HELPERS
-# ─────────────────────────────────────────
-func _progress_bar(pct: float, width: int) -> String:
-	var filled: int = int(round(pct * float(width)))
-	var bar: String = ""
-	for i: int in range(width):
-		if i < filled:
-			bar += "#"
-		else:
-			bar += "-"
-	return "[%s] %d%%" % [bar, int(pct * 100.0)]
