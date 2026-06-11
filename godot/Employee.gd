@@ -53,6 +53,12 @@ func full_name() -> String:
 @export var morale: int = 50
 
 # ─────────────────────────────────────────
+#  STAMINA  (SP — spent to work phases)
+# ─────────────────────────────────────────
+@export var sp_current: int = 5
+@export var sp_max: int = 5
+
+# ─────────────────────────────────────────
 #  CAREER
 # ─────────────────────────────────────────
 @export var level: int = 1
@@ -245,6 +251,7 @@ func to_dict() -> Dictionary:
 		"focus": focus, "communication": communication, "management": management,
 		"logistics": logistics, "precision": precision,
 		"morale": morale,
+		"sp_current": sp_current, "sp_max": sp_max,
 		"level": level, "experience_points": experience_points,
 		"monthly_salary": monthly_salary,
 		"is_hired": is_hired, "is_burned_out": is_burned_out,
@@ -274,6 +281,9 @@ static func from_dict(d: Dictionary) -> Employee:
 	emp.logistics              = d.get("logistics", 100)
 	emp.precision              = d.get("precision", 100)
 	emp.morale                 = d.get("morale", d.get("motivation", 50))
+	# Older saves predate the stamina system — default to a full 5/5
+	emp.sp_max                 = d.get("sp_max", 5)
+	emp.sp_current             = d.get("sp_current", 5)
 	emp.level                  = d.get("level", 1)
 	emp.experience_points      = d.get("experience_points", 0)
 	emp.monthly_salary         = d.get("monthly_salary", 1500)
