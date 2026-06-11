@@ -29,3 +29,23 @@ New design note (post-task result screen):
 
 Commit message: "docs: record PR-0 playtest findings and tier mapping bug"
 Push branch. Do not modify any other file.
+## Migration Plan Open Questions — Answers (2026-06-11)
+
+1. Per-task cash rewards: REMOVED entirely. Recurring revenue replaces them.
+2. ECONOMY_BIBLE v2: parallel docs PR. Does not block PR-1.
+3. Grade helpers: never extracted to a file. Delete _grade_from_progress()
+   inside ProjectManager directly (PR-1b).
+4. Region Area data: DEFERRED until Local Area is validated in v1.5.2.
+5. Same employee on phases of two different tasks: ALLOWED. Block
+   within-task only. SP is the throttle.
+6. Save wipe -> Character Customization reappears: YES.
+7. InternalProblemManager: DELETE. Not in v1.5.2 MVP.
+8. TaskDetailView.gd: DELETE in PR-1b (caller is ProjectBoard).
+9. ART_BIBLE: PICO-8 palette DROPPED. New warm pastel palette from the
+   Claude Design mockup + LimeZu assets. ART_BIBLE rewrite required
+   before PR-6 (first UI PR).
+10. SP item mappings: re-spec together with ECONOMY_BIBLE v2, before PR-15.
+
+PR-1 is split: PR-1a = reference-free deletions + rename.
+PR-1b = ProjectManager/ProjectBoard surgery + dependent deletions
+(WorkRoundResult.gd, TaskDetailView.gd).
