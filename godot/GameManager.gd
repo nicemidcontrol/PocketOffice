@@ -341,6 +341,15 @@ func load_game() -> void:
 	if data.is_empty():
 		return
 
+	# v1.5.2 phase schema: project saves older than _v 3 cannot be
+	# migrated — wipe to a clean new game instead of loading them.
+	if _project_save_version(data) < 3:
+		var old_name: String = str(data.get("company_data", {}).get("company_name", "My Startup Inc."))
+		print("[GM] Incompatible pre-phase-schema save detected — starting a new game.")
+		new_game(old_name)
+		save_game()
+		return
+
 	company_data = data.get("company_data", company_data)
 	# Backfill keys missing from old saves so direct access never crashes
 	if not company_data.has("current_tick"):
@@ -358,6 +367,15 @@ func load_game() -> void:
 	_fever_cooldown_month = data.get("fever_cooldown_month", -1)
 	total_rounds_played   = int(data.get("total_rounds_played", 0))
 	broadcast("Game loaded! Welcome back to %s." % company_data["company_name"])
+
+func _project_save_version(data: Dictionary) -> int:
+	var proj_save: Array = data.get("active_projects", [])
+	if proj_save.is_empty():
+		return 3  # no project data to migrate — treat as current
+	var first: Variant = proj_save[0]
+	if first is Dictionary:
+		return int((first as Dictionary).get("_v", 1))
+	return 1
 
 # ─────────────────────────────────────────
 #  CLOCK HANDLERS
