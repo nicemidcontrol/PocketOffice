@@ -1,0 +1,132 @@
+[gd_scene load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://scripts/ui/EmployeePickerCard.gd" id="1_epcscript"]
+[ext_resource type="PackedScene" path="res://scenes/ui/StaminaWidget.tscn" id="2_swscene"]
+
+[node name="EmployeePickerCard" type="Panel"]
+custom_minimum_size = Vector2(340, 120)
+script = ExtResource("1_epcscript")
+
+[node name="Margin" type="MarginContainer" parent="."]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/margin_left = 10
+theme_override_constants/margin_top = 8
+theme_override_constants/margin_right = 10
+theme_override_constants/margin_bottom = 8
+mouse_filter = 2
+
+[node name="HBox" type="HBoxContainer" parent="Margin"]
+layout_mode = 2
+theme_override_constants/separation = 10
+mouse_filter = 2
+
+[node name="Portrait" type="ColorRect" parent="Margin/HBox"]
+layout_mode = 2
+custom_minimum_size = Vector2(64, 64)
+size_flags_vertical = 4
+mouse_filter = 2
+
+[node name="InfoVBox" type="VBoxContainer" parent="Margin/HBox"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/separation = 2
+mouse_filter = 2
+
+[node name="NameLabel" type="Label" parent="Margin/HBox/InfoVBox"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 16
+text = "Employee Name"
+
+[node name="RoleTierLabel" type="Label" parent="Margin/HBox/InfoVBox"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 12
+theme_override_colors/font_color = Color(0.5, 0.51, 0.62, 1)
+text = "ROLE - TIER X"
+
+[node name="SpRow" type="HBoxContainer" parent="Margin/HBox/InfoVBox"]
+layout_mode = 2
+theme_override_constants/separation = 6
+mouse_filter = 2
+
+[node name="SpTitle" type="Label" parent="Margin/HBox/InfoVBox/SpRow"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 11
+theme_override_colors/font_color = Color(0.5, 0.51, 0.62, 1)
+text = "SP:"
+
+[node name="StaminaWidget" parent="Margin/HBox/InfoVBox/SpRow" instance=ExtResource("2_swscene")]
+layout_mode = 2
+
+[node name="NeedsSpLabel" type="Label" parent="Margin/HBox/InfoVBox/SpRow"]
+layout_mode = 2
+visible = false
+theme_override_font_sizes/font_size = 12
+theme_override_colors/font_color = Color(0.9, 0.25, 0.25, 1)
+text = "Needs 3 SP"
+
+[node name="Stat1Row" type="HBoxContainer" parent="Margin/HBox/InfoVBox"]
+layout_mode = 2
+theme_override_constants/separation = 6
+mouse_filter = 2
+
+[node name="Stat1Name" type="Label" parent="Margin/HBox/InfoVBox/Stat1Row"]
+layout_mode = 2
+custom_minimum_size = Vector2(86, 0)
+theme_override_font_sizes/font_size = 11
+text = "Stat1"
+
+[node name="Stat1Bar" type="ProgressBar" parent="Margin/HBox/InfoVBox/Stat1Row"]
+layout_mode = 2
+custom_minimum_size = Vector2(90, 8)
+size_flags_horizontal = 3
+size_flags_vertical = 4
+show_percentage = false
+
+[node name="Stat1Value" type="Label" parent="Margin/HBox/InfoVBox/Stat1Row"]
+layout_mode = 2
+custom_minimum_size = Vector2(48, 0)
+theme_override_font_sizes/font_size = 11
+horizontal_alignment = 2
+text = "0/200"
+
+[node name="Stat2Row" type="HBoxContainer" parent="Margin/HBox/InfoVBox"]
+layout_mode = 2
+theme_override_constants/separation = 6
+mouse_filter = 2
+
+[node name="Stat2Name" type="Label" parent="Margin/HBox/InfoVBox/Stat2Row"]
+layout_mode = 2
+custom_minimum_size = Vector2(86, 0)
+theme_override_font_sizes/font_size = 11
+text = "Stat2"
+
+[node name="Stat2Bar" type="ProgressBar" parent="Margin/HBox/InfoVBox/Stat2Row"]
+layout_mode = 2
+custom_minimum_size = Vector2(90, 8)
+size_flags_horizontal = 3
+size_flags_vertical = 4
+show_percentage = false
+
+[node name="Stat2Value" type="Label" parent="Margin/HBox/InfoVBox/Stat2Row"]
+layout_mode = 2
+custom_minimum_size = Vector2(48, 0)
+theme_override_font_sizes/font_size = 11
+horizontal_alignment = 2
+text = "0/200"
+
+[node name="MismatchLabel" type="Label" parent="Margin/HBox/InfoVBox"]
+layout_mode = 2
+visible = false
+theme_override_font_sizes/font_size = 12
+theme_override_colors/font_color = Color(0.95, 0.8, 0.2, 1)
+text = "70% efficiency - not specialized"
+
+[node name="ExpectedLabel" type="Label" parent="Margin/HBox/InfoVBox"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 12
+theme_override_colors/font_color = Color(1, 0.82, 0.1, 1)
+text = "Expected contribution: ~0"
