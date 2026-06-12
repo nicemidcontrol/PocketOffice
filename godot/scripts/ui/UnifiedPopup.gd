@@ -126,9 +126,10 @@ func _build_dots() -> void:
 #  INPUT
 # ─────────────────────────────────────────
 func _on_body_input(event: InputEvent) -> void:
-	# Skip rule: tap anywhere on the body jumps to the last page.
+	# Tap-to-advance rule (playtest revision 2026-06-12): a body tap
+	# advances exactly one page; on the last page it does nothing.
 	if _is_left_click(event):
-		skip_to_last()
+		next_page()
 
 func _on_dimmer_input(event: InputEvent) -> void:
 	# Outside tap closes only once the popup is fully acknowledged.

@@ -81,14 +81,14 @@ The single most reused UI element. Used for tutorials, item drops, achievements,
 |--------|--------|
 | Tap left arrow ◄ | Previous page (if not first) |
 | Tap right arrow ► | Next page (if not last) |
-| Tap **anywhere on body** | Skip to **last page** |
+| Tap **anywhere on body** | Advance **one page** (no-op on last page) |
 | Tap CLOSE | Close popup, fire `popup_closed` signal |
 | Tap outside popup | Close (only if all pages have been viewed at least once) |
 | Tap dimmed background | Same as tap outside |
 
-### Skip rule
+### Tap-to-advance rule
 
-The "tap-anywhere = jump to last page" gesture means players who don't want to read can immediately reveal the close button. This respects player time without removing the requirement to acknowledge the popup exists.
+A body tap advances exactly one page, like turning a page in a book. Because popups are capped at 3 pages, a full read-through is at most 2 taps — fast enough that no separate skip gesture is needed. On the last page a body tap does nothing; CLOSE and tap-outside handle closing. (revised after playtest, 2026-06-12)
 
 ### Use cases
 

@@ -65,14 +65,31 @@ func test_pages_capped_at_three() -> void:
 	assert_eq(popup.page_count(), 3)
 
 # ─────────────────────────────────────────
-#  SKIP RULE
+#  TAP-TO-ADVANCE RULE (playtest revision 2026-06-12)
 # ─────────────────────────────────────────
-func test_body_tap_jumps_to_last_page_and_acknowledges() -> void:
+func test_body_tap_advances_one_page() -> void:
 	var popup: CanvasLayer = _spawn(["a", "b", "c"])
 	popup._on_body_input(_left_click())
-	assert_eq(popup.current_page, 2, "body tap jumps to last page")
-	assert_true(popup.acknowledged)
+	assert_eq(popup.current_page, 1, "body tap advances exactly one page, not to last")
+	assert_false(popup.acknowledged, "page 2 of 3 is not yet acknowledged")
+	assert_false(popup._close_btn.visible)
+
+func test_body_tap_through_all_pages_acknowledges() -> void:
+	var popup: CanvasLayer = _spawn(["a", "b", "c"])
+	popup._on_body_input(_left_click())
+	popup._on_body_input(_left_click())
+	assert_eq(popup.current_page, 2)
+	assert_true(popup.acknowledged, "reaching last page by tapping acknowledges")
 	assert_true(popup._close_btn.visible)
+
+func test_body_tap_on_last_page_is_noop() -> void:
+	var popup: CanvasLayer = _spawn(["a", "b", "c"])
+	popup.skip_to_last()
+	watch_signals(popup)
+	popup._on_body_input(_left_click())
+	assert_eq(popup.current_page, 2, "body tap on last page stays on last page")
+	assert_signal_emit_count(popup, "popup_closed", 0, "body tap on last page must not close")
+	assert_false(popup.is_queued_for_deletion())
 
 # ─────────────────────────────────────────
 #  OUTSIDE TAP
