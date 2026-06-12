@@ -1,63 +1,37 @@
 extends CanvasLayer
 
-const PREFS_PATH: String = "user://pocketoffice_prefs.json"
+# v1.5.2 (PR-6): presentation is delegated to UnifiedPopup. This node keeps
+# its public interface (show_tutorial + seen-flag statics) so callers are
+# unchanged. The 6 v1.4 steps are served as two chained 3-page popups
+# (UnifiedPopup is capped at 3 pages per UI_SYSTEMS_BIBLE).
 
-# ------------------------------------------
-#  TUTORIAL STEPS
-# ------------------------------------------
-const STEPS: Array = [
+const PREFS_PATH: String = "user://pocketoffice_prefs.json"
+const POPUP_SCENE_PATH: String = "res://scenes/ui/UnifiedPopup.tscn"
+
+const TUTORIAL_SEQUENCE: Array = [
 	{
-		"title":   "Welcome to Pocket Office!",
-		"body":    "You are the boss of a new company.\nHire staff, win projects, beat competitors\nover 5 years to be #1.\nCHAMP will guide you!",
-		"speaker": "CHAMP"
+		"title": "Welcome to Pocket Office!",
+		"pages": [
+			"You are the boss of a new company.\nHire staff, win projects, beat competitors\nover 5 years to be #1.\nCHAMP will guide you!",
+			"STEP 1 - HIRE YOUR TEAM\n\nMENU -> HR -> Recruit.\nHigher ad tier = better candidates.\nTry Newspaper ($600) to start.",
+			"STEP 2 - ACCEPT PROJECTS\n\nMENU -> Corporate -> Assign Tasks.\nAccept a project, assign an employee,\nwatch progress tick up!",
+		],
 	},
 	{
-		"title":   "Step 1: Hire Your Team",
-		"body":    "MENU -> HR -> Recruit.\nHigher ad tier = better candidates.\nTry Newspaper ($600) to start.",
-		"speaker": "HOW TO HIRE"
+		"title": "CHAMP's Tips to Win",
+		"pages": [
+			"STEP 3 - EARN CORPORATE POINTS\n\nCompleting projects earns CASH and CP.\nCP shows top-right of HUD.\nUse CP for items, training, donors.",
+			"STEP 4 - BUILD YOUR OFFICE\n\nMENU -> Build to place facilities.\nFacilities boost employee stats.\nCombine facilities for COMBO BONUSES!",
+			"STEP 5 - WIN!\n\nEvery 12 months = Annual Evaluation.\nScored on Donors, Revenue, Reputation\nvs 3 AI competitors.\nFinish #1 after Year 5 to WIN!\nGood luck - CHAMP believes in you.",
+		],
 	},
-	{
-		"title":   "Step 2: Accept Projects",
-		"body":    "MENU -> Corporate -> Assign Tasks.\nAccept a project, assign an employee,\nwatch progress tick up!",
-		"speaker": "PROJECTS"
-	},
-	{
-		"title":   "Step 3: Earn Corporate Points",
-		"body":    "Completing projects earns CASH and CP.\nCP shows top-right of HUD.\nUse CP for items, training, donors.",
-		"speaker": "CORP POINTS"
-	},
-	{
-		"title":   "Step 4: Build Your Office",
-		"body":    "MENU -> Build to place facilities.\nFacilities boost employee stats.\nCombine facilities for COMBO BONUSES!",
-		"speaker": "OFFICE"
-	},
-	{
-		"title":   "Step 5: Win!",
-		"body":    "Every 12 months = Annual Evaluation.\nScored on Donors, Revenue, Reputation\nvs 3 AI competitors.\nFinish #1 after Year 5 to WIN!\nGood luck - CHAMP believes in you.",
-		"speaker": "WIN"
-	}
 ]
 
-# ------------------------------------------
-#  NODE REFS
-# ------------------------------------------
-@onready var _root:        Control       = $Root
-@onready var _step_lbl:    Label         = $Root/Card/CardMargin/CardVBox/TopRow/StepLabel
-@onready var _title_lbl:   Label         = $Root/Card/CardMargin/CardVBox/TitleLabel
-@onready var _body_lbl:    Label         = $Root/Card/CardMargin/CardVBox/BodyLabel
-@onready var _speaker_lbl: Label         = $Root/Card/CardMargin/CardVBox/TopRow/SpeakerLabel
-@onready var _next_btn:    Button        = $Root/Card/CardMargin/CardVBox/BtnRow/NextBtn
-@onready var _skip_btn:    Button        = $Root/Card/CardMargin/CardVBox/BtnRow/SkipBtn
-@onready var _dot_row:     HBoxContainer = $Root/Card/CardMargin/CardVBox/DotRow
+var _sequence_index: int = 0
 
-# ------------------------------------------
-#  STATE
-# ------------------------------------------
-var _step: int = 0
-
-# ------------------------------------------
-#  STATIC PREFS
-# ------------------------------------------
+# ─────────────────────────────────────────
+#  STATIC PREFS (unchanged public interface)
+# ─────────────────────────────────────────
 static func is_tutorial_seen() -> bool:
 	var f: FileAccess = FileAccess.open(PREFS_PATH, FileAccess.READ)
 	if f == null:
@@ -76,61 +50,29 @@ static func mark_tutorial_seen() -> void:
 	f.store_string(JSON.stringify({"tutorial_seen": true}))
 	f.close()
 
-# ------------------------------------------
-#  LIFECYCLE
-# ------------------------------------------
-func _ready() -> void:
-	_root.visible = false
-	_next_btn.pressed.connect(_on_next_pressed)
-	_skip_btn.pressed.connect(_on_skip_pressed)
-
-# ------------------------------------------
-#  PUBLIC API
-# ------------------------------------------
+# ─────────────────────────────────────────
+#  PUBLIC API (unchanged)
+# ─────────────────────────────────────────
 func show_tutorial() -> void:
-	_step = 0
-	_root.visible = true
-	_show_step()
+	_sequence_index = 0
+	_show_next_popup()
 
-# ------------------------------------------
-#  STEP LOGIC
-# ------------------------------------------
-func _show_step() -> void:
-	var data: Dictionary = STEPS[_step]
-	_speaker_lbl.text = data["speaker"]
-	_title_lbl.text   = data["title"]
-	_body_lbl.text    = data["body"]
-	_step_lbl.text    = "%d / %d" % [_step + 1, STEPS.size()]
-	if _step == STEPS.size() - 1:
-		_next_btn.text = "LET'S GO!"
-	else:
-		_next_btn.text = "NEXT >"
-	_build_dots()
-
-func _build_dots() -> void:
-	for child in _dot_row.get_children():
-		child.queue_free()
-	for i in range(STEPS.size()):
-		var dot: Label = Label.new()
-		dot.text = "O" if i == _step else "o"
-		dot.add_theme_font_size_override("font_size", 12)
-		if i == _step:
-			dot.add_theme_color_override("font_color", Color(1.0, 0.82, 0.1, 1.0))
-		else:
-			dot.add_theme_color_override("font_color", Color(0.4, 0.41, 0.52, 1.0))
-		_dot_row.add_child(dot)
-
-func _on_next_pressed() -> void:
-	_step += 1
-	if _step >= STEPS.size():
+# ─────────────────────────────────────────
+#  POPUP CHAIN
+# ─────────────────────────────────────────
+func _show_next_popup() -> void:
+	if _sequence_index >= TUTORIAL_SEQUENCE.size():
 		_finish()
-	else:
-		_show_step()
-
-func _on_skip_pressed() -> void:
-	_finish()
+		return
+	var entry: Dictionary = TUTORIAL_SEQUENCE[_sequence_index]
+	_sequence_index += 1
+	var popup_scene: PackedScene = load(POPUP_SCENE_PATH)
+	var popup: CanvasLayer = popup_scene.instantiate()
+	add_child(popup)
+	popup.setup(str(entry.get("title", "")), entry.get("pages", []))
+	popup.open()
+	popup.popup_closed.connect(_show_next_popup)
 
 func _finish() -> void:
 	mark_tutorial_seen()
-	_root.visible = false
 	queue_free()
