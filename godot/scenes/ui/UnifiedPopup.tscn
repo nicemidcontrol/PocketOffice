@@ -1,0 +1,171 @@
+[gd_scene load_steps=6 format=3]
+
+[ext_resource type="Script" path="res://scripts/ui/UnifiedPopup.gd" id="1_upscript"]
+
+[sub_resource type="StyleBoxFlat" id="SBFlat_up_card"]
+bg_color = Color(0.047, 0.047, 0.11, 0.97)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(0.18, 0.42, 0.78, 1)
+corner_radius_top_left = 10
+corner_radius_top_right = 10
+corner_radius_bottom_right = 10
+corner_radius_bottom_left = 10
+
+[sub_resource type="StyleBoxFlat" id="SBFlat_up_banner"]
+bg_color = Color(0.08, 0.08, 0.18, 1)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(1, 0.82, 0.1, 1)
+corner_radius_top_left = 8
+corner_radius_top_right = 8
+corner_radius_bottom_right = 8
+corner_radius_bottom_left = 8
+
+[sub_resource type="StyleBoxFlat" id="SBFlat_up_close"]
+bg_color = Color(1, 0.82, 0.1, 1)
+corner_radius_top_left = 6
+corner_radius_top_right = 6
+corner_radius_bottom_right = 6
+corner_radius_bottom_left = 6
+
+[sub_resource type="StyleBoxFlat" id="SBFlat_up_close_hover"]
+bg_color = Color(1, 0.9, 0.35, 1)
+corner_radius_top_left = 6
+corner_radius_top_right = 6
+corner_radius_bottom_right = 6
+corner_radius_bottom_left = 6
+
+[node name="UnifiedPopup" type="CanvasLayer"]
+layer = 9
+process_mode = 3
+script = ExtResource("1_upscript")
+
+[node name="Dimmer" type="ColorRect" parent="."]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0, 0, 0, 0.55)
+mouse_filter = 0
+
+[node name="Card" type="PanelContainer" parent="Dimmer"]
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+grow_horizontal = 2
+grow_vertical = 2
+custom_minimum_size = Vector2(360, 0)
+mouse_filter = 0
+theme_override_styles/panel = SubResource("SBFlat_up_card")
+
+[node name="VBox" type="VBoxContainer" parent="Dimmer/Card"]
+layout_mode = 2
+theme_override_constants/separation = 0
+
+[node name="Banner" type="Panel" parent="Dimmer/Card/VBox"]
+layout_mode = 2
+custom_minimum_size = Vector2(360, 80)
+theme_override_styles/panel = SubResource("SBFlat_up_banner")
+
+[node name="BannerMargin" type="MarginContainer" parent="Dimmer/Card/VBox/Banner"]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/margin_left = 16
+theme_override_constants/margin_top = 12
+theme_override_constants/margin_right = 16
+theme_override_constants/margin_bottom = 12
+
+[node name="BannerRow" type="HBoxContainer" parent="Dimmer/Card/VBox/Banner/BannerMargin"]
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="BannerTitle" type="Label" parent="Dimmer/Card/VBox/Banner/BannerMargin/BannerRow"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_font_sizes/font_size = 20
+theme_override_colors/font_color = Color(1, 0.82, 0.1, 1)
+vertical_alignment = 1
+autowrap_mode = 2
+text = "TITLE"
+
+[node name="BannerIcon" type="TextureRect" parent="Dimmer/Card/VBox/Banner/BannerMargin/BannerRow"]
+layout_mode = 2
+visible = false
+custom_minimum_size = Vector2(32, 32)
+size_flags_horizontal = 8
+size_flags_vertical = 4
+expand_mode = 1
+stretch_mode = 5
+
+[node name="BodyArea" type="MarginContainer" parent="Dimmer/Card/VBox"]
+layout_mode = 2
+custom_minimum_size = Vector2(0, 160)
+mouse_filter = 0
+theme_override_constants/margin_left = 16
+theme_override_constants/margin_top = 16
+theme_override_constants/margin_right = 16
+theme_override_constants/margin_bottom = 16
+
+[node name="BodyLabel" type="Label" parent="Dimmer/Card/VBox/BodyArea"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 14
+theme_override_colors/font_color = Color(0.92, 0.92, 0.95, 1)
+horizontal_alignment = 1
+vertical_alignment = 1
+autowrap_mode = 2
+mouse_filter = 2
+text = "Body"
+
+[node name="NavRow" type="HBoxContainer" parent="Dimmer/Card/VBox"]
+layout_mode = 2
+alignment = 1
+theme_override_constants/separation = 16
+
+[node name="PrevArrow" type="Button" parent="Dimmer/Card/VBox/NavRow"]
+layout_mode = 2
+custom_minimum_size = Vector2(32, 32)
+flat = true
+theme_override_font_sizes/font_size = 18
+theme_override_colors/font_color = Color(1, 0.82, 0.1, 1)
+text = "<"
+
+[node name="DotsRow" type="HBoxContainer" parent="Dimmer/Card/VBox/NavRow"]
+layout_mode = 2
+alignment = 1
+size_flags_vertical = 4
+theme_override_constants/separation = 16
+
+[node name="NextArrow" type="Button" parent="Dimmer/Card/VBox/NavRow"]
+layout_mode = 2
+custom_minimum_size = Vector2(32, 32)
+flat = true
+theme_override_font_sizes/font_size = 18
+theme_override_colors/font_color = Color(1, 0.82, 0.1, 1)
+text = ">"
+
+[node name="CloseRow" type="CenterContainer" parent="Dimmer/Card/VBox"]
+layout_mode = 2
+custom_minimum_size = Vector2(0, 64)
+
+[node name="CloseBtn" type="Button" parent="Dimmer/Card/VBox/CloseRow"]
+layout_mode = 2
+custom_minimum_size = Vector2(120, 40)
+theme_override_font_sizes/font_size = 14
+theme_override_colors/font_color = Color(0.047, 0.047, 0.11, 1)
+theme_override_colors/font_hover_color = Color(0.047, 0.047, 0.11, 1)
+theme_override_colors/font_pressed_color = Color(0.047, 0.047, 0.11, 1)
+theme_override_styles/normal = SubResource("SBFlat_up_close")
+theme_override_styles/hover = SubResource("SBFlat_up_close_hover")
+theme_override_styles/pressed = SubResource("SBFlat_up_close")
+text = "CLOSE"
